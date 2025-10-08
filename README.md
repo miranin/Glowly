@@ -1,0 +1,2 @@
+# Glowly
+AI Beauty Assistant
