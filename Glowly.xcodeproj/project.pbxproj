@@ -29,9 +29,22 @@
 		5FBAF3182E8E4C060022C5DC /* GlowlyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GlowlyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		5FBAF4A12E966A640022C5DC /* Exceptions for "Glowly" folder in "Glowly" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 5FBAF2FD2E8E4C040022C5DC /* Glowly */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		5FBAF3002E8E4C040022C5DC /* Glowly */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				5FBAF4A12E966A640022C5DC /* Exceptions for "Glowly" folder in "Glowly" target */,
+			);
 			path = Glowly;
 			sourceTree = "<group>";
 		};
@@ -399,6 +412,10 @@
 				DEVELOPMENT_TEAM = 9DBY2CT4GF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Glowly/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Glowly использует камеру для фотографирования косметических продуктов и автоматического распознавания их названий и брендов.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Glowly использует Face ID для быстрого и безопасного входа в приложение";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Glowly использует галерею для выбора фотографий косметических продуктов и автоматического распознавания их названий и брендов.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -428,6 +445,10 @@
 				DEVELOPMENT_TEAM = 9DBY2CT4GF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Glowly/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Glowly использует камеру для фотографирования косметических продуктов и автоматического распознавания их названий и брендов.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Glowly использует Face ID для быстрого и безопасного входа в приложение";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Glowly использует галерею для выбора фотографий косметических продуктов и автоматического распознавания их названий и брендов.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

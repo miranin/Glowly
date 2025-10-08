@@ -1,0 +1,84 @@
+//
+//  ProductCategory.swift
+//  Glowly
+//
+//  Created by Tamirlan Aubakirov
+//
+
+import Foundation
+
+enum ProductCategory: String, CaseIterable, Codable {
+    case foundation = "Тональный крем"
+    case concealer = "Консилер"
+    case powder = "Пудра"
+    case blush = "Румяна"
+    case bronzer = "Бронзер"
+    case highlighter = "Хайлайтер"
+    case eyeshadow = "Тени для век"
+    case eyeliner = "Подводка"
+    case mascara = "Тушь"
+    case lipstick = "Помада"
+    case lipGloss = "Блеск для губ"
+    case lipLiner = "Контур для губ"
+    case primer = "Праймер"
+    case settingSpray = "Фиксирующий спрей"
+    case cleanser = "Очищающее средство"
+    case moisturizer = "Увлажняющий крем"
+    case serum = "Сыворотка"
+    case sunscreen = "Солнцезащитный крем"
+    case mask = "Маска"
+    case other = "Другое"
+    
+    // Optional asset name to display custom image from Assets.xcassets
+    var assetName: String? {
+        switch self {
+        case .foundation: return "tone"
+        case .concealer: return "concealer"
+        case .powder: return "poudre"
+        default: return nil
+        }
+    }
+    
+    var icon: String {
+        switch self {
+        case .foundation: return "drop.fill"
+        case .concealer: return "circle.fill"
+        case .powder: return "sparkles"
+        case .blush: return "heart.fill"
+        case .bronzer: return "sun.max.fill"
+        case .highlighter: return "star.fill"
+        case .eyeshadow: return "eye.fill"
+        case .eyeliner: return "pencil"
+        case .mascara: return "eye"
+        case .lipstick: return "lips"
+        case .lipGloss: return "sparkle"
+        case .lipLiner: return "pencil.and.outline"
+        case .primer: return "paintbrush.fill"
+        case .settingSpray: return "spray"
+        case .cleanser: return "drop"
+        case .moisturizer: return "leaf.fill"
+        case .serum: return "flask.fill"
+        case .sunscreen: return "sun.max"
+        case .mask: return "face.smiling"
+        case .other: return "questionmark.circle"
+        }
+    }
+
+    // Suggested shelf life in days for MVP auto-expiry prefill
+    var suggestedShelfLifeDays: Int {
+        switch self {
+        case .mascara: return 90
+        case .foundation, .concealer: return 365
+        case .powder, .blush, .bronzer, .highlighter, .eyeshadow: return 730
+        case .cleanser: return 365
+        case .moisturizer, .serum: return 365
+        case .sunscreen: return 365
+        case .primer, .settingSpray: return 365
+        case .lipstick, .lipGloss, .lipLiner: return 540
+        case .mask: return 365
+        case .other: return 365
+        case .eyeliner: return 365
+        }
+    }
+}
+
