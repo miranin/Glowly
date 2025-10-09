@@ -8,15 +8,26 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var authManager = AuthManager.shared
+    // MARK: - Dependencies (Injected)
+    @StateObject private var authManager: AuthManager
     @StateObject private var productStore = ProductStore()
     @StateObject private var userProfilePresenter = UserProfilePresenter()
+    private let biometricService: BiometricAuthServiceProtocol
+    
+    // MARK: - Initialization with Dependency Injection
+    nonisolated init(
+        authManager: AuthManager = AuthManager(),
+        biometricService: BiometricAuthServiceProtocol = BiometricAuthService()
+    ) {
+        _authManager = StateObject(wrappedValue: authManager)
+        self.biometricService = biometricService
+    }
     
     var body: some View {
         Group {
             if !authManager.isAuthenticated {
                 // Show login if not authenticated
-                LoginView()
+                LoginView(authManager: authManager)
             } else if userProfilePresenter.needsOnboarding {
                 // Show onboarding after authentication if needed
                 OnboardingContainerView(userProfilePresenter: userProfilePresenter)
@@ -24,6 +35,10 @@ struct ContentView: View {
                 // Show main app
                 mainAppView
             }
+        }
+        .task {
+            // Initialize auth manager to check authentication status
+            authManager.initialize()
         }
     }
     
@@ -35,7 +50,7 @@ struct ContentView: View {
                 .tabItem { Label("Добавить", systemImage: "plus.circle.fill") }
             AIHelperView(productStore: productStore, userProfilePresenter: userProfilePresenter)
                 .tabItem { Label("AI", systemImage: "sparkles") }
-            SettingsView(productStore: productStore, userProfilePresenter: userProfilePresenter)
+            SettingsView(productStore: productStore, userProfilePresenter: userProfilePresenter, authManager: authManager, biometricService: biometricService)
                 .tabItem { Label("Профиль", systemImage: "person.fill") }
         }
         .tint(Theme.accent)

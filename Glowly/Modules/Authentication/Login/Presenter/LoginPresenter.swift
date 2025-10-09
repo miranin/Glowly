@@ -3,44 +3,60 @@
 //  Glowly
 //
 //  Created by Tamirlan Aubakirov on 08/10/25.
+//  Refactored: 09/10/25 - Added DI, async/await
 //
 
 import Foundation
 import Combine
 
-class LoginPresenter: ObservableObject {
+@MainActor
+final class LoginPresenter: ObservableObject {
     @Published var email: String = ""
     @Published var password: String = ""
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
     @Published var showError: Bool = false
     
-    private let authManager = AuthManager.shared
-    private let biometricService = BiometricAuthService.shared
+    // MARK: - Dependencies (Injected)
+    private let authManager: any AuthManagerProtocol
+    private let biometricService: BiometricAuthServiceProtocol
+    private let keychainService: KeychainServiceProtocol
     
-    // MARK: - Email/Password Login
+    // MARK: - Initialization with Dependency Injection
+    nonisolated init(
+        authManager: any AuthManagerProtocol,
+        biometricService: BiometricAuthServiceProtocol = BiometricAuthService(),
+        keychainService: KeychainServiceProtocol = KeychainService()
+    ) {
+        self.authManager = authManager
+        self.biometricService = biometricService
+        self.keychainService = keychainService
+    }
     
-    func signIn(completion: @escaping (Result<User, AuthError>) -> Void) {
+    // MARK: - Email/Password Login (Async/Await)
+    
+    func signIn() async -> Result<User, AuthError> {
         guard !email.isEmpty, !password.isEmpty else {
             showError(message: "Пожалуйста, заполните все поля")
-            completion(.failure(.invalidCredentials))
-            return
+            return .failure(.invalidCredentials)
         }
         
         isLoading = true
+        defer { isLoading = false }
         
-        authManager.signIn(email: email, password: password) { [weak self] result in
-            self?.isLoading = false
-            
-            switch result {
-            case .success(let user):
-                HapticsService.shared.success()
-                completion(.success(user))
-            case .failure(let error):
-                self?.showError(message: error.localizedDescription)
-                HapticsService.shared.warning()
-                completion(.failure(error))
-            }
+        do {
+            let user = try await authManager.signIn(email: email, password: password)
+            HapticsService.shared.success()
+            return .success(user)
+        } catch let error as AuthError {
+            showError(message: error.localizedDescription)
+            HapticsService.shared.warning()
+            return .failure(error)
+        } catch {
+            let authError = AuthError.unknown(error.localizedDescription)
+            showError(message: authError.localizedDescription)
+            HapticsService.shared.warning()
+            return .failure(authError)
         }
     }
     
@@ -48,48 +64,46 @@ class LoginPresenter: ObservableObject {
     
     func canUseBiometrics() -> Bool {
         // Check if biometrics are available
-        guard biometricService.isBiometricAvailable() else { 
-            return false 
+        guard biometricService.isBiometricAvailable() else {
+            return false
         }
         
         // Check if biometrics are enabled in settings
-        guard authManager.isBiometricEnabled else { 
-            return false 
+        guard authManager.isBiometricEnabled else {
+            return false
         }
         
         // Verify there's a saved email (means user has logged in before)
-        let keychain = KeychainService.shared
-        guard let _ = keychain.retrieveString(forKey: KeychainService.Keys.userEmail) else {
+        guard keychainService.retrieveString(forKey: KeychainService.Keys.userEmail) != nil else {
             return false
         }
         
         return true
     }
     
-    func signInWithBiometrics(completion: @escaping (Result<User, AuthError>) -> Void) {
+    func signInWithBiometrics() async -> Result<User, AuthError> {
         // Double check before attempting
         guard canUseBiometrics() else {
             showError(message: "Биометрическая аутентификация недоступна")
-            completion(.failure(.unknown("Биометрическая аутентификация недоступна")))
-            return
+            return .failure(.unknown("Биометрическая аутентификация недоступна"))
         }
         
         isLoading = true
+        defer { isLoading = false }
         
-        authManager.signInWithBiometrics { [weak self] result in
-            DispatchQueue.main.async {
-                self?.isLoading = false
-                
-                switch result {
-                case .success(let user):
-                    HapticsService.shared.success()
-                    completion(.success(user))
-                case .failure(let error):
-                    self?.showError(message: error.localizedDescription)
-                    HapticsService.shared.warning()
-                    completion(.failure(error))
-                }
-            }
+        do {
+            let user = try await authManager.signInWithBiometrics()
+            HapticsService.shared.success()
+            return .success(user)
+        } catch let error as AuthError {
+            showError(message: error.localizedDescription)
+            HapticsService.shared.warning()
+            return .failure(error)
+        } catch {
+            let authError = AuthError.unknown(error.localizedDescription)
+            showError(message: authError.localizedDescription)
+            HapticsService.shared.warning()
+            return .failure(authError)
         }
     }
     
@@ -99,15 +113,15 @@ class LoginPresenter: ObservableObject {
     
     // MARK: - Google Sign-In
     
-    func signInWithGoogle(completion: @escaping (Result<User, AuthError>) -> Void) {
+    func signInWithGoogle() async -> Result<User, AuthError> {
         isLoading = true
-        
-        // This will be implemented with real Google Sign-In SDK
-        // For now, we'll use ASWebAuthenticationSession for demonstration
+        defer { isLoading = false }
         
         #if DEBUG
         // Mock implementation for development
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+        do {
+            try await Task.sleep(nanoseconds: 1_500_000_000)
+            
             let mockCredentials = GoogleAuthCredentials(
                 idToken: UUID().uuidString,
                 email: "user@gmail.com",
@@ -115,25 +129,23 @@ class LoginPresenter: ObservableObject {
                 profileImageURL: nil
             )
             
-            self?.authManager.signInWithGoogle(credentials: mockCredentials) { result in
-                self?.isLoading = false
-                
-                switch result {
-                case .success(let user):
-                    HapticsService.shared.success()
-                    completion(.success(user))
-                case .failure(let error):
-                    self?.showError(message: error.localizedDescription)
-                    HapticsService.shared.warning()
-                    completion(.failure(error))
-                }
-            }
+            let user = try await authManager.signInWithGoogle(credentials: mockCredentials)
+            HapticsService.shared.success()
+            return .success(user)
+        } catch let error as AuthError {
+            showError(message: error.localizedDescription)
+            HapticsService.shared.warning()
+            return .failure(error)
+        } catch {
+            let authError = AuthError.unknown(error.localizedDescription)
+            showError(message: authError.localizedDescription)
+            HapticsService.shared.warning()
+            return .failure(authError)
         }
         #else
         // Production: Implement real Google Sign-In here
-        self.isLoading = false
         showError(message: "Google Sign-In не настроен")
-        completion(.failure(.unknown("Google Sign-In не настроен")))
+        return .failure(.unknown("Google Sign-In не настроен"))
         #endif
     }
     
@@ -155,4 +167,3 @@ class LoginPresenter: ObservableObject {
         showError = false
     }
 }
-

@@ -9,10 +9,18 @@ import SwiftUI
 
 struct RegistrationView: View {
     @Environment(\.dismiss) var dismiss
-    @StateObject private var presenter = RegistrationPresenter()
-    @StateObject private var googleSignIn = GoogleSignInService.shared
+    // MARK: - Dependencies (Injected)
+    @StateObject private var authManager: AuthManager
+    @StateObject private var presenter: RegistrationPresenter
     @State private var showPassword: Bool = false
     @State private var showConfirmPassword: Bool = false
+    
+    // MARK: - Initialization with Dependency Injection
+    nonisolated init(authManager: AuthManager = AuthManager()) {
+        let manager = authManager
+        _authManager = StateObject(wrappedValue: manager)
+        _presenter = StateObject(wrappedValue: RegistrationPresenter(authManager: manager))
+    }
     
     var body: some View {
         NavigationView {
@@ -368,12 +376,13 @@ struct RegistrationView: View {
         }
     }
     
-    // MARK: - Actions
+    // MARK: - Actions (Async/Await)
     
     private func signUp() {
         HapticsService.shared.impactMedium()
         
-        presenter.signUp { result in
+        Task {
+            let result = await presenter.signUp()
             if case .success = result {
                 dismiss()
             }
@@ -383,26 +392,10 @@ struct RegistrationView: View {
     private func signUpWithGoogle() {
         HapticsService.shared.impactMedium()
         
-        // Use the Google Sign-In service with web authentication
-        googleSignIn.mockSignIn { result in
-            switch result {
-            case .success(let credentials):
-                // Sign in with the credentials through AuthManager
-                AuthManager.shared.signInWithGoogle(credentials: credentials) { authResult in
-                    switch authResult {
-                    case .success:
-                        HapticsService.shared.success()
-                        dismiss()
-                    case .failure(let error):
-                        presenter.errorMessage = error.localizedDescription
-                        presenter.showError = true
-                        HapticsService.shared.warning()
-                    }
-                }
-            case .failure(let error):
-                presenter.errorMessage = error.localizedDescription
-                presenter.showError = true
-                HapticsService.shared.warning()
+        Task {
+            let result = await presenter.signUpWithGoogle()
+            if case .success = result {
+                dismiss()
             }
         }
     }

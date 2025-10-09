@@ -8,60 +8,59 @@
 import Foundation
 import Combine
 
-enum AuthError: LocalizedError {
-    case invalidCredentials
-    case userNotFound
-    case emailAlreadyExists
-    case weakPassword
-    case networkError
-    case invalidToken
-    case biometricFailed(BiometricAuthError)
-    case unknown(String)
+// MARK: - AuthManager Protocol for DI
+@MainActor
+protocol AuthManagerProtocol: ObservableObject {
+    var currentUser: User? { get set }
+    var isAuthenticated: Bool { get set }
+    var isLoading: Bool { get set }
+    var isBiometricEnabled: Bool { get set }
     
-    var errorDescription: String? {
-        switch self {
-        case .invalidCredentials:
-            return "Неверный email или пароль"
-        case .userNotFound:
-            return "Пользователь не найден"
-        case .emailAlreadyExists:
-            return "Пользователь с таким email уже существует"
-        case .weakPassword:
-            return "Пароль должен содержать минимум 8 символов"
-        case .networkError:
-            return "Ошибка сети. Проверьте подключение к интернету"
-        case .invalidToken:
-            return "Сессия истекла. Войдите заново"
-        case .biometricFailed(let error):
-            return error.errorDescription
-        case .unknown(let message):
-            return message
-        }
-    }
+    func signIn(email: String, password: String) async throws -> User
+    func signUp(email: String, password: String, name: String?) async throws -> User
+    func signInWithGoogle(credentials: GoogleAuthCredentials) async throws -> User
+    func signInWithBiometrics() async throws -> User
+    func enableBiometrics()
+    func disableBiometrics()
+    func signOut()
 }
 
-class AuthManager: ObservableObject {
-    static let shared = AuthManager()
-    
+// MARK: - AuthManager Implementation
+@MainActor
+final class AuthManager: ObservableObject, AuthManagerProtocol {
+    // MARK: - Published Properties
     @Published var currentUser: User?
     @Published var isAuthenticated: Bool = false
     @Published var isLoading: Bool = false
     @Published var isBiometricEnabled: Bool = false
     
-    private let keychain = KeychainService.shared
-    private let biometric = BiometricAuthService.shared
+    // MARK: - Dependencies (Injected)
+    private let keychain: KeychainServiceProtocol
+    private let biometric: BiometricAuthServiceProtocol
     private var cancellables = Set<AnyCancellable>()
     
-    private init() {
+    // MARK: - Initialization with Dependency Injection
+    nonisolated init(
+        keychainService: KeychainServiceProtocol = KeychainService(),
+        biometricService: BiometricAuthServiceProtocol = BiometricAuthService()
+    ) {
+        self.keychain = keychainService
+        self.biometric = biometricService
+        
+        // Note: checkAuthenticationStatus() and loadBiometricPreference() 
+        // will be called in onAppear or task modifier instead
+    }
+    
+    // Call this after initialization to check auth status
+    func initialize() {
         checkAuthenticationStatus()
         loadBiometricPreference()
     }
     
     // MARK: - Check Authentication
-    
     private func checkAuthenticationStatus() {
         // Check if user token exists
-        if let token = keychain.retrieveString(forKey: KeychainService.Keys.userToken),
+        if let _ = keychain.retrieveString(forKey: KeychainService.Keys.userToken),
            let userId = keychain.retrieveString(forKey: KeychainService.Keys.userId) {
             // Load user data
             loadUserData(userId: userId)
@@ -78,188 +77,183 @@ class AuthManager: ObservableObject {
         }
     }
     
-    // MARK: - Email/Password Authentication
+    // MARK: - Email/Password Authentication (Async/Await)
     
-    func signIn(email: String, password: String, completion: @escaping (Result<User, AuthError>) -> Void) {
+    /// Sign in with email and password
+    /// - Note: ⚠️ This is a MOCK implementation. In production:
+    ///   1. Send credentials to backend
+    ///   2. Backend validates and returns JWT token
+    ///   3. Store token in Keychain (NEVER store passwords)
+    func signIn(email: String, password: String) async throws -> User {
         isLoading = true
+        defer { isLoading = false }
         
         // Validate input
         guard !email.isEmpty, !password.isEmpty else {
-            isLoading = false
-            completion(.failure(.invalidCredentials))
-            return
+            throw AuthError.invalidCredentials
         }
         
         guard isValidEmail(email) else {
-            isLoading = false
-            completion(.failure(.invalidCredentials))
-            return
+            throw AuthError.invalidCredentials
         }
         
-        // Simulate API call
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
-            guard let self = self else { return }
-            
-            // Check if user exists (mock)
-            let userKey = "user_\(email)"
-            if let userData = UserDefaults.standard.data(forKey: userKey),
-               let storedPassword = UserDefaults.standard.string(forKey: "password_\(email)") {
-                
-                // Verify password
-                if storedPassword == password {
-                    do {
-                        let user = try JSONDecoder().decode(User.self, from: userData)
-                        self.handleSuccessfulAuth(user: user)
-                        completion(.success(user))
-                    } catch {
-                        self.isLoading = false
-                        completion(.failure(.unknown("Ошибка загрузки данных пользователя")))
-                    }
-                } else {
-                    self.isLoading = false
-                    completion(.failure(.invalidCredentials))
-                }
-            } else {
-                self.isLoading = false
-                completion(.failure(.userNotFound))
-            }
+        // ⚠️ MOCK: Simulate API call delay
+        try await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 seconds
+        
+        // ⚠️ MOCK: In production, send to backend API:
+        // let response = try await networkService.post("/auth/login", body: ["email": email, "password": password])
+        // let token = response.token
+        // let user = response.user
+        
+        // For mock, check if user exists
+        let userKey = "user_\(email)"
+        guard let userData = UserDefaults.standard.data(forKey: userKey),
+              let user = try? JSONDecoder().decode(User.self, from: userData) else {
+            throw AuthError.userNotFound
         }
+        
+        // ✅ SECURITY FIX: NO password storage or verification locally
+        // In production: Backend validates password and returns token
+        // For mock: Just simulate successful login
+        
+        handleSuccessfulAuth(user: user)
+        return user
     }
     
-    func signUp(email: String, password: String, name: String?, completion: @escaping (Result<User, AuthError>) -> Void) {
+    /// Sign up with email and password
+    /// - Note: ⚠️ This is a MOCK implementation. In production:
+    ///   1. Send credentials to backend
+    ///   2. Backend creates user and returns JWT token
+    ///   3. Store token in Keychain (NEVER store passwords)
+    func signUp(email: String, password: String, name: String?) async throws -> User {
         isLoading = true
+        defer { isLoading = false }
         
         // Validate input
         guard !email.isEmpty, !password.isEmpty else {
-            isLoading = false
-            completion(.failure(.invalidCredentials))
-            return
+            throw AuthError.invalidCredentials
         }
         
         guard isValidEmail(email) else {
-            isLoading = false
-            completion(.failure(.invalidCredentials))
-            return
+            throw AuthError.invalidCredentials
         }
         
         guard password.count >= 8 else {
-            isLoading = false
-            completion(.failure(.weakPassword))
-            return
+            throw AuthError.weakPassword
         }
         
-        // Simulate API call
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
-            guard let self = self else { return }
+        // ⚠️ MOCK: Simulate API call delay
+        try await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 seconds
+        
+        // ⚠️ MOCK: In production, send to backend API:
+        // let response = try await networkService.post("/auth/register", body: ["email": email, "password": password, "name": name])
+        // let token = response.token
+        // let user = response.user
+        
+        // For mock, check if user already exists
+        let userKey = "user_\(email)"
+        if UserDefaults.standard.data(forKey: userKey) != nil {
+            throw AuthError.emailAlreadyExists
+        }
+        
+        // Create new user
+        let user = User(
+            id: UUID().uuidString,
+            email: email,
+            name: name,
+            profilePhotoURL: nil,
+            authProvider: .email,
+            createdAt: Date(),
+            lastLoginAt: Date()
+        )
+        
+        // ✅ SECURITY FIX: NO password storage
+        // In production: Backend stores hashed password
+        // For mock: Just save user data
+        if let userData = try? JSONEncoder().encode(user) {
+            UserDefaults.standard.set(userData, forKey: userKey)
+            // ❌ REMOVED: UserDefaults.standard.set(password, forKey: "password_\(email)")
             
-            // Check if user already exists
-            let userKey = "user_\(email)"
-            if UserDefaults.standard.data(forKey: userKey) != nil {
-                self.isLoading = false
-                completion(.failure(.emailAlreadyExists))
-                return
-            }
-            
-            // Create new user
-            let user = User(
-                id: UUID().uuidString,
-                email: email,
-                name: name,
-                profilePhotoURL: nil,
-                authProvider: .email,
-                createdAt: Date(),
-                lastLoginAt: Date()
-            )
-            
-            // Save user data
-            if let userData = try? JSONEncoder().encode(user) {
-                UserDefaults.standard.set(userData, forKey: userKey)
-                UserDefaults.standard.set(password, forKey: "password_\(email)")
-                
-                self.handleSuccessfulAuth(user: user)
-                completion(.success(user))
-            } else {
-                self.isLoading = false
-                completion(.failure(.unknown("Не удалось создать пользователя")))
-            }
+            handleSuccessfulAuth(user: user)
+            return user
+        } else {
+            throw AuthError.unknown("Не удалось создать пользователя")
         }
     }
     
     // MARK: - Google Sign-In
     
-    func signInWithGoogle(credentials: GoogleAuthCredentials, completion: @escaping (Result<User, AuthError>) -> Void) {
+    func signInWithGoogle(credentials: GoogleAuthCredentials) async throws -> User {
         isLoading = true
+        defer { isLoading = false }
         
-        // Simulate API call
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
-            guard let self = self else { return }
+        // ⚠️ MOCK: Simulate API call delay
+        try await Task.sleep(nanoseconds: 1_500_000_000)
+        
+        // Check if user exists, otherwise create
+        let userKey = "user_\(credentials.email)"
+        
+        if let userData = UserDefaults.standard.data(forKey: userKey),
+           let existingUser = try? JSONDecoder().decode(User.self, from: userData) {
+            // Existing user
+            handleSuccessfulAuth(user: existingUser)
+            return existingUser
+        } else {
+            // New user
+            let user = User(
+                id: UUID().uuidString,
+                email: credentials.email,
+                name: credentials.name,
+                profilePhotoURL: credentials.profileImageURL,
+                authProvider: .google,
+                createdAt: Date(),
+                lastLoginAt: Date()
+            )
             
-            // Check if user exists, otherwise create
-            let userKey = "user_\(credentials.email)"
-            
-            if let userData = UserDefaults.standard.data(forKey: userKey),
-               let existingUser = try? JSONDecoder().decode(User.self, from: userData) {
-                // Existing user
-                self.handleSuccessfulAuth(user: existingUser)
-                completion(.success(existingUser))
+            if let userData = try? JSONEncoder().encode(user) {
+                UserDefaults.standard.set(userData, forKey: userKey)
+                handleSuccessfulAuth(user: user)
+                return user
             } else {
-                // New user
-                let user = User(
-                    id: UUID().uuidString,
-                    email: credentials.email,
-                    name: credentials.name,
-                    profilePhotoURL: credentials.profileImageURL,
-                    authProvider: .google,
-                    createdAt: Date(),
-                    lastLoginAt: Date()
-                )
-                
-                if let userData = try? JSONEncoder().encode(user) {
-                    UserDefaults.standard.set(userData, forKey: userKey)
-                    self.handleSuccessfulAuth(user: user)
-                    completion(.success(user))
-                } else {
-                    self.isLoading = false
-                    completion(.failure(.unknown("Не удалось создать пользователя")))
-                }
+                throw AuthError.unknown("Не удалось создать пользователя")
             }
         }
     }
     
     // MARK: - Biometric Authentication
     
-    func signInWithBiometrics(completion: @escaping (Result<User, AuthError>) -> Void) {
+    func signInWithBiometrics() async throws -> User {
         guard isBiometricEnabled else {
-            completion(.failure(.unknown("Биометрическая аутентификация не включена")))
-            return
+            throw AuthError.unknown("Биометрическая аутентификация не включена")
         }
         
         guard let email = keychain.retrieveString(forKey: KeychainService.Keys.userEmail) else {
-            completion(.failure(.userNotFound))
-            return
+            throw AuthError.userNotFound
         }
         
         isLoading = true
+        defer { isLoading = false }
         
-        biometric.authenticateWithBiometrics { [weak self] result in
-            guard let self = self else { return }
-            
-            switch result {
-            case .success:
-                // Load user
-                let userKey = "user_\(email)"
-                if let userData = UserDefaults.standard.data(forKey: userKey),
-                   let user = try? JSONDecoder().decode(User.self, from: userData) {
-                    self.handleSuccessfulAuth(user: user)
-                    completion(.success(user))
-                } else {
-                    self.isLoading = false
-                    completion(.failure(.userNotFound))
-                }
+        // Perform biometric authentication
+        return try await withCheckedThrowingContinuation { continuation in
+            biometric.authenticateWithBiometrics(reason: nil) { [weak self] result in
+                guard let self = self else { return }
                 
-            case .failure(let error):
-                self.isLoading = false
-                completion(.failure(.biometricFailed(error)))
+                switch result {
+                case .success:
+                    // Load user
+                    let userKey = "user_\(email)"
+                    if let userData = UserDefaults.standard.data(forKey: userKey),
+                       let user = try? JSONDecoder().decode(User.self, from: userData) {
+                        self.handleSuccessfulAuth(user: user)
+                        continuation.resume(returning: user)
+                    } else {
+                        continuation.resume(throwing: AuthError.userNotFound)
+                    }
+                    
+                case .failure(let error):
+                    continuation.resume(throwing: AuthError.biometricFailed(error))
+                }
             }
         }
     }
@@ -306,9 +300,8 @@ class AuthManager: ObservableObject {
     private func handleSuccessfulAuth(user: User) {
         self.currentUser = user
         self.isAuthenticated = true
-        self.isLoading = false
         
-        // Save tokens (mock)
+        // Save tokens (mock - in production, these come from backend)
         let token = UUID().uuidString
         _ = keychain.save(token, forKey: KeychainService.Keys.userToken)
         _ = keychain.save(user.id, forKey: KeychainService.Keys.userId)
@@ -327,4 +320,3 @@ class AuthManager: ObservableObject {
         return emailPredicate.evaluate(with: email)
     }
 }
-

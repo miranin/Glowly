@@ -11,7 +11,8 @@ import PDFKit
 struct SettingsView: View {
     @ObservedObject var productStore: ProductStore
     @ObservedObject var userProfilePresenter: UserProfilePresenter
-    @StateObject private var authManager = AuthManager.shared
+    @ObservedObject var authManager: AuthManager
+    let biometricService: BiometricAuthServiceProtocol
     @State private var showingShareSheet = false
     @State private var showingExportOptions = false
     @State private var showingProfileEdit = false
@@ -432,7 +433,7 @@ struct SettingsView: View {
             
             VStack(spacing: 12) {
                 // Biometric Authentication Toggle
-                if BiometricAuthService.shared.isBiometricAvailable() {
+                if biometricService.isBiometricAvailable() {
                     Toggle(isOn: Binding(
                         get: { authManager.isBiometricEnabled },
                         set: { enabled in
@@ -445,11 +446,11 @@ struct SettingsView: View {
                         }
                     )) {
                         HStack(spacing: 12) {
-                            Image(systemName: BiometricAuthService.shared.biometricType().iconName)
+                            Image(systemName: biometricService.biometricType().iconName)
                                 .foregroundColor(Theme.accent)
                                 .frame(width: 24)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(BiometricAuthService.shared.biometricType().displayName)
+                                Text(biometricService.biometricType().displayName)
                                     .foregroundColor(.primary)
                                 Text("Быстрый вход в приложение")
                                     .font(.caption)

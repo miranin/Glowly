@@ -8,10 +8,20 @@
 import Foundation
 import Security
 
-class KeychainService {
-    static let shared = KeychainService()
-    
-    private init() {}
+// MARK: - KeychainService Protocol for DI
+protocol KeychainServiceProtocol {
+    func save(_ data: Data, forKey key: String) -> Bool
+    func save(_ string: String, forKey key: String) -> Bool
+    func retrieve(forKey key: String) -> Data?
+    func retrieveString(forKey key: String) -> String?
+    func delete(forKey key: String) -> Bool
+    func update(_ data: Data, forKey key: String) -> Bool
+    func clearAll() -> Bool
+}
+
+final class KeychainService: KeychainServiceProtocol {
+    // Removed singleton - use dependency injection instead
+    init() {}
     
     // MARK: - Save
     

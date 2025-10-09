@@ -8,10 +8,18 @@
 import SwiftUI
 
 struct LoginView: View {
-    @StateObject private var presenter = LoginPresenter()
-    @StateObject private var googleSignIn = GoogleSignInService.shared
+    // MARK: - Dependencies (Injected)
+    @StateObject private var authManager: AuthManager
+    @StateObject private var presenter: LoginPresenter
     @State private var showPassword: Bool = false
     @State private var showRegistration: Bool = false
+    
+    // MARK: - Initialization with Dependency Injection
+    nonisolated init(authManager: AuthManager = AuthManager()) {
+        let manager = authManager
+        _authManager = StateObject(wrappedValue: manager)
+        _presenter = StateObject(wrappedValue: LoginPresenter(authManager: manager))
+    }
     
     var body: some View {
         NavigationView {
@@ -310,12 +318,13 @@ struct LoginView: View {
         .padding(.top, 8)
     }
     
-    // MARK: - Actions
+    // MARK: - Actions (Async/Await)
     
     private func signIn() {
         HapticsService.shared.impactMedium()
         
-        presenter.signIn { result in
+        Task {
+            _ = await presenter.signIn()
             // Navigation handled by AuthManager state
         }
     }
@@ -323,7 +332,8 @@ struct LoginView: View {
     private func authenticateWithBiometrics() {
         HapticsService.shared.impactMedium()
         
-        presenter.signInWithBiometrics { result in
+        Task {
+            _ = await presenter.signInWithBiometrics()
             // Navigation handled by AuthManager state
         }
     }
@@ -331,26 +341,9 @@ struct LoginView: View {
     private func signInWithGoogle() {
         HapticsService.shared.impactMedium()
         
-        // Use the Google Sign-In service with web authentication
-        googleSignIn.mockSignIn { result in
-            switch result {
-            case .success(let credentials):
-                // Sign in with the credentials through AuthManager
-                AuthManager.shared.signInWithGoogle(credentials: credentials) { authResult in
-                    switch authResult {
-                    case .success:
-                        HapticsService.shared.success()
-                    case .failure(let error):
-                        presenter.errorMessage = error.localizedDescription
-                        presenter.showError = true
-                        HapticsService.shared.warning()
-                    }
-                }
-            case .failure(let error):
-                presenter.errorMessage = error.localizedDescription
-                presenter.showError = true
-                HapticsService.shared.warning()
-            }
+        Task {
+            _ = await presenter.signInWithGoogle()
+            // Navigation handled by AuthManager state
         }
     }
     

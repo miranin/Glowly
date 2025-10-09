@@ -3,12 +3,14 @@
 //  Glowly
 //
 //  Created by Tamirlan Aubakirov on 08/10/25.
+//  Refactored: 09/10/25 - Added DI, async/await
 //
 
 import Foundation
 import Combine
 
-class RegistrationPresenter: ObservableObject {
+@MainActor
+final class RegistrationPresenter: ObservableObject {
     @Published var name: String = ""
     @Published var email: String = ""
     @Published var password: String = ""
@@ -18,54 +20,66 @@ class RegistrationPresenter: ObservableObject {
     @Published var errorMessage: String?
     @Published var showError: Bool = false
     
-    private let authManager = AuthManager.shared
+    // MARK: - Dependencies (Injected)
+    private let authManager: any AuthManagerProtocol
     
-    // MARK: - Registration
+    // MARK: - Initialization with Dependency Injection
+    nonisolated init(authManager: any AuthManagerProtocol) {
+        self.authManager = authManager
+    }
     
-    func signUp(completion: @escaping (Result<User, AuthError>) -> Void) {
+    // MARK: - Registration (Async/Await)
+    
+    func signUp() async -> Result<User, AuthError> {
         guard isFormValid() else {
             showError(message: "Пожалуйста, заполните все поля корректно")
-            completion(.failure(.invalidCredentials))
-            return
+            return .failure(.invalidCredentials)
         }
         
         guard password == confirmPassword else {
             showError(message: "Пароли не совпадают")
-            completion(.failure(.invalidCredentials))
-            return
+            return .failure(.invalidCredentials)
         }
         
         guard agreedToTerms else {
             showError(message: "Необходимо согласиться с условиями использования")
-            completion(.failure(.invalidCredentials))
-            return
+            return .failure(.invalidCredentials)
         }
         
         isLoading = true
+        defer { isLoading = false }
         
-        authManager.signUp(email: email, password: password, name: name.isEmpty ? nil : name) { [weak self] result in
-            self?.isLoading = false
-            
-            switch result {
-            case .success(let user):
-                HapticsService.shared.success()
-                completion(.success(user))
-            case .failure(let error):
-                self?.showError(message: error.localizedDescription)
-                HapticsService.shared.warning()
-                completion(.failure(error))
-            }
+        do {
+            let user = try await authManager.signUp(
+                email: email,
+                password: password,
+                name: name.isEmpty ? nil : name
+            )
+            HapticsService.shared.success()
+            return .success(user)
+        } catch let error as AuthError {
+            showError(message: error.localizedDescription)
+            HapticsService.shared.warning()
+            return .failure(error)
+        } catch {
+            let authError = AuthError.unknown(error.localizedDescription)
+            showError(message: authError.localizedDescription)
+            HapticsService.shared.warning()
+            return .failure(authError)
         }
     }
     
     // MARK: - Google Sign-Up
     
-    func signUpWithGoogle(completion: @escaping (Result<User, AuthError>) -> Void) {
+    func signUpWithGoogle() async -> Result<User, AuthError> {
         isLoading = true
+        defer { isLoading = false }
         
         #if DEBUG
         // Mock implementation for development
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+        do {
+            try await Task.sleep(nanoseconds: 1_500_000_000)
+            
             let mockCredentials = GoogleAuthCredentials(
                 idToken: UUID().uuidString,
                 email: "newuser@gmail.com",
@@ -73,25 +87,23 @@ class RegistrationPresenter: ObservableObject {
                 profileImageURL: nil
             )
             
-            self?.authManager.signInWithGoogle(credentials: mockCredentials) { result in
-                self?.isLoading = false
-                
-                switch result {
-                case .success(let user):
-                    HapticsService.shared.success()
-                    completion(.success(user))
-                case .failure(let error):
-                    self?.showError(message: error.localizedDescription)
-                    HapticsService.shared.warning()
-                    completion(.failure(error))
-                }
-            }
+            let user = try await authManager.signInWithGoogle(credentials: mockCredentials)
+            HapticsService.shared.success()
+            return .success(user)
+        } catch let error as AuthError {
+            showError(message: error.localizedDescription)
+            HapticsService.shared.warning()
+            return .failure(error)
+        } catch {
+            let authError = AuthError.unknown(error.localizedDescription)
+            showError(message: authError.localizedDescription)
+            HapticsService.shared.warning()
+            return .failure(authError)
         }
         #else
         // Production: Implement real Google Sign-In here
-        self.isLoading = false
         showError(message: "Google Sign-In не настроен")
-        completion(.failure(.unknown("Google Sign-In не настроен")))
+        return .failure(.unknown("Google Sign-In не настроен"))
         #endif
     }
     
@@ -150,4 +162,3 @@ class RegistrationPresenter: ObservableObject {
         showError = false
     }
 }
-

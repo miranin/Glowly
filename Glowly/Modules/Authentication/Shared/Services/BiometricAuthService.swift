@@ -8,62 +8,20 @@
 import LocalAuthentication
 import Foundation
 
-enum BiometricType {
-    case none
-    case touchID
-    case faceID
-    case opticID
-    
-    var displayName: String {
-        switch self {
-        case .none: return "None"
-        case .touchID: return "Touch ID"
-        case .faceID: return "Face ID"
-        case .opticID: return "Optic ID"
-        }
-    }
-    
-    var iconName: String {
-        switch self {
-        case .none: return "lock.fill"
-        case .touchID: return "touchid"
-        case .faceID: return "faceid"
-        case .opticID: return "opticid"
-        }
-    }
+// MARK: - BiometricAuthService Protocol for DI
+protocol BiometricAuthServiceProtocol {
+    func biometricType() -> BiometricType
+    func isBiometricAvailable() -> Bool
+    func canUseBiometrics() -> Result<Bool, BiometricAuthError>
+    func authenticateWithBiometrics(reason: String?, completion: @escaping (Result<Void, BiometricAuthError>) -> Void)
+    func authenticateWithDeviceOwner(reason: String, completion: @escaping (Result<Void, BiometricAuthError>) -> Void)
 }
 
-enum BiometricAuthError: LocalizedError {
-    case notAvailable
-    case notEnrolled
-    case failed(String)
-    case cancelled
-    case fallback
-    case passcodeNotSet
-    
-    var errorDescription: String? {
-        switch self {
-        case .notAvailable:
-            return "Биометрическая аутентификация недоступна на этом устройстве"
-        case .notEnrolled:
-            return "Биометрическая аутентификация не настроена. Пожалуйста, настройте Face ID или Touch ID в настройках устройства"
-        case .failed(let message):
-            return message
-        case .cancelled:
-            return "Аутентификация отменена"
-        case .fallback:
-            return "Выбрана альтернативная аутентификация"
-        case .passcodeNotSet:
-            return "Необходимо установить пароль устройства"
-        }
-    }
-}
-
-class BiometricAuthService {
-    static let shared = BiometricAuthService()
+final class BiometricAuthService: BiometricAuthServiceProtocol {
+    // Removed singleton - use dependency injection instead
     private let context = LAContext()
     
-    private init() {}
+    init() {}
     
     // MARK: - Check Biometric Availability
     
