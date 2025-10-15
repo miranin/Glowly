@@ -231,3 +231,19 @@
 "category_mask" = "Mask";
 "category_other" = "Other";
 
+/* Social Product Detail Sheet */
+"product_detail_title" = "About Product";
+"product_detail_done" = "Done";
+"product_detail_from_bag" = "From cosmetic bag";
+"product_detail_category" = "Category";
+"product_detail_benefits" = "Benefits";
+"product_detail_how_to_use" = "How to Use";
+"product_detail_ingredients" = "Ingredients";
+"product_detail_warnings" = "Warnings";
+"product_detail_user_notes" = "Notes from";
+"product_detail_properties" = "Properties";
+"product_detail_sensitive_safe" = "For sensitive skin";
+"product_detail_acne_safe" = "Acne-safe";
+"product_detail_add_to_wishlist" = "Add to wishlist";
+"product_detail_remove_from_wishlist" = "Remove from wishlist";
+

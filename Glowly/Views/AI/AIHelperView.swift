@@ -339,19 +339,9 @@ struct AIHelperView: View {
     
     private func generateProductAnalysis() -> String {
         let activeProducts = productStore.products.filter { $0.isActive }
-        let expiringProducts = productStore.getExpiringProducts()
-        let expiredProducts = productStore.getExpiredProducts()
         
         var analysis = "Анализ твоей косметички:\n\n"
         analysis += "📊 Всего продуктов: \(activeProducts.count)\n"
-        
-        if !expiredProducts.isEmpty {
-            analysis += "⚠️ Просрочено: \(expiredProducts.count) - рекомендую выбросить\n"
-        }
-        
-        if !expiringProducts.isEmpty {
-            analysis += "⏰ Скоро истекает: \(expiringProducts.count) - используй в первую очередь\n"
-        }
         
         let categories = Set(activeProducts.map { $0.category })
         analysis += "📂 Категории: \(categories.count)\n\n"

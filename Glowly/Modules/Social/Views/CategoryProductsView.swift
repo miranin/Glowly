@@ -13,7 +13,8 @@ struct CategoryProductsView: View {
     let profile: SocialUserProfile
     @ObservedObject var wishListService: WishListService
     @State private var searchText = ""
-    
+    @State private var selectedProduct: SocialUserProfile.ProductPreview?
+
     var filteredProducts: [SocialUserProfile.ProductPreview] {
         if searchText.isEmpty {
             return products
@@ -55,7 +56,10 @@ struct CategoryProductsView: View {
                         ProductRow(
                             product: product,
                             profile: profile,
-                            wishListService: wishListService
+                            wishListService: wishListService,
+                            onTap: {
+                                selectedProduct = product
+                            }
                         )
                     }
                 }
@@ -64,6 +68,13 @@ struct CategoryProductsView: View {
         }
         .navigationTitle(category.rawValue)
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(item: $selectedProduct) { product in
+            SocialProductDetailSheet(
+                product: product,
+                profile: profile,
+                wishListService: wishListService
+            )
+        }
     }
 }
 
@@ -72,72 +83,87 @@ struct ProductRow: View {
     let product: SocialUserProfile.ProductPreview
     let profile: SocialUserProfile
     @ObservedObject var wishListService: WishListService
-    
+    let onTap: () -> Void
+
     var isInWishList: Bool {
         wishListService.isInWishList(productId: product.id)
     }
-    
+
     var body: some View {
-        HStack(spacing: 12) {
-            // Product Image
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.gray.opacity(0.1))
-                .frame(width: 60, height: 60)
-                .overlay(
-                    Image(systemName: "photo")
-                        .foregroundColor(.gray)
-                )
-            
-            // Product Info
-            VStack(alignment: .leading, spacing: 4) {
-                Text(product.name)
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.primary)
-                
-                Text(product.brand)
-                    .font(.system(size: 13))
-                    .foregroundColor(.secondary)
-                
-                Text(product.category.rawValue)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(product.category.color)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(
-                        Capsule()
-                            .fill(product.category.color.opacity(0.1))
+        Button(action: onTap) {
+            HStack(spacing: 12) {
+                // Product Image
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.gray.opacity(0.1))
+                    .frame(width: 60, height: 60)
+                    .overlay(
+                        Image(systemName: product.category.icon)
+                            .font(.system(size: 24))
+                            .foregroundColor(product.category.color)
                     )
-            }
-            
-            Spacer()
-            
-            // WishList Button
-            Button {
-                if isInWishList {
-                    // Найти и удалить из wishlist
-                    if let item = wishListService.wishListItems.first(where: { $0.productId == product.id }) {
-                        wishListService.removeFromWishList(itemId: item.id)
-                    }
-                } else {
-                    wishListService.addToWishList(product: product, fromUser: profile)
+
+                // Product Info
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(product.name)
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(.primary)
+                        .lineLimit(2)
+
+                    Text(product.brand)
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+
+                    Text(product.category.rawValue)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(product.category.color)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(
+                            Capsule()
+                                .fill(product.category.color.opacity(0.1))
+                        )
                 }
-            } label: {
-                Image(systemName: isInWishList ? "heart.fill" : "heart")
-                    .font(.system(size: 22))
-                    .foregroundColor(isInWishList ? .red : .gray)
+
+                Spacer()
+
+                // WishList Button & Arrow
+                HStack(spacing: 8) {
+                    // WishList Button
+                    Button {
+                        HapticsService.shared.impactLight()
+                        if isInWishList {
+                            // Найти и удалить из wishlist
+                            if let item = wishListService.wishListItems.first(where: { $0.productId == product.id }) {
+                                wishListService.removeFromWishList(itemId: item.id)
+                            }
+                        } else {
+                            wishListService.addToWishList(product: product, fromUser: profile)
+                        }
+                    } label: {
+                        Image(systemName: isInWishList ? "heart.fill" : "heart")
+                            .font(.system(size: 20))
+                            .foregroundColor(isInWishList ? .red : .gray)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+
+                    // Chevron to indicate tappable
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.secondary)
+                }
             }
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(.systemBackground))
+                    .shadow(color: Color.black.opacity(0.03), radius: 4, x: 0, y: 1)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(product.category.color.opacity(0.15), lineWidth: 1)
+            )
         }
         .buttonStyle(PlainButtonStyle())
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
-                .shadow(color: Color.black.opacity(0.03), radius: 4, x: 0, y: 1)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(product.category.color.opacity(0.15), lineWidth: 1)
-        )
     }
 }
 

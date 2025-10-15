@@ -23,12 +23,6 @@ class NotificationService: ObservableObject {
         }
     }
     
-    func scheduleExpiryReminders(for products: [Product]) {
-        // No expiry functionality - method kept for compatibility
-        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
-    }
-    
-    
     func scheduleDailyRoutineReminder() {
         let content = UNMutableNotificationContent()
         content.title = "Glowly - Утренняя рутина"

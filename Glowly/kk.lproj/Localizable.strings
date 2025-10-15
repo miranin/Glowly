@@ -231,3 +231,19 @@
 "category_mask" = "Маска";
 "category_other" = "Басқа";
 
+/* Social Product Detail Sheet */
+"product_detail_title" = "Өнім туралы";
+"product_detail_done" = "Дайын";
+"product_detail_from_bag" = "Косметика сөмкесінен";
+"product_detail_category" = "Санат";
+"product_detail_benefits" = "Пайдасы";
+"product_detail_how_to_use" = "Қалай пайдалану";
+"product_detail_ingredients" = "Құрамы";
+"product_detail_warnings" = "Ескертулер";
+"product_detail_user_notes" = "Жазбалар";
+"product_detail_properties" = "Қасиеттері";
+"product_detail_sensitive_safe" = "Сезімтал тері үшін";
+"product_detail_acne_safe" = "Acne-safe";
+"product_detail_add_to_wishlist" = "Тілектер тізіміне қосу";
+"product_detail_remove_from_wishlist" = "Тілектер тізімінен жою";
+

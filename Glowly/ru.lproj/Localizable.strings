@@ -231,3 +231,19 @@
 "category_mask" = "Маска";
 "category_other" = "Другое";
 
+/* Social Product Detail Sheet */
+"product_detail_title" = "О продукте";
+"product_detail_done" = "Готово";
+"product_detail_from_bag" = "Из косметички";
+"product_detail_category" = "Категория";
+"product_detail_benefits" = "Польза";
+"product_detail_how_to_use" = "Как использовать";
+"product_detail_ingredients" = "Состав";
+"product_detail_warnings" = "Предупреждения";
+"product_detail_user_notes" = "Заметки";
+"product_detail_properties" = "Свойства";
+"product_detail_sensitive_safe" = "Для чувствительной кожи";
+"product_detail_acne_safe" = "Acne-safe";
+"product_detail_add_to_wishlist" = "Добавить в список желаний";
+"product_detail_remove_from_wishlist" = "Убрать из списка желаний";
+
