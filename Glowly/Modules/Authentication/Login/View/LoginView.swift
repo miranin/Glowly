@@ -10,9 +10,13 @@ import SwiftUI
 struct LoginView: View {
     @StateObject private var viewModel: LoginViewModel
     @State private var showPrivacyPolicy = false
-    
-    nonisolated init(authManager: AuthManager = AuthManager()) {
+
+    nonisolated init(authManager: any AuthManagerProtocol) {
         _viewModel = StateObject(wrappedValue: LoginViewModel(authManager: authManager))
+    }
+
+    init() {
+        self.init(authManager: AuthManager())
     }
     
     var body: some View {

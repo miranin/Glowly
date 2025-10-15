@@ -11,9 +11,13 @@ struct RegistrationView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var viewModel: RegistrationViewModel
     @State private var showPrivacyPolicy = false
-    
-    nonisolated init(authManager: AuthManager = AuthManager()) {
+
+    nonisolated init(authManager: any AuthManagerProtocol) {
         _viewModel = StateObject(wrappedValue: RegistrationViewModel(authManager: authManager))
+    }
+
+    init() {
+        self.init(authManager: AuthManager())
     }
     
     var body: some View {
