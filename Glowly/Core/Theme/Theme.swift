@@ -35,10 +35,10 @@ extension Color {
 }
 
 enum Theme {
-    // Modern peachy-coral palette (warm and inviting)
-    static let accent: Color = Color(hex: "#FF9A8B") // peachy coral
-    static let accentDark: Color = Color(hex: "#FF6A88") // deeper coral
-    static let accentLight: Color = Color(hex: "#FFD5CD") // light peach
+    // Modern blue-cyan palette (fresh and clean) - matching Figma design
+    static let accent: Color = Color(hex: "#7DD3FC") // sky blue (cyan)
+    static let accentDark: Color = Color(hex: "#38BDF8") // deeper blue
+    static let accentLight: Color = Color(hex: "#BAE6FD") // light cyan
     
     // Backgrounds
     static let backgroundPowder: Color = Color(hex: "#FFF8F6") // warm white

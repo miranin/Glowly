@@ -17,6 +17,21 @@ enum SkinTone: String, Codable, CaseIterable {
     case deep = "Темный"
     case veryDeep = "Очень темный"
     
+    func localizedName(languageManager: LanguageManager) -> String {
+        switch self {
+        case .notSpecified: return languageManager.currentLanguage == .russian ? "Не указано" :
+                           languageManager.currentLanguage == .english ? "Not specified" :
+                           "Көрсетілмеген"
+        case .veryFair: return languageManager.translate("skin_tone_fair")
+        case .fair: return languageManager.translate("skin_tone_light")
+        case .light: return languageManager.translate("skin_tone_light")
+        case .medium: return languageManager.translate("skin_tone_medium")
+        case .tan: return languageManager.translate("skin_tone_tan")
+        case .deep: return languageManager.translate("skin_tone_dark")
+        case .veryDeep: return languageManager.translate("skin_tone_deep")
+        }
+    }
+    
     var colorHex: String {
         switch self {
         case .notSpecified: return "#CCCCCC"

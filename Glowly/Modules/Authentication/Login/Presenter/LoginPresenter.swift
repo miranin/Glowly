@@ -12,13 +12,14 @@ import Combine
 @MainActor
 final class LoginPresenter: ObservableObject {
     @Published var email: String = ""
+    @Published var phone: String = ""
     @Published var password: String = ""
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
     @Published var showError: Bool = false
     
     // MARK: - Dependencies (Injected)
-    private let authManager: any AuthManagerProtocol
+    let authManager: any AuthManagerProtocol
     private let biometricService: BiometricAuthServiceProtocol
     private let keychainService: KeychainServiceProtocol
     
@@ -36,6 +37,15 @@ final class LoginPresenter: ObservableObject {
     // MARK: - Email/Password Login (Async/Await)
     
     func signIn() async -> Result<User, AuthError> {
+        guard !email.isEmpty, !password.isEmpty else {
+            showError(message: "Пожалуйста, заполните все поля")
+            return .failure(.invalidCredentials)
+        }
+        
+        return await signIn(email: email, password: password)
+    }
+    
+    func signIn(email: String, password: String) async -> Result<User, AuthError> {
         guard !email.isEmpty, !password.isEmpty else {
             showError(message: "Пожалуйста, заполните все поля")
             return .failure(.invalidCredentials)

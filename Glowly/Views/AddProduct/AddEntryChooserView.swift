@@ -9,6 +9,7 @@ import SwiftUI
 
 struct AddEntryChooserView: View {
     @ObservedObject var productStore: ProductStore
+    @EnvironmentObject var languageManager: LanguageManager
     @State private var showingActionSheet = false
     @State private var presentManual = false
     @State private var presentCamera = false
@@ -24,13 +25,15 @@ struct AddEntryChooserView: View {
                 Image(systemName: "plus.circle.fill")
                     .font(.system(size: 64))
                     .foregroundColor(Theme.accent)
-                Text("Как добавить продукт?")
+                Text(languageManager.translate("add_product_subtitle"))
                     .font(.title2).fontWeight(.bold)
-                Text("Выберите способ добавления")
+                Text(languageManager.translate("add_product_description"))
                     .foregroundColor(.secondary)
                 Spacer()
                 Button(action: { showingActionSheet = true }) {
-                    Text("Выбрать способ")
+                    Text(languageManager.currentLanguage == .russian ? "Выбрать способ" :
+                         languageManager.currentLanguage == .english ? "Choose Method" :
+                         "Әдісті таңдау")
                         .foregroundColor(.white)
                         .padding(.horizontal, 28)
                         .padding(.vertical, 14)
@@ -39,14 +42,16 @@ struct AddEntryChooserView: View {
                 }
                 .padding(.bottom, 32)
             }
-            .navigationTitle("Добавить")
+            .navigationTitle(languageManager.translate("add_product_title"))
             .actionSheet(isPresented: $showingActionSheet) {
                 ActionSheet(
-                    title: Text("Добавить"),
+                    title: Text(languageManager.translate("add_product_title")),
                     buttons: [
-                        .default(Text("Ввести вручную")) { presentManual = true },
-                        .default(Text("Сделать фото")) { presentCamera = true },
-                        .default(Text("Выбрать из галереи")) { presentGallery = true },
+                        .default(Text(languageManager.currentLanguage == .russian ? "Ввести вручную" :
+                                     languageManager.currentLanguage == .english ? "Manual Entry" :
+                                     "Қолмен енгізу")) { presentManual = true },
+                        .default(Text(languageManager.translate("add_product_take_photo"))) { presentCamera = true },
+                        .default(Text(languageManager.translate("add_product_choose_gallery"))) { presentGallery = true },
                         .cancel()
                     ]
                 )

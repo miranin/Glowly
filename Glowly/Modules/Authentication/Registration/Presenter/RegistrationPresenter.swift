@@ -13,9 +13,10 @@ import Combine
 final class RegistrationPresenter: ObservableObject {
     @Published var name: String = ""
     @Published var email: String = ""
+    @Published var phone: String = ""
     @Published var password: String = ""
     @Published var confirmPassword: String = ""
-    @Published var agreedToTerms: Bool = false
+    @Published var agreedToTerms: Bool = true // Auto-agreed in new design
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
     @Published var showError: Bool = false
@@ -31,8 +32,17 @@ final class RegistrationPresenter: ObservableObject {
     // MARK: - Registration (Async/Await)
     
     func signUp() async -> Result<User, AuthError> {
-        guard isFormValid() else {
-            showError(message: "Пожалуйста, заполните все поля корректно")
+        return await signUp(
+            name: name,
+            identifier: !email.isEmpty ? email : "+7\(phone)",
+            password: password,
+            confirmPassword: confirmPassword
+        )
+    }
+    
+    func signUp(name: String, identifier: String, password: String, confirmPassword: String) async -> Result<User, AuthError> {
+        guard !name.isEmpty, !identifier.isEmpty, !password.isEmpty, !confirmPassword.isEmpty else {
+            showError(message: "Пожалуйста, заполните все поля")
             return .failure(.invalidCredentials)
         }
         
@@ -41,9 +51,9 @@ final class RegistrationPresenter: ObservableObject {
             return .failure(.invalidCredentials)
         }
         
-        guard agreedToTerms else {
-            showError(message: "Необходимо согласиться с условиями использования")
-            return .failure(.invalidCredentials)
+        guard password.count >= 8 else {
+            showError(message: "Пароль должен содержать минимум 8 символов")
+            return .failure(.weakPassword)
         }
         
         isLoading = true
@@ -51,7 +61,7 @@ final class RegistrationPresenter: ObservableObject {
         
         do {
             let user = try await authManager.signUp(
-                email: email,
+                email: identifier,
                 password: password,
                 name: name.isEmpty ? nil : name
             )
@@ -110,13 +120,20 @@ final class RegistrationPresenter: ObservableObject {
     // MARK: - Validation
     
     func isFormValid() -> Bool {
-        return !email.isEmpty &&
+        let hasValidContact = !email.isEmpty ? isValidEmail(email) : isValidPhone(phone)
+        
+        return !name.isEmpty &&
+               hasValidContact &&
                !password.isEmpty &&
                !confirmPassword.isEmpty &&
                password == confirmPassword &&
-               password.count >= 8 &&
-               agreedToTerms &&
-               isValidEmail(email)
+               password.count >= 8
+    }
+    
+    private func isValidPhone(_ phone: String) -> Bool {
+        // Kazakhstan phone: 10 digits (700-799 range)
+        let digitsOnly = phone.filter { $0.isNumber }
+        return digitsOnly.count == 10 && digitsOnly.hasPrefix("7")
     }
     
     func passwordsMatch() -> Bool {

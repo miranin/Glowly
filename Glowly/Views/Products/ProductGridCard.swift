@@ -34,7 +34,6 @@ struct ProductGridCard: View {
                                 .font(.system(size: 34, weight: .semibold))
                                 .foregroundColor(.white.opacity(0.95))
                         )
-                        .overlay(expiryOverlay)
                 }
                 
                 Text(product.name)
@@ -58,33 +57,6 @@ struct ProductGridCard: View {
         .buttonStyle(.plain)
     }
     
-    private var expiryOverlay: some View {
-        HStack {
-            Spacer()
-            VStack {
-                if let days = product.daysUntilExpiry {
-                    let text = product.isExpired ? "Просрочено" : "\(days) дн."
-                    Text(text)
-                        .font(.caption2)
-                        .fontWeight(.semibold)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(
-                            Capsule().fill(expiryColor().opacity(0.9))
-                        )
-                        .foregroundColor(.white)
-                        .padding(8)
-                }
-                Spacer()
-            }
-        }
-    }
-    
-    private func expiryColor() -> Color {
-        if product.isExpired { return .red }
-        if product.isExpiringSoon { return .orange }
-        return .green
-    }
     
     private func gradient(for category: ProductCategory) -> LinearGradient {
         let colors: [Color]
@@ -105,8 +77,8 @@ struct ProductGridCard: View {
             name: "Помада",
             brand: "MAC",
             category: .lipstick,
+            applicationZone: .lips,
             purchaseDate: Date(),
-            expiryDate: Calendar.current.date(byAdding: .day, value: 20, to: Date()),
             barcode: nil,
             imageData: nil,
             notes: ""

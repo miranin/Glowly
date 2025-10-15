@@ -13,49 +13,60 @@ struct SettingsView: View {
     @ObservedObject var userProfilePresenter: UserProfilePresenter
     @ObservedObject var authManager: AuthManager
     let biometricService: BiometricAuthServiceProtocol
-    @State private var showingShareSheet = false
-    @State private var showingExportOptions = false
+    @ObservedObject var wishListService: WishListService
+    @EnvironmentObject var languageManager: LanguageManager
     @State private var showingProfileEdit = false
     @State private var showingImagePicker = false
     @State private var showingPhotoActionSheet = false
     @State private var photoSourceType: UIImagePickerController.SourceType = .photoLibrary
-    @State private var userProfile = UserProfile()
-    @State private var allergies: String = ""
-    @State private var userSegment: String = "Новичок"
     @State private var showingLogoutAlert = false
-    @StateObject private var pdfService = PDFExportService()
-    private let segments = ["Новичок", "Эксперт", "Визажист"]
+    @State private var showingWishListSheet = false
 
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: 24) {
-                    profileHeader
-                    profileEditButton
-                    securitySection
-                    sharingSection
-                    exportSection
-                    aboutSection
-                    logoutButton
+            ZStack {
+                // Background gradient
+                LinearGradient(
+                    colors: [Color(.systemGray6).opacity(0.3), Color(.systemBackground)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(spacing: 20) {
+                        profileHeader
+                        
+                        VStack(spacing: 16) {
+                            profileEditButton
+                            wishListSection
+                            languageSection
+                            aboutSection
+                        }
+                        .padding(.horizontal, 20)
+                        
+                        logoutButton
+                            .padding(.horizontal, 20)
+                            .padding(.top, 8)
+                    }
+                    .padding(.bottom, 100) // Safe area для Tab Bar
                 }
-                .padding(20)
             }
-            .navigationTitle("Профиль")
+                    .navigationTitle(languageManager.translate("profile_title"))
+            .navigationBarTitleDisplayMode(.large)
         }
-        .alert("Выход из аккаунта", isPresented: $showingLogoutAlert) {
-            Button("Отмена", role: .cancel) {}
-            Button("Выйти", role: .destructive) {
+        .alert(languageManager.translate("profile_logout"), isPresented: $showingLogoutAlert) {
+            Button(languageManager.translate("profile_cancel"), role: .cancel) {}
+            Button(languageManager.translate("profile_logout"), role: .destructive) {
                 authManager.signOut()
                 HapticsService.shared.success()
             }
         } message: {
-            Text("Вы уверены, что хотите выйти из аккаунта?")
-        }
-        .sheet(isPresented: $showingShareSheet) {
-            ShareSheet(items: [productStore.shareExportURL()])
+            Text(languageManager.translate("profile_logout_confirm"))
         }
         .sheet(isPresented: $showingProfileEdit) {
-            ProfileEditView(userProfilePresenter: userProfilePresenter)
+            ModernProfileEditView(userProfilePresenter: userProfilePresenter)
+                .environmentObject(languageManager)
         }
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(selectedImage: .init(
@@ -90,59 +101,57 @@ struct SettingsView: View {
             }
             Button("Отмена", role: .cancel) {}
         }
-        .confirmationDialog("Поделиться косметичкой", isPresented: $showingExportOptions, titleVisibility: .visible) {
-            Button("Создать PDF для просмотра") {
-                createAndSharePDF()
-            }
-            Button("Поделиться данными (для пользователей Glowly)") {
-                showingShareSheet = true
-            }
-            Button("Отмена", role: .cancel) {}
-        } message: {
-            Text("Выберите способ экспорта")
-        }
     }
     
     private var profileHeader: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 20) {
             Button(action: { 
                 HapticsService.shared.impactMedium()
                 showingPhotoActionSheet = true 
             }) {
                 ZStack(alignment: .bottomTrailing) {
-                    ZStack {
-                        // Animated gradient background
+                    if let photoData = userProfilePresenter.userProfile.profilePhotoData,
+                       let uiImage = UIImage(data: photoData) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 120, height: 120)
+                            .clipShape(Circle())
+                            .overlay(
+                                Circle()
+                                    .stroke(
+                                        LinearGradient(
+                                            colors: [Theme.accent, Theme.accentDark],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ),
+                                        lineWidth: 4
+                                    )
+                            )
+                            .shadow(color: Theme.accent.opacity(0.2), radius: 20, x: 0, y: 8)
+                    } else {
                         Circle()
                             .fill(
                                 LinearGradient(
-                                    colors: [Theme.accent.opacity(0.2), Theme.accentDark.opacity(0.1)],
+                                    colors: [Theme.accent, Theme.accentDark],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 )
                             )
-                            .frame(width: 100, height: 100)
-                            .blur(radius: 15)
-                        
-                        if let photoData = userProfilePresenter.userProfile.profilePhotoData,
-                           let uiImage = UIImage(data: photoData) {
-                            Image(uiImage: uiImage)
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 90, height: 90)
-                                .clipShape(Circle())
-                                .overlay(
-                                    Circle()
-                                        .stroke(
-                                            LinearGradient(
-                                                colors: [Theme.accent, Theme.accentDark],
-                                                startPoint: .topLeading,
-                                                endPoint: .bottomTrailing
-                                            ),
-                                            lineWidth: 3
-                                        )
-                                        .shadow(color: Theme.accent.opacity(0.3), radius: 8, x: 0, y: 4)
-                                )
-                        } else {
+                            .frame(width: 120, height: 120)
+                            .overlay(
+                                Image(systemName: "person.fill")
+                                    .font(.system(size: 50))
+                                    .foregroundColor(.white)
+                            )
+                            .shadow(color: Theme.accent.opacity(0.3), radius: 20, x: 0, y: 8)
+                    }
+                    
+                    // Camera badge
+                    Circle()
+                        .fill(Color(.systemBackground))
+                        .frame(width: 40, height: 40)
+                        .overlay(
                             Circle()
                                 .fill(
                                     LinearGradient(
@@ -151,80 +160,44 @@ struct SettingsView: View {
                                         endPoint: .bottomTrailing
                                     )
                                 )
-                                .frame(width: 90, height: 90)
+                                .frame(width: 32, height: 32)
                                 .overlay(
-                                    Image(systemName: "person.fill")
-                                        .font(.system(size: 36))
+                                    Image(systemName: "camera.fill")
+                                        .font(.system(size: 16, weight: .medium))
                                         .foregroundColor(.white)
                                 )
-                                .shadow(color: Theme.accent.opacity(0.4), radius: 12, x: 0, y: 6)
-                        }
-                    }
-                    
-                    // Camera badge with gradient
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [Theme.accent, Theme.accentDark],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
                         )
-                        .frame(width: 32, height: 32)
-                        .overlay(
-                            Image(systemName: "camera.fill")
-                                .font(.system(size: 14))
-                                .foregroundColor(.white)
-                        )
-                        .overlay(
-                            Circle()
-                                .stroke(Theme.backgroundCard, lineWidth: 3)
-                        )
-                        .shadow(color: Theme.accent.opacity(0.4), radius: 6, x: 0, y: 3)
-                        .offset(x: 4, y: 4)
+                        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                        .offset(x: 8, y: 8)
                 }
-                .contentShape(Circle())
             }
             .buttonStyle(ScaleButtonStyle())
             
-            VStack(spacing: 4) {
-                Text(userProfilePresenter.userProfile.name.isEmpty ? "Пользователь Glowly" : userProfilePresenter.userProfile.name)
-                    .font(.title2)
-                    .fontWeight(.semibold)
+            VStack(spacing: 8) {
+                Text(userProfilePresenter.userProfile.name.isEmpty ? "Glowly User" : userProfilePresenter.userProfile.name)
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
                 
-                HStack(spacing: 6) {
+                HStack(spacing: 8) {
                     Image(systemName: "bag.fill")
-                        .font(.caption)
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [Theme.accent, Theme.accentDark],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                    Text("\(productStore.products.filter { $0.isActive }.count) продуктов в косметичке")
-                        .font(.caption)
-                        .foregroundColor(Theme.textSecondary)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(Theme.accent)
+                    
+                    Text("\(productStore.products.filter { $0.isActive }.count) \(languageManager.translate("profile_products_count"))")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(.secondary)
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(
+                    Capsule()
+                        .fill(Theme.accent.opacity(0.1))
+                )
             }
         }
-        .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Theme.backgroundCard)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(
-                            LinearGradient(
-                                colors: [Theme.accent.opacity(0.1), Theme.accentLight.opacity(0.05)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1
-                        )
-                )
-                .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
-        )
+        .padding(.top, 20)
+        .padding(.horizontal, 20)
     }
     
     private var profileEditButton: some View {
@@ -232,202 +205,152 @@ struct SettingsView: View {
             HapticsService.shared.impactLight()
             showingProfileEdit = true 
         }) {
-            HStack(spacing: 12) {
-                ZStack {
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [Theme.accent.opacity(0.15), Theme.accentDark.opacity(0.08)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 40, height: 40)
-                    
-                    Image(systemName: "person.crop.circle.badge.pencil")
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [Theme.accent, Theme.accentDark],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                }
+            HStack(spacing: 16) {
+                Circle()
+                    .fill(Theme.accent.opacity(0.15))
+                    .frame(width: 44, height: 44)
+                    .overlay(
+                        Image(systemName: "person.crop.circle.badge.checkmark")
+                            .font(.system(size: 20, weight: .medium))
+                            .foregroundColor(Theme.accent)
+                    )
                 
-                Text("Редактировать профиль")
-                    .foregroundColor(.primary)
-                    .fontWeight(.medium)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(languageManager.translate("profile_edit"))
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.primary)
+                    
+                }
                 
                 Spacer()
                 
                 Image(systemName: "chevron.right")
-                    .foregroundColor(Theme.accent)
-                    .font(.caption)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.secondary)
             }
-            .padding(16)
+            .padding(20)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(
-                        LinearGradient(
-                            colors: [Theme.neutralLight, Theme.backgroundCard],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+                    .fill(Color(.systemBackground))
+                    .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 4)
             )
         }
-        .buttonStyle(ScaleButtonStyle())
+        .buttonStyle(PlainButtonStyle())
     }
     
-    private var profileSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Персонализация")
-                .font(.headline)
-                .fontWeight(.semibold)
-            
-            VStack(spacing: 12) {
-                Picker("Уровень", selection: $userSegment) {
-                    ForEach(segments, id: \.self) { Text($0) }
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding(16)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Theme.neutralLight)
-                )
-                
-                TextField("Аллергии / триггеры", text: $allergies)
-                    .padding(16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Theme.neutralLight)
-                    )
-            }
-        }
-    }
     
-    private var sharingSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Поделиться")
-                .font(.headline)
-                .fontWeight(.semibold)
+    private var languageSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(languageManager.translate("profile_language"))
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.secondary)
+                .padding(.horizontal, 20)
             
-            VStack(spacing: 12) {
-                Button(action: { showingExportOptions = true }) {
-                    HStack {
-                        Image(systemName: "square.and.arrow.up")
-                            .foregroundColor(Theme.accent)
-                        Text("Поделиться косметичкой")
-                            .foregroundColor(.primary)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(.secondary)
-                            .font(.caption)
-                    }
-                    .padding(16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Theme.neutralLight)
-                    )
-                }
-                .buttonStyle(PlainButtonStyle())
-                
-                Text("Создайте PDF для друзей без приложения или поделитесь данными с другими пользователями Glowly")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.leading)
-            }
-        }
-    }
-    
-    private var exportSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Экспорт данных")
-                .font(.headline)
-                .fontWeight(.semibold)
-            
-            VStack(spacing: 12) {
-                Button(action: { createAndSharePDF() }) {
-                    HStack {
-                        Image(systemName: "doc.text")
-                            .foregroundColor(Theme.accent)
-                        Text("Экспорт в PDF")
-                            .foregroundColor(.primary)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(.secondary)
-                            .font(.caption)
-                    }
-                    .padding(16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Theme.neutralLight)
-                    )
-                }
-                .buttonStyle(PlainButtonStyle())
-                
-                Button(action: { showingShareSheet = true }) {
-                    HStack {
-                        Image(systemName: "square.and.arrow.up")
-                            .foregroundColor(Theme.accent)
-                        Text("Экспорт данных")
-                            .foregroundColor(.primary)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(.secondary)
-                            .font(.caption)
-                    }
-                    .padding(16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Theme.neutralLight)
-                    )
-                }
-                .buttonStyle(PlainButtonStyle())
-            }
+            LanguageSwitcher(languageManager: languageManager)
+                .padding(.horizontal, 20)
         }
     }
     
     private var aboutSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("О приложении")
-                .font(.headline)
-                .fontWeight(.semibold)
+        HStack {
+            Text(languageManager.translate("profile_version"))
+                .font(.system(size: 14))
+                .foregroundColor(.secondary)
             
-            VStack(spacing: 12) {
-                HStack {
-                    Text("Версия")
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Text("1.0.0")
-                        .foregroundColor(.primary)
-                }
-                .padding(16)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Theme.neutralLight)
-                )
+            Spacer()
+            
+            Text("1.0.0")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.primary)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+    }
+    
+    private var wishListSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Text(languageManager.translate("profile_wishlist"))
+                    .font(.headline)
+                    .fontWeight(.semibold)
                 
-                HStack {
-                    Text("Продуктов в базе")
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Text("\(productStore.products.count)")
-                        .foregroundColor(.primary)
+                Spacer()
+                
+                if !wishListService.wishListItems.isEmpty {
+                    Button {
+                        showingWishListSheet = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(languageManager.translate("profile_share"))
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.system(size: 12))
+                        }
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(Theme.accent)
+                    }
                 }
-                .padding(16)
+            }
+            
+            if wishListService.wishListItems.isEmpty {
+                VStack(spacing: 12) {
+                    Image(systemName: "heart")
+                        .font(.system(size: 40))
+                        .foregroundColor(.gray)
+                    
+                    Text(languageManager.translate("profile_wishlist_empty"))
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(.primary)
+                    
+                    Text(languageManager.translate("profile_wishlist_empty_desc"))
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 32)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Theme.neutralLight)
+                        .fill(Color(.systemGray6))
                 )
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(wishListService.wishListItems.prefix(5)) { item in
+                            WishListItemCard(item: item)
+                        }
+                        
+                        if wishListService.wishListItems.count > 5 {
+                            Button {
+                                showingWishListSheet = true
+                            } label: {
+                                VStack(spacing: 8) {
+                                    Text("+\(wishListService.wishListItems.count - 5)")
+                                        .font(.system(size: 20, weight: .bold))
+                                        .foregroundColor(Theme.accent)
+                                    
+                                    Text(languageManager.translate("profile_more"))
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary)
+                                }
+                                .frame(width: 100, height: 120)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color(.systemGray6))
+                                )
+                            }
+                        }
+                    }
+                }
             }
+        }
+        .sheet(isPresented: $showingWishListSheet) {
+            WishListFullView(wishListService: wishListService)
         }
     }
     
     private var securitySection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Безопасность")
+            Text("Security") // Not localized - will be removed
                 .font(.headline)
                 .fontWeight(.semibold)
             
@@ -513,7 +436,7 @@ struct SettingsView: View {
             HStack(spacing: 12) {
                 Image(systemName: "arrow.right.square.fill")
                     .foregroundColor(Theme.danger)
-                Text("Выйти из аккаунта")
+                Text(languageManager.translate("profile_logout"))
                     .fontWeight(.semibold)
                     .foregroundColor(Theme.danger)
             }
@@ -531,16 +454,6 @@ struct SettingsView: View {
         .buttonStyle(ScaleButtonStyle())
     }
     
-    private func createAndSharePDF() {
-        if let pdfURL = pdfService.createCosmeticBagPDF(products: productStore.products, userProfile: userProfile) {
-            let shareSheet = ShareSheet(items: [pdfURL])
-            // Present the share sheet with PDF
-            DispatchQueue.main.async {
-                // This would present the PDF share sheet
-                showingShareSheet = true
-            }
-        }
-    }
 }
 
 struct ShareSheet: UIViewControllerRepresentable {
@@ -552,6 +465,146 @@ struct ShareSheet: UIViewControllerRepresentable {
     }
     
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+
+// MARK: - WishList Item Card
+struct WishListItemCard: View {
+    let item: WishListItem
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Product Image
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.gray.opacity(0.1))
+                .frame(width: 100, height: 100)
+                .overlay(
+                    Image(systemName: "photo")
+                        .font(.system(size: 24))
+                        .foregroundColor(.gray)
+                )
+            
+            // Product Info
+            VStack(alignment: .leading, spacing: 4) {
+                Text(item.productName)
+                    .font(.system(size: 13, weight: .medium))
+                    .lineLimit(1)
+                
+                Text(item.productBrand)
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                
+                Text("от \(item.fromUserName)")
+                    .font(.system(size: 10))
+                    .foregroundColor(Theme.accent)
+                    .lineLimit(1)
+            }
+            .frame(width: 100)
+        }
+    }
+}
+
+// MARK: - WishList Full View
+struct WishListFullView: View {
+    @ObservedObject var wishListService: WishListService
+    @Environment(\.dismiss) var dismiss
+    @State private var showingShareSheet = false
+    
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                LazyVStack(spacing: 12) {
+                    ForEach(wishListService.wishListItems) { item in
+                        WishListItemRow(item: item, wishListService: wishListService)
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("WishList")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .foregroundColor(.primary)
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showingShareSheet = true
+                    } label: {
+                        Image(systemName: "square.and.arrow.up")
+                            .foregroundColor(Theme.accent)
+                    }
+                }
+            }
+            .sheet(isPresented: $showingShareSheet) {
+                ShareSheet(items: [generateWishListText()])
+            }
+        }
+    }
+    
+    private func generateWishListText() -> String {
+        var text = "🌟 Мой WishList в Glowly:\n\n"
+        for item in wishListService.wishListItems {
+            text += "• \(item.productName) - \(item.productBrand) (от \(item.fromUserName))\n"
+        }
+        text += "\nСкачай Glowly: [App Store Link]"
+        return text
+    }
+}
+
+// MARK: - WishList Item Row
+struct WishListItemRow: View {
+    let item: WishListItem
+    @ObservedObject var wishListService: WishListService
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            // Product Image
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.gray.opacity(0.1))
+                .frame(width: 60, height: 60)
+                .overlay(
+                    Image(systemName: "photo")
+                        .foregroundColor(.gray)
+                )
+            
+            // Product Info
+            VStack(alignment: .leading, spacing: 4) {
+                Text(item.productName)
+                    .font(.system(size: 15, weight: .medium))
+                
+                Text(item.productBrand)
+                    .font(.system(size: 13))
+                    .foregroundColor(.secondary)
+                
+                Text("от \(item.fromUserName)")
+                    .font(.system(size: 12))
+                    .foregroundColor(Theme.accent)
+            }
+            
+            Spacer()
+            
+            // Remove Button
+            Button {
+                wishListService.removeFromWishList(itemId: item.id)
+            } label: {
+                Image(systemName: "heart.fill")
+                    .font(.system(size: 20))
+                    .foregroundColor(.red)
+            }
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.03), radius: 4, x: 0, y: 1)
+        )
+    }
 }
 
 // Scale button style for better tap feedback

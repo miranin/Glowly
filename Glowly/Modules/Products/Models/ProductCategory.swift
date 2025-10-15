@@ -29,6 +29,31 @@ enum ProductCategory: String, CaseIterable, Codable {
     case mask = "Маска"
     case other = "Другое"
     
+    func localizedName(languageManager: LanguageManager) -> String {
+        switch self {
+        case .foundation: return languageManager.translate("category_foundation")
+        case .concealer: return languageManager.translate("category_concealer")
+        case .powder: return languageManager.translate("category_powder")
+        case .blush: return languageManager.translate("category_blush")
+        case .bronzer: return languageManager.translate("category_bronzer")
+        case .highlighter: return languageManager.translate("category_highlighter")
+        case .eyeshadow: return languageManager.translate("category_eyeshadow")
+        case .eyeliner: return languageManager.translate("category_eyeliner")
+        case .mascara: return languageManager.translate("category_mascara")
+        case .lipstick: return languageManager.translate("category_lipstick")
+        case .lipGloss: return languageManager.translate("category_lip_gloss")
+        case .lipLiner: return languageManager.translate("category_lip_liner")
+        case .primer: return languageManager.translate("category_primer")
+        case .settingSpray: return languageManager.translate("category_setting_spray")
+        case .cleanser: return languageManager.translate("category_cleanser")
+        case .moisturizer: return languageManager.translate("category_moisturizer")
+        case .serum: return languageManager.translate("category_serum")
+        case .sunscreen: return languageManager.translate("category_sunscreen")
+        case .mask: return languageManager.translate("category_mask")
+        case .other: return languageManager.translate("category_other")
+        }
+    }
+    
     // Optional asset name to display custom image from Assets.xcassets
     var assetName: String? {
         switch self {

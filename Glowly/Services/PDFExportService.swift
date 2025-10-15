@@ -138,17 +138,6 @@ class PDFExportService: ObservableObject {
         let purchaseText = "Куплено: \(product.purchaseDate.formatted(date: .abbreviated, time: .omitted))"
         purchaseText.draw(in: CGRect(x: productRect.minX, y: productRect.minY + 40, width: productRect.width - 100, height: 20), withAttributes: brandAttributes)
         
-        // Expiry date
-        if let expiryDate = product.expiryDate {
-            let expiryText = "Срок годности: \(expiryDate.formatted(date: .abbreviated, time: .omitted))"
-            let expiryColor = expiryDate < Date() ? UIColor.systemRed : UIColor.systemGreen
-            let expiryAttributes: [NSAttributedString.Key: Any] = [
-                .font: brandFont,
-                .foregroundColor: expiryColor
-            ]
-            
-            expiryText.draw(in: CGRect(x: productRect.minX, y: productRect.minY + 60, width: productRect.width - 100, height: 20), withAttributes: expiryAttributes)
-        }
         
         // Product image (if available)
         if let imageData = product.imageData, let image = UIImage(data: imageData) {

@@ -52,108 +52,47 @@ struct ProductCard: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(product.name)
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(Theme.textPrimary)
+                    .foregroundColor(.primary)
                     .lineLimit(1)
                 
                 Text(product.brand)
                     .font(.system(size: 14))
-                    .foregroundColor(Theme.textSecondary)
+                    .foregroundColor(.secondary)
                 
-                HStack(spacing: 6) {
-                    Text(product.category.rawValue)
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(Theme.categoryColor(product.category))
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 4)
-                        .background(
-                            Capsule()
-                                .fill(Theme.categoryColor(product.category).opacity(0.15))
-                        )
-                    
-                    if product.isExpired {
-                        Text("Просрочено")
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(Theme.danger)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .background(
-                                Capsule()
-                                    .fill(Theme.danger.opacity(0.15))
-                            )
-                    } else if product.isExpiringSoon {
-                        if let days = product.daysUntilExpiry {
-                            Text("\(days) дн.")
-                                .font(.system(size: 11, weight: .medium))
-                                .foregroundColor(Theme.warning)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 4)
-                                .background(
-                                    Capsule()
-                                        .fill(Theme.warning.opacity(0.15))
-                                )
-                        }
-                    }
-                }
+                Text(product.category.rawValue)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(Theme.categoryColor(product.category))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule()
+                            .fill(Theme.categoryColor(product.category).opacity(0.15))
+                    )
             }
             
             Spacer()
             
-            // Expiry date badge
-            VStack(spacing: 4) {
-                if let expiryDate = product.expiryDate {
-                    VStack(spacing: 2) {
-                        Text(formatDateShort(expiryDate))
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(product.isExpired ? Theme.danger : product.isExpiringSoon ? Theme.warning : Theme.success)
-                        
-                        if let days = product.daysUntilExpiry, !product.isExpired {
-                            Text("\(days) дн.")
-                                .font(.system(size: 10))
-                                .foregroundColor(Theme.textSecondary)
-                        }
-                    }
+            // Menu
+            Menu {
+                Button("Редактировать", action: {})
+                Button("Удалить", role: .destructive) {
+                    showingDeleteAlert = true
                 }
-                
-                Menu {
-                    Button("Редактировать", action: {})
-                    Button("Удалить", role: .destructive) {
-                        showingDeleteAlert = true
-                    }
-                } label: {
-                    Image(systemName: "ellipsis.circle.fill")
-                        .font(.system(size: 20))
-                        .foregroundColor(Theme.neutral.opacity(0.6))
-                }
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.system(size: 18))
+                    .foregroundColor(.secondary)
             }
         }
         .padding(14)
         .background(
-            RoundedRectangle(cornerRadius: 18)
-                .fill(Theme.backgroundCard)
-                .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 18)
-                .strokeBorder(
-                    LinearGradient(
-                        colors: product.isExpired ? 
-                            [Theme.danger.opacity(0.5), Theme.danger.opacity(0.3)] :
-                        product.isExpiringSoon ? 
-                            [Theme.warning.opacity(0.4), Theme.warning.opacity(0.2)] :
-                            [Theme.categoryColor(product.category).opacity(0.3), Theme.categoryColor(product.category).opacity(0.1)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 2
-                )
-                .shadow(
-                    color: product.isExpired ? Theme.danger.opacity(0.2) :
-                    product.isExpiringSoon ? Theme.warning.opacity(0.15) :
-                    Theme.categoryColor(product.category).opacity(0.1),
-                    radius: 6,
-                    x: 0,
-                    y: 2
-                )
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Theme.categoryColor(product.category).opacity(0.2), lineWidth: 1)
         )
         .alert("Удалить продукт", isPresented: $showingDeleteAlert) {
             Button("Отмена", role: .cancel) { }
@@ -185,8 +124,8 @@ struct ProductCard: View {
                 name: "Тональный крем",
                 brand: "L'Oréal",
                 category: .foundation,
+                applicationZone: .face,
                 purchaseDate: Date(),
-                expiryDate: Calendar.current.date(byAdding: .day, value: 15, to: Date()),
                 barcode: nil,
                 imageData: nil,
                 notes: "Любимый оттенок"
@@ -199,8 +138,8 @@ struct ProductCard: View {
                 name: "Помада",
                 brand: "MAC",
                 category: .lipstick,
+                applicationZone: .lips,
                 purchaseDate: Date(),
-                expiryDate: Calendar.current.date(byAdding: .day, value: -5, to: Date()),
                 barcode: nil,
                 imageData: nil,
                 notes: "Классический красный"

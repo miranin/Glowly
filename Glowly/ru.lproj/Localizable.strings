@@ -1,0 +1,233 @@
+/* Tab Bar */
+"tab_cosmetics" = "Косметичка";
+"tab_feed" = "Лента";
+"tab_learning" = "Обучение";
+"tab_profile" = "Профиль";
+
+/* Profile */
+"profile_title" = "Профиль";
+"profile_edit" = "Редактировать персонализацию";
+"profile_wishlist" = "WishList";
+"profile_language" = "Язык";
+"profile_version" = "Версия";
+"profile_logout" = "Выйти";
+"profile_logout_confirm" = "Вы уверены, что хотите выйти?";
+"profile_cancel" = "Отмена";
+"profile_products_count" = "Продуктов в косметичке";
+"profile_wishlist_empty" = "WishList пуст";
+"profile_wishlist_empty_desc" = "Добавляйте продукты из профилей других пользователей";
+"profile_share" = "Поделиться";
+"profile_more" = "Ещё";
+
+/* Bag */
+"bag_greeting_morning" = "Доброе утро";
+"bag_greeting_afternoon" = "Добрый день";
+"bag_greeting_evening" = "Добрый вечер";
+"bag_search" = "Поиск продуктов...";
+"bag_all_products" = "Вся продукция";
+"bag_add_product" = "Добавить продукт";
+"bag_add_new" = "Добавить новый продукт";
+
+/* AI */
+"ai_title" = "AI Помощник";
+"ai_placeholder" = "Спроси AI-помощника...";
+"ai_welcome_title" = "Привет! Я твой AI-помощник по красоте";
+"ai_welcome_desc" = "Спроси меня о рутинах, советах по макияжу,\nили попроси рекомендации на основе твоих продуктов";
+"ai_morning_routine" = "Создать утреннюю рутину";
+"ai_makeup_advice" = "Рекомендации по макияжу";
+"ai_product_analysis" = "Анализ моих продуктов";
+
+/* Feed */
+"feed_title" = "Лента новостей";
+"feed_followers" = "Подписчики";
+"feed_following" = "Подписки";
+"feed_products" = "Продукты";
+"feed_follow" = "Подписаться";
+"feed_unfollow" = "Отписаться";
+
+/* Learning */
+"learning_title" = "Обучение";
+"learning_ai_chat" = "AI Чат";
+"learning_articles" = "Статьи";
+
+/* Common */
+"common_save" = "Сохранить";
+"common_cancel" = "Отмена";
+"common_delete" = "Удалить";
+"common_edit" = "Редактировать";
+"common_done" = "Готово";
+
+/* AI Mock Responses (будет с backend) */
+"ai_welcome_message" = "Привет! Я твой персональный AI-помощник по красоте. Чем могу помочь?";
+"ai_profile_updated" = "✨ Профиль обновлен! Я учел ваши новые предпочтения и буду давать советы с учетом этих изменений.";
+"ai_routine_intro" = "На основе вашего профиля, рекомендую следующую рутину:";
+"ai_general_advice" = "Буду рад помочь! Могу предложить советы по уходу за кожей, макияжу или проанализировать ваши продукты.";
+
+/* Add Product */
+"add_product_title" = "Добавить";
+"add_product_subtitle" = "Добавить продукт";
+"add_product_description" = "Сфотографируйте или выберите из галереи";
+"add_product_take_photo" = "Сделать фото";
+"add_product_choose_gallery" = "Выбрать из галереи";
+
+/* Categories (Mock - будет с backend) */
+"category_all" = "Вся продукция";
+"category_foundation" = "Тональный крем";
+"category_lipstick" = "Помада";
+"category_mascara" = "Тушь для ресниц";
+"category_moisturizer" = "Увлажняющий крем";
+"category_cleanser" = "Очищающее средство";
+
+/* Social (Mock usernames - будет с backend) */
+"social_posts" = "Посты";
+"social_subscribers" = "Подписчики";
+"social_subscriptions" = "Подписки";
+"social_subscribe" = "Подписаться";
+"social_unsubscribe" = "Отписаться";
+"social_common_title" = "У вас общее";
+"social_cosmetic_bag" = "Косметичка";
+
+/* User Profile */
+"user_profile_blogger" = "Бьюти-блогер";
+"user_profile_shares_secrets" = "Делюсь секретами красоты";
+
+/* Articles (Mock - будет с backend) */
+"article_category_skincare" = "Уход за кожей";
+"article_category_makeup" = "Макияж";
+"article_category_protection" = "Защита";
+"article_read_time" = "мин";
+
+/* Personalization */
+"personalization_title" = "Персонализация";
+"personalization_cancel" = "Отмена";
+"personalization_save" = "Сохранить";
+"personalization_basic_info" = "Основная информация";
+"personalization_name" = "Имя";
+"personalization_age" = "Возраст";
+"personalization_gender" = "Пол";
+"personalization_skin_info" = "Тип кожи";
+"personalization_skin_type" = "Тип кожи";
+"personalization_skin_tone" = "Тон кожи";
+"personalization_skin_conditions" = "Состояние кожи";
+"personalization_allergies" = "Аллергии";
+"personalization_beauty_profile" = "Бьюти-профиль";
+"personalization_experience" = "Уровень опыта";
+"personalization_goals" = "Ваши цели";
+"personalization_preferences" = "Предпочтения";
+"personalization_makeup_frequency" = "Частота макияжа";
+"personalization_skincare_complexity" = "Сложность ухода";
+"personalization_photo_change" = "Нажмите, чтобы изменить фото";
+
+/* Gender */
+"gender_male" = "Мужской";
+"gender_female" = "Женский";
+"gender_other" = "Другой";
+
+/* Skin Type */
+"skin_type_normal" = "Нормальная";
+"skin_type_oily" = "Жирная";
+"skin_type_dry" = "Сухая";
+"skin_type_combination" = "Комбинированная";
+"skin_type_sensitive" = "Чувствительная";
+
+/* Skin Tone */
+"skin_tone_fair" = "Очень светлый";
+"skin_tone_light" = "Светлый";
+"skin_tone_medium" = "Средний";
+"skin_tone_tan" = "Загорелый";
+"skin_tone_dark" = "Темный";
+"skin_tone_deep" = "Очень темный";
+
+/* Age Range */
+"age_range_18_24" = "18-24";
+"age_range_25_34" = "25-34";
+"age_range_35_44" = "35-44";
+"age_range_45_54" = "45-54";
+"age_range_55_plus" = "55+";
+
+/* Skin Conditions */
+"skin_condition_acne" = "Акне";
+"skin_condition_eczema" = "Экзема";
+"skin_condition_rosacea" = "Розацеа";
+"skin_condition_psoriasis" = "Псориаз";
+"skin_condition_hyperpigmentation" = "Гиперпигментация";
+"skin_condition_dry_patches" = "Сухие участки";
+"skin_condition_enlarged_pores" = "Расширенные поры";
+"skin_condition_fine_lines" = "Мелкие морщины";
+"skin_condition_dark_circles" = "Темные круги";
+"skin_condition_redness" = "Покраснения";
+
+/* Allergens */
+"allergen_parabens" = "Парабены";
+"allergen_sulfates" = "Сульфаты";
+"allergen_fragrances" = "Ароматизаторы";
+"allergen_alcohol" = "Спирт";
+"allergen_essential_oils" = "Эфирные масла";
+"allergen_silicones" = "Силиконы";
+"allergen_dyes" = "Красители";
+"allergen_retinol" = "Ретинол";
+"allergen_aha_acids" = "АНА кислоты";
+"allergen_bha_acids" = "ВНА кислоты";
+"allergen_vitamin_c" = "Витамин С";
+"allergen_niacinamide" = "Ниацинамид";
+
+/* Experience Level */
+"experience_level_beginner" = "Новичок";
+"experience_level_intermediate" = "Средний";
+"experience_level_advanced" = "Продвинутый";
+
+/* Beauty Goals */
+"beauty_goal_hydration" = "Увлажнение";
+"beauty_goal_anti_aging" = "Антивозрастной уход";
+"beauty_goal_acne_treatment" = "Лечение акне";
+"beauty_goal_brightening" = "Осветление";
+"beauty_goal_even_tone" = "Ровный тон";
+"beauty_goal_sun_protection" = "Защита от солнца";
+
+/* Makeup Frequency */
+"makeup_frequency_never" = "Никогда";
+"makeup_frequency_rarely" = "Редко";
+"makeup_frequency_sometimes" = "Иногда";
+"makeup_frequency_often" = "Часто";
+"makeup_frequency_daily" = "Ежедневно";
+
+/* Skincare Routine Complexity */
+"skincare_routine_complexity_simple" = "Простая";
+"skincare_routine_complexity_moderate" = "Умеренная";
+"skincare_routine_complexity_extensive" = "Обширная";
+
+/* Application Zones */
+"application_zone_face" = "Лицо";
+"application_zone_eyes" = "Глаза";
+"application_zone_lips" = "Губы";
+"application_zone_cheeks" = "Щеки";
+"application_zone_body" = "Тело";
+"application_zone_hair" = "Волосы";
+"application_zone_hands" = "Руки";
+"application_zone_feet" = "Ноги";
+"application_zone_nails" = "Ногти";
+"application_zone_neck" = "Шея";
+"application_zone_decolletage" = "Декольте";
+
+/* Product Categories */
+"category_foundation" = "Тональный крем";
+"category_concealer" = "Консилер";
+"category_powder" = "Пудра";
+"category_blush" = "Румяна";
+"category_bronzer" = "Бронзер";
+"category_highlighter" = "Хайлайтер";
+"category_eyeshadow" = "Тени для век";
+"category_eyeliner" = "Подводка";
+"category_mascara" = "Тушь";
+"category_lipstick" = "Помада";
+"category_lip_gloss" = "Блеск для губ";
+"category_lip_liner" = "Контур для губ";
+"category_primer" = "Праймер";
+"category_setting_spray" = "Фиксирующий спрей";
+"category_cleanser" = "Очищающее средство";
+"category_moisturizer" = "Увлажняющий крем";
+"category_serum" = "Сыворотка";
+"category_sunscreen" = "Солнцезащитный крем";
+"category_mask" = "Маска";
+"category_other" = "Другое";
+

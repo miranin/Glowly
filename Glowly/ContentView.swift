@@ -13,6 +13,8 @@ struct ContentView: View {
     @StateObject private var productStore = ProductStore()
     @StateObject private var userProfilePresenter = UserProfilePresenter()
     private let biometricService: BiometricAuthServiceProtocol
+    @StateObject private var permissionsService: PermissionsService
+    @State private var isFirstLogin = false
     
     // MARK: - Initialization with Dependency Injection
     nonisolated init(
@@ -21,6 +23,7 @@ struct ContentView: View {
     ) {
         _authManager = StateObject(wrappedValue: authManager)
         self.biometricService = biometricService
+        _permissionsService = StateObject(wrappedValue: PermissionsService(biometricService: biometricService))
     }
     
     var body: some View {
@@ -37,23 +40,36 @@ struct ContentView: View {
             }
         }
         .task {
-            // Initialize auth manager to check authentication status
+            // Initialize auth manager (but don't auto-authenticate)
             authManager.initialize()
+        }
+        .onChange(of: authManager.isAuthenticated) { oldValue, newValue in
+            // Check if user just authenticated (first login)
+            if !oldValue && newValue {
+                // Check if it's first login (no biometric preference set)
+                let hasSetBiometric = UserDefaults.standard.object(forKey: "hasSetBiometricPreference") != nil
+                if !hasSetBiometric {
+                    isFirstLogin = true
+                    UserDefaults.standard.set(true, forKey: "hasSetBiometricPreference")
+                    
+                    // Request permissions after a short delay
+                    Task {
+                        try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
+                        await permissionsService.completeFirstTimeOnboarding()
+                        isFirstLogin = false
+                    }
+                }
+            }
         }
     }
     
     private var mainAppView: some View {
-        TabView {
-            BagListView(productStore: productStore)
-                .tabItem { Label("Косметичка", systemImage: "bag.fill") }
-            AddEntryChooserView(productStore: productStore)
-                .tabItem { Label("Добавить", systemImage: "plus.circle.fill") }
-            AIHelperView(productStore: productStore, userProfilePresenter: userProfilePresenter)
-                .tabItem { Label("AI", systemImage: "sparkles") }
-            SettingsView(productStore: productStore, userProfilePresenter: userProfilePresenter, authManager: authManager, biometricService: biometricService)
-                .tabItem { Label("Профиль", systemImage: "person.fill") }
-        }
-        .tint(Theme.accent)
+        MainTabView(
+            productStore: productStore,
+            userProfilePresenter: userProfilePresenter,
+            authManager: authManager,
+            biometricService: biometricService
+        )
     }
 }
 

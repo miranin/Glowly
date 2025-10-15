@@ -24,64 +24,10 @@ class NotificationService: ObservableObject {
     }
     
     func scheduleExpiryReminders(for products: [Product]) {
-        // Remove existing notifications
+        // No expiry functionality - method kept for compatibility
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
-        
-        for product in products {
-            guard let expiryDate = product.expiryDate,
-                  !product.isExpired,
-                  product.isActive else { continue }
-            
-            let calendar = Calendar.current
-            let daysUntilExpiry = calendar.dateComponents([.day], from: Date(), to: expiryDate).day ?? 0
-            
-            // Schedule notifications for 30, 14, 7, 3, and 1 days before expiry
-            let reminderDays = [30, 14, 7, 3, 1]
-            
-            for days in reminderDays {
-                if daysUntilExpiry >= days {
-                    scheduleNotification(
-                        for: product,
-                        daysBeforeExpiry: days,
-                        actualDaysUntilExpiry: daysUntilExpiry
-                    )
-                }
-            }
-        }
     }
     
-    private func scheduleNotification(for product: Product, daysBeforeExpiry: Int, actualDaysUntilExpiry: Int) {
-        guard let expiryDate = product.expiryDate else { return }
-        
-        let content = UNMutableNotificationContent()
-        content.title = "Glowly - Напоминание"
-        
-        if daysBeforeExpiry == 1 {
-            content.body = "⚠️ \(product.name) от \(product.brand) истекает завтра!"
-        } else if daysBeforeExpiry <= 3 {
-            content.body = "⚠️ \(product.name) от \(product.brand) истекает через \(actualDaysUntilExpiry) дня!"
-        }
-        
-        content.sound = .default
-        content.badge = 1
-        
-        // Calculate trigger date
-        let triggerDate = Calendar.current.date(byAdding: .day, value: -(daysBeforeExpiry - actualDaysUntilExpiry), to: expiryDate)!
-        let triggerDateComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: triggerDate)
-        let trigger = UNCalendarNotificationTrigger(dateMatching: triggerDateComponents, repeats: false)
-        
-        let request = UNNotificationRequest(
-            identifier: "\(product.id.uuidString)_\(daysBeforeExpiry)",
-            content: content,
-            trigger: trigger
-        )
-        
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                print("Error scheduling notification: \(error)")
-            }
-        }
-    }
     
     func scheduleDailyRoutineReminder() {
         let content = UNMutableNotificationContent()

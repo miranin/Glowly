@@ -2,406 +2,367 @@
 //  RegistrationView.swift
 //  Glowly
 //
-//  Created by Tamirlan Aubakirov on 08/10/25.
+//  Created by Tamirlan Aubakirov on 10/10/25.
 //
 
 import SwiftUI
 
 struct RegistrationView: View {
     @Environment(\.dismiss) var dismiss
-    // MARK: - Dependencies (Injected)
-    @StateObject private var authManager: AuthManager
-    @StateObject private var presenter: RegistrationPresenter
-    @State private var showPassword: Bool = false
-    @State private var showConfirmPassword: Bool = false
+    @StateObject private var viewModel: RegistrationViewModel
+    @State private var showPrivacyPolicy = false
     
-    // MARK: - Initialization with Dependency Injection
     nonisolated init(authManager: AuthManager = AuthManager()) {
-        let manager = authManager
-        _authManager = StateObject(wrappedValue: manager)
-        _presenter = StateObject(wrappedValue: RegistrationPresenter(authManager: manager))
+        _viewModel = StateObject(wrappedValue: RegistrationViewModel(authManager: authManager))
     }
     
     var body: some View {
-        NavigationView {
-            ZStack {
-                // Background
-                LinearGradient(
-                    colors: [Theme.backgroundPowder, Theme.accentLight.opacity(0.1)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
-                
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 32) {
-                        // Header
-                        headerSection
-                        
-                        // Registration Form
-                        registrationFormSection
-                        
-                        // Terms
-                        termsSection
-                        
-                        // Sign Up Button
-                        signUpButton
-                        
-                        // Divider
-                        dividerSection
-                        
-                        // Google Sign Up
-                        googleSignUpButton
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 40)
-                }
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark")
-                            .foregroundColor(Theme.textPrimary)
-                            .font(.system(size: 16, weight: .semibold))
-                            .frame(width: 32, height: 32)
-                            .background(Theme.backgroundCard)
-                            .clipShape(Circle())
-                    }
+        ZStack {
+            Color(.systemBackground).ignoresSafeArea()
+            
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 24) {
+                    Spacer().frame(height: 60)
+                    
+                    // Title
+                    titleSection
+                    
+                    // Segmented Control
+                    segmentedControl
+                    
+                    // Form
+                    formSection
+                    
+                    // Register Button
+                    registerButton
+                    
+                    // Terms
+                    termsSection
+                    
+                    Spacer().frame(height: 60)
+                    
+                    // Login
+                    loginSection
+                    
+                    // Social Sign Up
+                    socialSignUpSection
                 }
             }
             .dismissKeyboardOnTap()
         }
-        .alert("Ошибка", isPresented: $presenter.showError) {
-            Button("OK", role: .cancel) {
-                presenter.clearError()
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(false) // System back button only
+        .sheet(isPresented: $showPrivacyPolicy) {
+            PrivacyPolicyView()
+        }
+        .background(
+            NavigationLink(
+                destination: OTPVerificationView(
+                    contactInfo: viewModel.registrationType == .email ? viewModel.email : "+7\(viewModel.phone)",
+                    verificationType: viewModel.registrationType == .email ? .email : .sms,
+                    onSuccess: {
+                        // OTP verified successfully
+                    }
+                ),
+                isActive: $viewModel.showOTPVerification
+            ) {
+                EmptyView()
             }
-        } message: {
-            Text(presenter.errorMessage ?? "Неизвестная ошибка")
+        )
+        .overlay(alignment: .bottom) {
+            if viewModel.showError, let error = viewModel.errorMessage {
+                ErrorToast(message: error) {
+                    viewModel.clearError()
+                }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
     }
     
-    // MARK: - Header
-    
-    private var headerSection: some View {
-        VStack(spacing: 12) {
-            Text("Создать аккаунт")
-                .font(.title)
-                .fontWeight(.bold)
-                .foregroundColor(Theme.textPrimary)
+    // MARK: - Title Section
+    private var titleSection: some View {
+        VStack(spacing: 8) {
+            Text("регистрация 🎉")
+                .font(.system(size: 32, weight: .bold))
+                .frame(maxWidth: .infinity, alignment: .leading)
             
-            Text("Присоединяйтесь к Glowly")
-                .font(.subheadline)
-                .foregroundColor(Theme.textSecondary)
+            Text("создайте аккаунт, чтобы начать\nиспользовать приложение")
+                .font(.system(size: 15))
+                .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(.top, 20)
+        .padding(.horizontal, 24)
     }
     
-    // MARK: - Registration Form
+    // MARK: - Segmented Control
+    private var segmentedControl: some View {
+        Picker("", selection: $viewModel.registrationType) {
+            Text("Email").tag(RegistrationViewModel.RegistrationType.email)
+            Text("Телефон").tag(RegistrationViewModel.RegistrationType.phone)
+        }
+        .pickerStyle(.segmented)
+        .padding(.horizontal, 24)
+        .onChange(of: viewModel.registrationType) { _, newValue in
+            viewModel.handleRegistrationTypeChange(newValue)
+        }
+    }
     
-    private var registrationFormSection: some View {
+    // MARK: - Form Section
+    private var formSection: some View {
         VStack(spacing: 16) {
-            // Name Field
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Имя")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(Theme.textPrimary)
-                
-                HStack(spacing: 12) {
-                    Image(systemName: "person.fill")
-                        .foregroundColor(Theme.accent)
-                        .frame(width: 20)
-                    
-                    TextField("Ваше имя", text: $presenter.name)
-                        .textContentType(.name)
-                        .autocapitalization(.words)
-                        .foregroundColor(Theme.textPrimary)
-                }
-                .padding(16)
-                .background(Theme.backgroundCard)
-                .cornerRadius(12)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Theme.neutralLight, lineWidth: 1)
-                )
+            // Name
+            nameInputField
+            
+            // Email or Phone
+            if viewModel.registrationType == .email {
+                emailInputField
+            } else {
+                phoneInputField
             }
             
-            // Email Field
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Email")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(Theme.textPrimary)
-                
-                HStack(spacing: 12) {
-                    Image(systemName: "envelope.fill")
-                        .foregroundColor(Theme.accent)
-                        .frame(width: 20)
-                    
-                    TextField("example@mail.com", text: $presenter.email)
-                        .textContentType(.emailAddress)
-                        .autocapitalization(.none)
-                        .keyboardType(.emailAddress)
-                        .foregroundColor(Theme.textPrimary)
-                }
-                .padding(16)
-                .background(Theme.backgroundCard)
-                .cornerRadius(12)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Theme.neutralLight, lineWidth: 1)
-                )
-            }
+            // Password
+            passwordInputField
             
-            // Password Field
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Пароль")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(Theme.textPrimary)
-                
-                HStack(spacing: 12) {
-                    Image(systemName: "lock.fill")
-                        .foregroundColor(Theme.accent)
-                        .frame(width: 20)
-                    
-                    if showPassword {
-                        TextField("Минимум 8 символов", text: $presenter.password)
-                            .textContentType(.newPassword)
-                            .foregroundColor(Theme.textPrimary)
-                    } else {
-                        SecureField("Минимум 8 символов", text: $presenter.password)
-                            .textContentType(.newPassword)
-                            .foregroundColor(Theme.textPrimary)
-                    }
-                    
-                    Button(action: { showPassword.toggle() }) {
-                        Image(systemName: showPassword ? "eye.slash.fill" : "eye.fill")
-                            .foregroundColor(Theme.textSecondary)
-                    }
-                }
+            // Confirm Password
+            confirmPasswordInputField
+        }
+        .padding(.horizontal, 24)
+    }
+    
+    private var nameInputField: some View {
+        TextField("имя", text: $viewModel.name)
+            .textContentType(.name)
+            .autocapitalization(.words)
+            .padding(16)
+            .background(Color(.systemGray6))
+            .cornerRadius(12)
+    }
+    
+    private var emailInputField: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            TextField("e-mail", text: $viewModel.email)
+                .textContentType(.emailAddress)
+                .autocapitalization(.none)
+                .keyboardType(.emailAddress)
                 .padding(16)
-                .background(Theme.backgroundCard)
+                .background(Color(.systemGray6))
                 .cornerRadius(12)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(passwordStrengthColor(), lineWidth: presenter.password.isEmpty ? 1 : 2)
+                        .stroke(viewModel.emailBorderColor(), lineWidth: !viewModel.email.isEmpty ? 2 : 0)
                 )
-                
-                // Password Strength
-                if !presenter.password.isEmpty {
-                    HStack(spacing: 6) {
-                        Image(systemName: passwordStrengthIcon())
-                            .font(.caption)
-                            .foregroundColor(passwordStrengthColor())
-                        Text(presenter.getPasswordStrengthText())
-                            .font(.caption)
-                            .foregroundColor(passwordStrengthColor())
-                    }
-                }
-            }
             
-            // Confirm Password Field
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Подтвердите пароль")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(Theme.textPrimary)
-                
-                HStack(spacing: 12) {
-                    Image(systemName: "lock.fill")
-                        .foregroundColor(Theme.accent)
-                        .frame(width: 20)
-                    
-                    if showConfirmPassword {
-                        TextField("Повторите пароль", text: $presenter.confirmPassword)
-                            .textContentType(.newPassword)
-                            .foregroundColor(Theme.textPrimary)
-                    } else {
-                        SecureField("Повторите пароль", text: $presenter.confirmPassword)
-                            .textContentType(.newPassword)
-                            .foregroundColor(Theme.textPrimary)
-                    }
-                    
-                    Button(action: { showConfirmPassword.toggle() }) {
-                        Image(systemName: showConfirmPassword ? "eye.slash.fill" : "eye.fill")
-                            .foregroundColor(Theme.textSecondary)
-                    }
-                }
-                .padding(16)
-                .background(Theme.backgroundCard)
-                .cornerRadius(12)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(presenter.passwordsMatch() ? Theme.success : Theme.neutralLight, lineWidth: presenter.confirmPassword.isEmpty ? 1 : 2)
-                )
-                
-                // Password Match Indicator
-                if !presenter.confirmPassword.isEmpty {
-                    HStack(spacing: 6) {
-                        Image(systemName: presenter.passwordsMatch() ? "checkmark.circle.fill" : "xmark.circle.fill")
-                            .font(.caption)
-                            .foregroundColor(presenter.passwordsMatch() ? Theme.success : Theme.danger)
-                        Text(presenter.passwordsMatch() ? "Пароли совпадают" : "Пароли не совпадают")
-                            .font(.caption)
-                            .foregroundColor(presenter.passwordsMatch() ? Theme.success : Theme.danger)
-                    }
+            if !viewModel.email.isEmpty && !viewModel.isValidEmail(viewModel.email) {
+                HStack(spacing: 6) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(.red)
+                    Text("неверный формат email")
+                        .font(.system(size: 12))
+                        .foregroundColor(.red)
                 }
             }
         }
     }
     
-    // MARK: - Terms
-    
-    private var termsSection: some View {
-        Button(action: { presenter.agreedToTerms.toggle() }) {
-            HStack(spacing: 12) {
-                Image(systemName: presenter.agreedToTerms ? "checkmark.square.fill" : "square")
-                    .font(.title3)
-                    .foregroundColor(presenter.agreedToTerms ? Theme.accent : Theme.textSecondary)
+    private var phoneInputField: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("+7")
+                    .font(.system(size: 16))
+                    .foregroundColor(.primary)
+                    .padding(.leading, 4)
                 
-                Text("Я согласен с ")
-                    .font(.subheadline)
-                    .foregroundColor(Theme.textSecondary)
-                +
-                Text("условиями использования")
-                    .font(.subheadline)
-                    .foregroundColor(Theme.accent)
-                +
-                Text(" и ")
-                    .font(.subheadline)
-                    .foregroundColor(Theme.textSecondary)
-                +
-                Text("политикой конфиденциальности")
-                    .font(.subheadline)
-                    .foregroundColor(Theme.accent)
+                TextField("700 123 45 67", text: $viewModel.phone)
+                    .textContentType(.telephoneNumber)
+                    .keyboardType(.phonePad)
+                    .onChange(of: viewModel.phone) { _, newValue in
+                        viewModel.handlePhoneInput(newValue)
+                        viewModel.phone = viewModel.formatPhone(viewModel.phone)
+                    }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-    }
-    
-    // MARK: - Sign Up Button
-    
-    private var signUpButton: some View {
-        Button(action: { signUp() }) {
-            HStack(spacing: 8) {
-                if presenter.isLoading {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                } else {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.title3)
-                    Text("Зарегистрироваться")
-                        .fontWeight(.semibold)
-                }
-            }
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(
-                LinearGradient(
-                    colors: [Theme.accent, Theme.accentDark],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-            )
-            .cornerRadius(14)
-            .shadow(color: Theme.accent.opacity(0.3), radius: 8, x: 0, y: 4)
-        }
-        .buttonStyle(ScaleButtonStyle())
-        .disabled(!presenter.isFormValid() || presenter.isLoading)
-        .opacity(presenter.isFormValid() && !presenter.isLoading ? 1.0 : 0.6)
-    }
-    
-    // MARK: - Divider
-    
-    private var dividerSection: some View {
-        HStack(spacing: 16) {
-            Rectangle()
-                .fill(Theme.neutralLight)
-                .frame(height: 1)
-            
-            Text("или")
-                .font(.subheadline)
-                .foregroundColor(Theme.textSecondary)
-            
-            Rectangle()
-                .fill(Theme.neutralLight)
-                .frame(height: 1)
-        }
-    }
-    
-    // MARK: - Google Sign Up
-    
-    private var googleSignUpButton: some View {
-        Button(action: { signUpWithGoogle() }) {
-            HStack(spacing: 12) {
-                Image(systemName: "g.circle.fill")
-                    .font(.title2)
-                Text("Зарегистрироваться через Google")
-                    .fontWeight(.semibold)
-            }
-            .foregroundColor(Theme.textPrimary)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(Theme.backgroundCard)
-            .cornerRadius(14)
+            .padding(16)
+            .background(Color(.systemGray6))
+            .cornerRadius(12)
             .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(Theme.neutralLight, lineWidth: 1.5)
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(viewModel.phoneBorderColor(), lineWidth: !viewModel.phone.isEmpty ? 2 : 0)
             )
-        }
-        .buttonStyle(ScaleButtonStyle())
-        .disabled(presenter.isLoading)
-    }
-    
-    // MARK: - Helper Methods
-    
-    private func passwordStrengthColor() -> Color {
-        let strength = presenter.calculatePasswordStrength()
-        switch strength {
-        case 0...2: return Theme.danger
-        case 3: return Theme.warning
-        default: return Theme.success
-        }
-    }
-    
-    private func passwordStrengthIcon() -> String {
-        let strength = presenter.calculatePasswordStrength()
-        switch strength {
-        case 0...2: return "xmark.circle.fill"
-        case 3: return "exclamationmark.circle.fill"
-        default: return "checkmark.circle.fill"
-        }
-    }
-    
-    // MARK: - Actions (Async/Await)
-    
-    private func signUp() {
-        HapticsService.shared.impactMedium()
-        
-        Task {
-            let result = await presenter.signUp()
-            if case .success = result {
-                dismiss()
+            
+            if !viewModel.phone.isEmpty && !viewModel.isValidPhone(viewModel.phone) {
+                HStack(spacing: 6) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(.red)
+                    Text("введите 10 цифр номера")
+                        .font(.system(size: 12))
+                        .foregroundColor(.red)
+                }
             }
         }
     }
     
-    private func signUpWithGoogle() {
-        HapticsService.shared.impactMedium()
-        
-        Task {
-            let result = await presenter.signUpWithGoogle()
-            if case .success = result {
-                dismiss()
+    private var passwordInputField: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                if viewModel.showPassword {
+                    TextField("пароль (минимум 8 символов)", text: $viewModel.password)
+                } else {
+                    SecureField("пароль (минимум 8 символов)", text: $viewModel.password)
+                }
+                
+                Button {
+                    viewModel.togglePasswordVisibility()
+                } label: {
+                    Image(systemName: viewModel.showPassword ? "eye.slash" : "eye")
+                        .foregroundColor(.gray)
+                }
+            }
+            .padding(16)
+            .background(Color(.systemGray6))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(viewModel.passwordBorderColor(), lineWidth: !viewModel.password.isEmpty ? 2 : 0)
+            )
+            
+            if !viewModel.password.isEmpty {
+                HStack(spacing: 6) {
+                    Image(systemName: viewModel.passwordStrengthIcon())
+                        .font(.system(size: 12))
+                        .foregroundColor(viewModel.passwordStrengthColor())
+                    Text(viewModel.passwordStrengthText())
+                        .font(.system(size: 12))
+                        .foregroundColor(viewModel.passwordStrengthColor())
+                }
             }
         }
+    }
+    
+    private var confirmPasswordInputField: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                if viewModel.showConfirmPassword {
+                    TextField("подтвердите пароль", text: $viewModel.confirmPassword)
+                } else {
+                    SecureField("подтвердите пароль", text: $viewModel.confirmPassword)
+                }
+                
+                Button {
+                    viewModel.toggleConfirmPasswordVisibility()
+                } label: {
+                    Image(systemName: viewModel.showConfirmPassword ? "eye.slash" : "eye")
+                        .foregroundColor(.gray)
+                }
+            }
+            .padding(16)
+            .background(Color(.systemGray6))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(viewModel.confirmPasswordBorderColor(), lineWidth: !viewModel.confirmPassword.isEmpty ? 2 : 0)
+            )
+            
+            if !viewModel.confirmPassword.isEmpty {
+                HStack(spacing: 6) {
+                    Image(systemName: viewModel.passwordsMatch() ? "checkmark.circle.fill" : "xmark.circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(viewModel.passwordsMatch() ? .green : .red)
+                    Text(viewModel.passwordsMatch() ? "пароли совпадают" : "пароли не совпадают")
+                        .font(.system(size: 12))
+                        .foregroundColor(viewModel.passwordsMatch() ? .green : .red)
+                }
+            }
+        }
+    }
+    
+    // MARK: - Register Button
+    private var registerButton: some View {
+        Button {
+            Task { await viewModel.signUp() }
+        } label: {
+            Text(viewModel.isLoading ? "" : "зарегистрироваться")
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 52)
+                .background(viewModel.isFormValid() ? Theme.accent : Color.gray)
+                .cornerRadius(26)
+                .overlay {
+                    if viewModel.isLoading {
+                        ProgressView().tint(.white)
+                    }
+                }
+        }
+        .disabled(viewModel.isLoading || !viewModel.isFormValid())
+        .padding(.horizontal, 24)
+        .padding(.top, 8)
+    }
+    
+    // MARK: - Terms Section
+    private var termsSection: some View {
+        Button {
+            showPrivacyPolicy = true
+        } label: {
+            (Text("нажимая кнопку \"зарегистрироваться\", вы принимаете условия ")
+                .font(.system(size: 12))
+                .foregroundColor(.secondary)
+            + Text("политики конфиденциальности")
+                .font(.system(size: 12))
+                .foregroundColor(Theme.accent))
+            .multilineTextAlignment(.center)
+        }
+    }
+    
+    // MARK: - Login Section
+    private var loginSection: some View {
+        HStack(spacing: 4) {
+            Text("уже есть аккаунт?")
+                .font(.system(size: 15))
+                .foregroundColor(.secondary)
+            
+            Button {
+                dismiss()
+            } label: {
+                Text("войти")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(Theme.accent)
+            }
+        }
+    }
+    
+    // MARK: - Social Sign Up Section
+    private var socialSignUpSection: some View {
+        HStack(spacing: 16) {
+            Button {
+                // Apple Sign Up - TODO
+            } label: {
+                Image(systemName: "apple.logo")
+                    .font(.system(size: 20))
+                    .foregroundColor(.primary)
+                    .frame(width: 56, height: 56)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(28)
+            }
+            
+            Button {
+                Task { await viewModel.signUpWithGoogle() }
+            } label: {
+                Image(systemName: "g.circle.fill")
+                    .font(.system(size: 20))
+                    .foregroundColor(.primary)
+                    .frame(width: 56, height: 56)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(28)
+            }
+        }
+        .padding(.top, 8)
     }
 }
 
 #Preview {
-    RegistrationView()
+    NavigationView {
+        RegistrationView()
+    }
 }
 

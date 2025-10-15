@@ -18,8 +18,6 @@ struct ProductConfirmationView: View {
     @State private var brand: String
     @State private var selectedCategory: ProductCategory
     @State private var purchaseDate = Date()
-    @State private var expiryDate = Date()
-    @State private var hasExpiryDate = true
     @State private var notes: String
     @State private var shade: String
     @State private var ingredients = ""
@@ -107,9 +105,6 @@ struct ProductConfirmationView: View {
                                 ForEach(ProductCategory.allCases, id: \.self) { category in
                                     Button(action: {
                                         selectedCategory = category
-                                        if hasExpiryDate {
-                                            expiryDate = Calendar.current.date(byAdding: .day, value: category.suggestedShelfLifeDays, to: purchaseDate) ?? purchaseDate
-                                        }
                                     }) {
                                         HStack {
                                             Image(systemName: category.icon)
@@ -163,36 +158,8 @@ struct ProductConfirmationView: View {
                                     RoundedRectangle(cornerRadius: 12)
                                         .fill(Color(.systemGray6))
                                 )
-                                .onChange(of: purchaseDate) { _ in
-                                    if hasExpiryDate {
-                                        expiryDate = Calendar.current.date(byAdding: .day, value: selectedCategory.suggestedShelfLifeDays, to: purchaseDate) ?? purchaseDate
-                                    }
-                                }
                         }
                         
-                        // Expiry Date
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Text("Срок годности")
-                                    .font(.headline)
-                                    .foregroundColor(.primary)
-                                
-                                Spacer()
-                                
-                                Toggle("", isOn: $hasExpiryDate)
-                                    .toggleStyle(SwitchToggleStyle(tint: .pink))
-                            }
-                            
-                            if hasExpiryDate {
-                                DatePicker("", selection: $expiryDate, displayedComponents: .date)
-                                    .datePickerStyle(CompactDatePickerStyle())
-                                    .padding(16)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(Color(.systemGray6))
-                                    )
-                            }
-                        }
 
                         // Personalization tags
                         VStack(alignment: .leading, spacing: 8) {
@@ -336,8 +303,8 @@ struct ProductConfirmationView: View {
                 name: self.name,
                 brand: self.brand,
                 category: self.selectedCategory,
+                applicationZone: .face, // Default zone, can be made configurable later
                 purchaseDate: self.purchaseDate,
-                expiryDate: self.hasExpiryDate ? self.expiryDate : nil,
                 barcode: nil,
                 imageData: self.image?.jpegData(compressionQuality: 0.8),
                 notes: self.notes.isEmpty ? "" : self.notes,

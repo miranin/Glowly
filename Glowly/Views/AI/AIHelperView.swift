@@ -11,6 +11,7 @@ import Combine
 struct AIHelperView: View {
     @ObservedObject var productStore: ProductStore
     @ObservedObject var userProfilePresenter: UserProfilePresenter
+    @EnvironmentObject var languageManager: LanguageManager
     @State private var messages: [ChatMessage] = []
     @State private var inputText = ""
     @State private var isTyping = false
@@ -47,6 +48,7 @@ struct AIHelperView: View {
                             }
                             .padding(.horizontal, 16)
                             .padding(.vertical, 8)
+                            .padding(.bottom, 20) // Отступ от input area
                         }
                         // Stronger canvas background for chat area only
                         .background(
@@ -69,7 +71,7 @@ struct AIHelperView: View {
                     inputArea
                 }
             }
-            .navigationTitle("AI Помощник")
+            .navigationTitle(languageManager.translate("ai_title"))
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
                 if messages.isEmpty {
@@ -111,12 +113,12 @@ struct AIHelperView: View {
             }
             
             VStack(spacing: 8) {
-                Text("Привет! Я твой AI-помощник по красоте")
+                Text(languageManager.translate("ai_welcome_title"))
                     .font(.title2)
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
                 
-                Text("Спроси меня о рутинах, советах по макияжу,\nили попроси рекомендации на основе твоих продуктов")
+                Text(languageManager.translate("ai_welcome_desc"))
                     .font(.body)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -124,27 +126,27 @@ struct AIHelperView: View {
             
             VStack(spacing: 12) {
                 QuickActionButton(
-                    title: "Создать утреннюю рутину",
+                    title: languageManager.translate("ai_morning_routine"),
                     icon: "sunrise.fill",
                     color: Color(hex: "#FF9A8B")
                 ) {
-                    sendMessage("Создай утреннюю рутину на основе моих продуктов")
+                    sendMessage(languageManager.translate("ai_morning_routine"))
                 }
                 
                 QuickActionButton(
-                    title: "Рекомендации по макияжу",
+                    title: languageManager.translate("ai_makeup_advice"),
                     icon: "paintbrush.pointed.fill",
                     color: Color(hex: "#FF6A88")
                 ) {
-                    sendMessage("Дай рекомендации по макияжу")
+                    sendMessage(languageManager.translate("ai_makeup_advice"))
                 }
                 
                 QuickActionButton(
-                    title: "Анализ моих продуктов",
+                    title: languageManager.translate("ai_product_analysis"),
                     icon: "magnifyingglass.circle.fill",
                     color: Color(hex: "#FFB4A2")
                 ) {
-                    sendMessage("Проанализируй мои продукты и дай советы")
+                    sendMessage(languageManager.translate("ai_product_analysis"))
                 }
             }
         }
@@ -156,7 +158,7 @@ struct AIHelperView: View {
             Divider()
             
             HStack(spacing: 12) {
-                TextField("Спроси AI-помощника...", text: $inputText, axis: .vertical)
+                TextField(languageManager.translate("ai_placeholder"), text: $inputText, axis: .vertical)
                     .textFieldStyle(PlainTextFieldStyle())
                     .lineLimit(1...4)
                     .focused($isInputFocused)
@@ -192,6 +194,7 @@ struct AIHelperView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
+            .padding(.bottom, 50) // Safe area для Tab Bar
         }
         // Solid bar to clearly separate from chat canvas
         .background(Theme.backgroundCard)
@@ -232,8 +235,9 @@ struct AIHelperView: View {
     }
     
     private func addWelcomeMessage() {
+        // Mock data - будет с backend
         let welcomeMessage = ChatMessage(
-            content: "Привет! Я твой персональный AI-помощник по красоте. Чем могу помочь?",
+            content: languageManager.translate("ai_welcome_message"),
             isUser: false,
             timestamp: Date()
         )
@@ -241,9 +245,9 @@ struct AIHelperView: View {
     }
     
     private func handleProfileUpdate() {
-        // Add a system notification message
+        // Mock data - будет с backend
         let updateMessage = ChatMessage(
-            content: "✨ Профиль обновлен! Я учел ваши новые предпочтения и буду давать советы с учетом этих изменений.",
+            content: languageManager.translate("ai_profile_updated"),
             isUser: false,
             timestamp: Date()
         )

@@ -37,25 +37,6 @@ struct CircularProductSelector: View {
                         .foregroundColor(.white)
                 }
                 
-                // Expiry indicator
-                if product.isExpired || product.isExpiringSoon {
-                    VStack {
-                        HStack {
-                            Spacer()
-                            Circle()
-                                .fill(expiryColor)
-                                .frame(width: 16, height: 16)
-                                .overlay(
-                                    Text("!")
-                                        .font(.caption2)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.white)
-                                )
-                        }
-                        Spacer()
-                    }
-                    .padding(4)
-                }
             }
             .scaleEffect(isPressed ? 0.9 : 1.0)
             .onTapGesture {
@@ -116,11 +97,6 @@ struct CircularProductSelector: View {
         return LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing)
     }
     
-    private var expiryColor: Color {
-        if product.isExpired { return .red }
-        if product.isExpiringSoon { return .orange }
-        return .green
-    }
 }
 
 #Preview {
@@ -130,8 +106,8 @@ struct CircularProductSelector: View {
                 name: "Помада Ruby Woo",
                 brand: "MAC",
                 category: .lipstick,
+                applicationZone: .lips,
                 purchaseDate: Date(),
-                expiryDate: Calendar.current.date(byAdding: .day, value: 15, to: Date()),
                 barcode: nil,
                 imageData: nil,
                 notes: "Классический красный"
@@ -145,8 +121,8 @@ struct CircularProductSelector: View {
                 name: "Тональный крем",
                 brand: "L'Oréal",
                 category: .foundation,
+                applicationZone: .face,
                 purchaseDate: Date(),
-                expiryDate: Calendar.current.date(byAdding: .day, value: -5, to: Date()),
                 barcode: nil,
                 imageData: nil,
                 notes: "Любимый оттенок"

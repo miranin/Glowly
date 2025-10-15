@@ -13,8 +13,6 @@ struct AddProductSimpleView: View {
     @State private var brand = ""
     @State private var category: ProductCategory = .foundation
     @State private var purchaseDate = Date()
-    @State private var hasExpiryDate = true
-    @State private var expiryDate = Date()
     @State private var isSensitiveSafe = false
     @State private var isAcneSafe = true
     @State private var notes = ""
@@ -36,15 +34,6 @@ struct AddProductSimpleView: View {
                 // Photo-related actions moved to AddEntryChooserView (action sheet)
                 Section(header: Text("Даты")) {
                     DatePicker("Покупка", selection: $purchaseDate, displayedComponents: .date)
-                        .onChange(of: purchaseDate) { _ in
-                            if hasExpiryDate {
-                                expiryDate = Calendar.current.date(byAdding: .day, value: category.suggestedShelfLifeDays, to: purchaseDate) ?? purchaseDate
-                            }
-                        }
-                    Toggle("Есть срок годности", isOn: $hasExpiryDate)
-                    if hasExpiryDate {
-                        DatePicker("Годен до", selection: $expiryDate, displayedComponents: .date)
-                    }
                 }
                 Section(header: Text("Персонализация")) {
                     Toggle("Для чувствительной кожи", isOn: $isSensitiveSafe)
@@ -73,8 +62,8 @@ struct AddProductSimpleView: View {
             name: name,
             brand: brand,
             category: category,
+            applicationZone: .face, // Default zone, can be made configurable later
             purchaseDate: purchaseDate,
-            expiryDate: hasExpiryDate ? expiryDate : nil,
             barcode: nil,
             imageData: nil,
             notes: notes,

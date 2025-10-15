@@ -59,12 +59,11 @@ final class AuthManager: ObservableObject, AuthManagerProtocol {
     
     // MARK: - Check Authentication
     private func checkAuthenticationStatus() {
-        // Check if user token exists
-        if let _ = keychain.retrieveString(forKey: KeychainService.Keys.userToken),
-           let userId = keychain.retrieveString(forKey: KeychainService.Keys.userId) {
-            // Load user data
-            loadUserData(userId: userId)
-        }
+        // Always start with unauthenticated state
+        // User must explicitly sign in each time
+        // In the future, we'll add session management with expiration
+        self.isAuthenticated = false
+        self.currentUser = nil
     }
     
     private func loadUserData(userId: String) {
@@ -134,8 +133,11 @@ final class AuthManager: ObservableObject, AuthManagerProtocol {
             throw AuthError.invalidCredentials
         }
         
-        guard isValidEmail(email) else {
-            throw AuthError.invalidCredentials
+        // ⚠️ MOCK: Skip email validation for phone numbers (starts with +7)
+        if !email.hasPrefix("+7") {
+            guard isValidEmail(email) else {
+                throw AuthError.invalidCredentials
+            }
         }
         
         guard password.count >= 8 else {

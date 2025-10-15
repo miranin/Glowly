@@ -7,13 +7,47 @@
 
 import Foundation
 
+enum ApplicationZone: String, CaseIterable, Codable {
+    case face = "Лицо"
+    case eyes = "Глаза"
+    case lips = "Губы"
+    case cheeks = "Щеки"
+    case body = "Тело"
+    case hair = "Волосы"
+    case hands = "Руки"
+    case feet = "Ноги"
+    case nails = "Ногти"
+    case neck = "Шея"
+    case décolletage = "Декольте"
+    
+    func localizedName(languageManager: LanguageManager) -> String {
+        switch self {
+        case .face: return languageManager.translate("application_zone_face")
+        case .eyes: return languageManager.translate("application_zone_eyes")
+        case .lips: return languageManager.translate("application_zone_lips")
+        case .cheeks: return languageManager.translate("application_zone_cheeks")
+        case .body: return languageManager.translate("application_zone_body")
+        case .hair: return languageManager.translate("application_zone_hair")
+        case .hands: return languageManager.translate("application_zone_hands")
+        case .feet: return languageManager.translate("application_zone_feet")
+        case .nails: return languageManager.translate("application_zone_nails")
+        case .neck: return languageManager.translate("application_zone_neck")
+        case .décolletage: return languageManager.translate("application_zone_decolletage")
+        }
+    }
+    
+    var localizedName: String {
+        return self.rawValue
+    }
+}
+
 struct Product: Identifiable, Codable {
     let id = UUID()
     var name: String
     var brand: String
     var category: ProductCategory
+    var applicationZone: ApplicationZone
     var purchaseDate: Date
-    var expiryDate: Date?
     var barcode: String?
     var imageData: Data?
     var notes: String
@@ -29,20 +63,4 @@ struct Product: Identifiable, Codable {
     var isSensitiveSafe: Bool = false
     var isAcneSafe: Bool = true
     
-    var daysUntilExpiry: Int? {
-        guard let expiryDate = expiryDate else { return nil }
-        let calendar = Calendar.current
-        let days = calendar.dateComponents([.day], from: Date(), to: expiryDate).day
-        return days
-    }
-    
-    var isExpiringSoon: Bool {
-        guard let days = daysUntilExpiry else { return false }
-        return days <= 30 && days > 0
-    }
-    
-    var isExpired: Bool {
-        guard let days = daysUntilExpiry else { return false }
-        return days <= 0
-    }
 }

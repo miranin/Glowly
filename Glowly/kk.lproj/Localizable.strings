@@ -1,0 +1,233 @@
+/* Tab Bar */
+"tab_cosmetics" = "Косметика";
+"tab_feed" = "Лента";
+"tab_learning" = "Оқу";
+"tab_profile" = "Профиль";
+
+/* Profile */
+"profile_title" = "Профиль";
+"profile_edit" = "Жекелендіруді өңдеу";
+"profile_wishlist" = "Тілектер тізімі";
+"profile_language" = "Тіл";
+"profile_version" = "Нұсқа";
+"profile_logout" = "Шығу";
+"profile_logout_confirm" = "Шынымен де шығуды қалайсыз ба?";
+"profile_cancel" = "Болдырмау";
+"profile_products_count" = "өнім сөмкеде";
+"profile_wishlist_empty" = "Тілектер тізімі бос";
+"profile_wishlist_empty_desc" = "Басқа пайдаланушылардың профильдерінен өнімдерді қосыңыз";
+"profile_share" = "Бөлісу";
+"profile_more" = "Тағы";
+
+/* Bag */
+"bag_greeting_morning" = "Қайырлы таң";
+"bag_greeting_afternoon" = "Қайырлы күн";
+"bag_greeting_evening" = "Қайырлы кеш";
+"bag_search" = "Өнімдерді іздеу...";
+"bag_all_products" = "Барлық өнімдер";
+"bag_add_product" = "Өнім қосу";
+"bag_add_new" = "Жаңа өнім қосу";
+
+/* AI */
+"ai_title" = "AI Көмекші";
+"ai_placeholder" = "AI көмекшіден сұраңыз...";
+"ai_welcome_title" = "Сәлем! Мен сіздің сұлулық AI көмекшіңізбін";
+"ai_welcome_desc" = "Маған рутиналар, макияж кеңестері туралы сұраңыз,\nнемесе өнімдеріңізге негізделген ұсыныстар сұраңыз";
+"ai_morning_routine" = "Таңғы рутина жасау";
+"ai_makeup_advice" = "Макияж ұсыныстары";
+"ai_product_analysis" = "Өнімдерімді талдау";
+
+/* Feed */
+"feed_title" = "Жаңалықтар лентасы";
+"feed_followers" = "Жазылушылар";
+"feed_following" = "Жазылымдар";
+"feed_products" = "Өнімдер";
+"feed_follow" = "Жазылу";
+"feed_unfollow" = "Жазылудан бас тарту";
+
+/* Learning */
+"learning_title" = "Оқу";
+"learning_ai_chat" = "AI Чат";
+"learning_articles" = "Мақалалар";
+
+/* Common */
+"common_save" = "Сақтау";
+"common_cancel" = "Болдырмау";
+"common_delete" = "Жою";
+"common_edit" = "Өңдеу";
+"common_done" = "Дайын";
+
+/* AI Mock Responses (backend-тен келеді) */
+"ai_welcome_message" = "Сәлем! Мен сіздің жеке сұлулық AI көмекшіңізбін. Қалай көмектесе аламын?";
+"ai_profile_updated" = "✨ Профиль жаңартылды! Жаңа қалауларыңызды ескеріп, кеңестер беремін.";
+"ai_routine_intro" = "Профиліңізге негізделіп, келесі рутинаны ұсынамын:";
+"ai_general_advice" = "Көмектесуге қуаныштымын! Тері күтімі, макияж кеңестері немесе өнімдерді талдау бере аламын.";
+
+/* Add Product */
+"add_product_title" = "Қосу";
+"add_product_subtitle" = "Өнім қосу";
+"add_product_description" = "Түсіріңіз немесе галереядан таңдаңыз";
+"add_product_take_photo" = "Фото түсіру";
+"add_product_choose_gallery" = "Галереядан таңдау";
+
+/* Categories (Mock - backend-тен келеді) */
+"category_all" = "барлық өнімдер";
+"category_foundation" = "Тональды крем";
+"category_lipstick" = "Ерін бояуы";
+"category_mascara" = "Кірпік түсі";
+"category_moisturizer" = "Ылғалдандырғыш";
+"category_cleanser" = "Тазартқыш";
+
+/* Social (Mock usernames - backend-тен келеді) */
+"social_posts" = "Жазбалар";
+"social_subscribers" = "Жазылушылар";
+"social_subscriptions" = "Жазылымдар";
+"social_subscribe" = "Жазылу";
+"social_unsubscribe" = "Жазылудан бас тарту";
+"social_common_title" = "Сізде ортақ";
+"social_cosmetic_bag" = "Косметика сөмкесі";
+
+/* User Profile */
+"user_profile_blogger" = "Сұлулық блогері";
+"user_profile_shares_secrets" = "Сұлулық құпияларын бөлісемін";
+
+/* Articles (Mock - backend-тен келеді) */
+"article_category_skincare" = "Тері күтімі";
+"article_category_makeup" = "Макияж";
+"article_category_protection" = "Қорғау";
+"article_read_time" = "мин";
+
+/* Personalization */
+"personalization_title" = "Жекелендіру";
+"personalization_cancel" = "Болдырмау";
+"personalization_save" = "Өзгерістерді сақтау";
+"personalization_basic_info" = "Негізгі ақпарат";
+"personalization_name" = "Аты";
+"personalization_age" = "Жасы";
+"personalization_gender" = "Жынысы";
+"personalization_skin_info" = "Тері түрі";
+"personalization_skin_type" = "Тері түрі";
+"personalization_skin_tone" = "Тері реңі";
+"personalization_skin_conditions" = "Тері жағдайы";
+"personalization_allergies" = "Аллергия";
+"personalization_beauty_profile" = "Сұлулық профилі";
+"personalization_experience" = "Тәжірибе деңгейі";
+"personalization_goals" = "Сіздің мақсаттарыңыз";
+"personalization_preferences" = "Қалаулар";
+"personalization_makeup_frequency" = "Макияж жиілігі";
+"personalization_skincare_complexity" = "Күтім рутинасы";
+"personalization_photo_change" = "Фотосуретті өзгерту үшін басыңыз";
+
+/* Gender */
+"gender_male" = "Ер";
+"gender_female" = "Әйел";
+"gender_other" = "Басқа";
+
+/* Skin Type */
+"skin_type_normal" = "Қалыпты";
+"skin_type_oily" = "Майлы";
+"skin_type_dry" = "Құрғақ";
+"skin_type_combination" = "Аралас";
+"skin_type_sensitive" = "Сезімтал";
+
+/* Skin Tone */
+"skin_tone_fair" = "Өте ақ";
+"skin_tone_light" = "Ақ";
+"skin_tone_medium" = "Орташа";
+"skin_tone_tan" = "Күңгірт";
+"skin_tone_dark" = "Қара";
+"skin_tone_deep" = "Өте қара";
+
+/* Age Range */
+"age_range_18_24" = "18-24";
+"age_range_25_34" = "25-34";
+"age_range_35_44" = "35-44";
+"age_range_45_54" = "45-54";
+"age_range_55_plus" = "55+";
+
+/* Skin Conditions */
+"skin_condition_acne" = "Акне";
+"skin_condition_eczema" = "Экзема";
+"skin_condition_rosacea" = "Розацеа";
+"skin_condition_psoriasis" = "Псориаз";
+"skin_condition_hyperpigmentation" = "Гиперпигментация";
+"skin_condition_dry_patches" = "Құрғақ аймақтар";
+"skin_condition_enlarged_pores" = "Кеңейген тесіктер";
+"skin_condition_fine_lines" = "Жіңішке сызықтар";
+"skin_condition_dark_circles" = "Қара дөңгелектер";
+"skin_condition_redness" = "Қызару";
+
+/* Allergens */
+"allergen_parabens" = "Парабендер";
+"allergen_sulfates" = "Сульфаттар";
+"allergen_fragrances" = "Хош иістер";
+"allergen_alcohol" = "Спирт";
+"allergen_essential_oils" = "Эфир майлары";
+"allergen_silicones" = "Силикондар";
+"allergen_dyes" = "Бояуыштар";
+"allergen_retinol" = "Ретинол";
+"allergen_aha_acids" = "АНА қышқылдары";
+"allergen_bha_acids" = "ВНА қышқылдары";
+"allergen_vitamin_c" = "С витамині";
+"allergen_niacinamide" = "Ниацинамид";
+
+/* Experience Level */
+"experience_level_beginner" = "Бастапқы";
+"experience_level_intermediate" = "Орташа";
+"experience_level_advanced" = "Жоғары";
+
+/* Beauty Goals */
+"beauty_goal_hydration" = "Ылғалдандыру";
+"beauty_goal_anti_aging" = "Жасылдыққа қарсы";
+"beauty_goal_acne_treatment" = "Акне емдеу";
+"beauty_goal_brightening" = "Жарқырату";
+"beauty_goal_even_tone" = "Біркелкі тон";
+"beauty_goal_sun_protection" = "Күннен қорғау";
+
+/* Makeup Frequency */
+"makeup_frequency_never" = "Ешқашан";
+"makeup_frequency_rarely" = "Сирек";
+"makeup_frequency_sometimes" = "Кейде";
+"makeup_frequency_often" = "Жиі";
+"makeup_frequency_daily" = "Күнделікті";
+
+/* Skincare Routine Complexity */
+"skincare_routine_complexity_simple" = "Қарапайым";
+"skincare_routine_complexity_moderate" = "Орташа";
+"skincare_routine_complexity_extensive" = "Кең";
+
+/* Application Zones */
+"application_zone_face" = "Бет";
+"application_zone_eyes" = "Көздер";
+"application_zone_lips" = "Еріндер";
+"application_zone_cheeks" = "Бет жақтары";
+"application_zone_body" = "Дене";
+"application_zone_hair" = "Шаш";
+"application_zone_hands" = "Қолдар";
+"application_zone_feet" = "Аяқтар";
+"application_zone_nails" = "Тырнақтар";
+"application_zone_neck" = "Мойын";
+"application_zone_decolletage" = "Декольте";
+
+/* Product Categories */
+"category_foundation" = "Тональды крем";
+"category_concealer" = "Консилер";
+"category_powder" = "Ұнтақ";
+"category_blush" = "Румяна";
+"category_bronzer" = "Бронзер";
+"category_highlighter" = "Хайлайтер";
+"category_eyeshadow" = "Көз көлеңкесі";
+"category_eyeliner" = "Көз сызығы";
+"category_mascara" = "Кірпік түсі";
+"category_lipstick" = "Ерін бояуы";
+"category_lip_gloss" = "Ерін жылтыртқышы";
+"category_lip_liner" = "Ерін контуры";
+"category_primer" = "Праймер";
+"category_setting_spray" = "Бекіту спреі";
+"category_cleanser" = "Тазартқыш";
+"category_moisturizer" = "Ылғалдандырғыш";
+"category_serum" = "Сыворотка";
+"category_sunscreen" = "Күннен қорғау кремі";
+"category_mask" = "Маска";
+"category_other" = "Басқа";
+

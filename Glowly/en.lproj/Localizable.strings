@@ -1,0 +1,233 @@
+/* Tab Bar */
+"tab_cosmetics" = "Cosmetics";
+"tab_feed" = "Feed";
+"tab_learning" = "Learning";
+"tab_profile" = "Profile";
+
+/* Profile */
+"profile_title" = "Profile";
+"profile_edit" = "Edit Personalization";
+"profile_wishlist" = "WishList";
+"profile_language" = "Language";
+"profile_version" = "Version";
+"profile_logout" = "Sign Out";
+"profile_logout_confirm" = "Are you sure you want to sign out?";
+"profile_cancel" = "Cancel";
+"profile_products_count" = "products in bag";
+"profile_wishlist_empty" = "WishList is empty";
+"profile_wishlist_empty_desc" = "Add products from other users' profiles";
+"profile_share" = "Share";
+"profile_more" = "More";
+
+/* Bag */
+"bag_greeting_morning" = "Good morning";
+"bag_greeting_afternoon" = "Good afternoon";
+"bag_greeting_evening" = "Good evening";
+"bag_search" = "Search products...";
+"bag_all_products" = "All Products";
+"bag_add_product" = "Add Product";
+"bag_add_new" = "Add new product";
+
+/* AI */
+"ai_title" = "AI Assistant";
+"ai_placeholder" = "Ask AI assistant...";
+"ai_welcome_title" = "Hi! I'm your beauty AI assistant";
+"ai_welcome_desc" = "Ask me about routines, makeup tips,\nor request recommendations based on your products";
+"ai_morning_routine" = "Create morning routine";
+"ai_makeup_advice" = "Makeup recommendations";
+"ai_product_analysis" = "Analyze my products";
+
+/* Feed */
+"feed_title" = "News Feed";
+"feed_followers" = "Followers";
+"feed_following" = "Following";
+"feed_products" = "Products";
+"feed_follow" = "Follow";
+"feed_unfollow" = "Unfollow";
+
+/* Learning */
+"learning_title" = "Learning";
+"learning_ai_chat" = "AI Chat";
+"learning_articles" = "Articles";
+
+/* Common */
+"common_save" = "Save";
+"common_cancel" = "Cancel";
+"common_delete" = "Delete";
+"common_edit" = "Edit";
+"common_done" = "Done";
+
+/* AI Mock Responses (will be from backend) */
+"ai_welcome_message" = "Hi! I'm your personal beauty AI assistant. How can I help?";
+"ai_profile_updated" = "✨ Profile updated! I've noted your new preferences and will give advice accordingly.";
+"ai_routine_intro" = "Based on your profile, I recommend the following routine:";
+"ai_general_advice" = "Happy to help! I can offer skincare advice, makeup tips, or analyze your products.";
+
+/* Add Product */
+"add_product_title" = "Add";
+"add_product_subtitle" = "Add Product";
+"add_product_description" = "Take a photo or choose from gallery";
+"add_product_take_photo" = "Take Photo";
+"add_product_choose_gallery" = "Choose from Gallery";
+
+/* Categories (Mock - will be from backend) */
+"category_all" = "All Products";
+"category_foundation" = "Foundation";
+"category_lipstick" = "Lipstick";
+"category_mascara" = "Mascara";
+"category_moisturizer" = "Moisturizer";
+"category_cleanser" = "Cleanser";
+
+/* Social (Mock usernames - will be from backend) */
+"social_posts" = "Posts";
+"social_subscribers" = "Followers";
+"social_subscriptions" = "Following";
+"social_subscribe" = "Follow";
+"social_unsubscribe" = "Unfollow";
+"social_common_title" = "You have in common";
+"social_cosmetic_bag" = "Cosmetic Bag";
+
+/* User Profile */
+"user_profile_blogger" = "Beauty Blogger";
+"user_profile_shares_secrets" = "Sharing beauty secrets";
+
+/* Articles (Mock - will be from backend) */
+"article_category_skincare" = "Skincare";
+"article_category_makeup" = "Makeup";
+"article_category_protection" = "Protection";
+"article_read_time" = "Min";
+
+/* Personalization */
+"personalization_title" = "Personalization";
+"personalization_cancel" = "Cancel";
+"personalization_save" = "Save Changes";
+"personalization_basic_info" = "Basic Information";
+"personalization_name" = "Name";
+"personalization_age" = "Age";
+"personalization_gender" = "Gender";
+"personalization_skin_info" = "Skin Type";
+"personalization_skin_type" = "Skin Type";
+"personalization_skin_tone" = "Skin Tone";
+"personalization_skin_conditions" = "Skin Conditions";
+"personalization_allergies" = "Allergies";
+"personalization_beauty_profile" = "Beauty Profile";
+"personalization_experience" = "Experience Level";
+"personalization_goals" = "Your Goals";
+"personalization_preferences" = "Preferences";
+"personalization_makeup_frequency" = "Makeup Frequency";
+"personalization_skincare_complexity" = "Skincare Routine";
+"personalization_photo_change" = "Tap to change photo";
+
+/* Gender */
+"gender_male" = "Male";
+"gender_female" = "Female";
+"gender_other" = "Other";
+
+/* Skin Type */
+"skin_type_normal" = "Normal";
+"skin_type_oily" = "Oily";
+"skin_type_dry" = "Dry";
+"skin_type_combination" = "Combination";
+"skin_type_sensitive" = "Sensitive";
+
+/* Skin Tone */
+"skin_tone_fair" = "Fair";
+"skin_tone_light" = "Light";
+"skin_tone_medium" = "Medium";
+"skin_tone_tan" = "Tan";
+"skin_tone_dark" = "Dark";
+"skin_tone_deep" = "Deep";
+
+/* Age Range */
+"age_range_18_24" = "18-24";
+"age_range_25_34" = "25-34";
+"age_range_35_44" = "35-44";
+"age_range_45_54" = "45-54";
+"age_range_55_plus" = "55+";
+
+/* Skin Conditions */
+"skin_condition_acne" = "Acne";
+"skin_condition_eczema" = "Eczema";
+"skin_condition_rosacea" = "Rosacea";
+"skin_condition_psoriasis" = "Psoriasis";
+"skin_condition_hyperpigmentation" = "Hyperpigmentation";
+"skin_condition_dry_patches" = "Dry patches";
+"skin_condition_enlarged_pores" = "Enlarged pores";
+"skin_condition_fine_lines" = "Fine lines";
+"skin_condition_dark_circles" = "Dark circles";
+"skin_condition_redness" = "Redness";
+
+/* Allergens */
+"allergen_parabens" = "Parabens";
+"allergen_sulfates" = "Sulfates";
+"allergen_fragrances" = "Fragrances";
+"allergen_alcohol" = "Alcohol";
+"allergen_essential_oils" = "Essential oils";
+"allergen_silicones" = "Silicones";
+"allergen_dyes" = "Dyes";
+"allergen_retinol" = "Retinol";
+"allergen_aha_acids" = "AHA acids";
+"allergen_bha_acids" = "BHA acids";
+"allergen_vitamin_c" = "Vitamin C";
+"allergen_niacinamide" = "Niacinamide";
+
+/* Experience Level */
+"experience_level_beginner" = "Beginner";
+"experience_level_intermediate" = "Intermediate";
+"experience_level_advanced" = "Advanced";
+
+/* Beauty Goals */
+"beauty_goal_hydration" = "Hydration";
+"beauty_goal_anti_aging" = "Anti-aging";
+"beauty_goal_acne_treatment" = "Acne treatment";
+"beauty_goal_brightening" = "Brightening";
+"beauty_goal_even_tone" = "Even tone";
+"beauty_goal_sun_protection" = "Sun protection";
+
+/* Makeup Frequency */
+"makeup_frequency_never" = "Never";
+"makeup_frequency_rarely" = "Rarely";
+"makeup_frequency_sometimes" = "Sometimes";
+"makeup_frequency_often" = "Often";
+"makeup_frequency_daily" = "Daily";
+
+/* Skincare Routine Complexity */
+"skincare_routine_complexity_simple" = "Simple";
+"skincare_routine_complexity_moderate" = "Moderate";
+"skincare_routine_complexity_extensive" = "Extensive";
+
+/* Application Zones */
+"application_zone_face" = "Face";
+"application_zone_eyes" = "Eyes";
+"application_zone_lips" = "Lips";
+"application_zone_cheeks" = "Cheeks";
+"application_zone_body" = "Body";
+"application_zone_hair" = "Hair";
+"application_zone_hands" = "Hands";
+"application_zone_feet" = "Feet";
+"application_zone_nails" = "Nails";
+"application_zone_neck" = "Neck";
+"application_zone_decolletage" = "Décolletage";
+
+/* Product Categories */
+"category_foundation" = "Foundation";
+"category_concealer" = "Concealer";
+"category_powder" = "Powder";
+"category_blush" = "Blush";
+"category_bronzer" = "Bronzer";
+"category_highlighter" = "Highlighter";
+"category_eyeshadow" = "Eyeshadow";
+"category_eyeliner" = "Eyeliner";
+"category_mascara" = "Mascara";
+"category_lipstick" = "Lipstick";
+"category_lip_gloss" = "Lip Gloss";
+"category_lip_liner" = "Lip Liner";
+"category_primer" = "Primer";
+"category_setting_spray" = "Setting Spray";
+"category_cleanser" = "Cleanser";
+"category_moisturizer" = "Moisturizer";
+"category_serum" = "Serum";
+"category_sunscreen" = "Sunscreen";
+"category_mask" = "Mask";
+"category_other" = "Other";
+

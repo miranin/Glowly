@@ -14,10 +14,12 @@ extension Notification.Name {
 
 struct ProfileEditView: View {
     @ObservedObject var userProfilePresenter: UserProfilePresenter
+    // No localization needed for profile edit - all fields are universal
     @Environment(\.dismiss) var dismiss
     
     @State private var editedProfile: UserProfile
     @State private var showingImagePicker = false
+    @State private var showingPhotoActionSheet = false
     @State private var photoSourceType: UIImagePickerController.SourceType = .photoLibrary
     
     init(userProfilePresenter: UserProfilePresenter) {

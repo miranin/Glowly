@@ -3,6 +3,7 @@
 //  Glowly
 //
 //  Created by Tamirlan Aubakirov on 02/10/25.
+//  Redesigned on 10/10/25.
 //
 
 import SwiftUI
@@ -15,268 +16,339 @@ struct ProductDetailSheet: View {
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: 20) {
-                    // Product Image Header
-                    ZStack {
-                        // Background gradient
-                        LinearGradient(
-                            colors: [Theme.categoryColor(product.category).opacity(0.1), Theme.backgroundPowder],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                        .frame(height: 250)
+            ZStack {
+                Color(.systemBackground).ignoresSafeArea()
+                
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 24) {
+                        // Product Image Section
+                        productImageSection
                         
-                        VStack(spacing: 16) {
-                            if let imageData = product.imageData, let uiImage = UIImage(data: imageData) {
-                                Image(uiImage: uiImage)
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(maxWidth: 200, maxHeight: 200)
-                                    .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
-                            } else {
-                                ZStack {
-                                    Circle()
-                                        .fill(
-                                            LinearGradient(
-                                                colors: [Theme.categoryColor(product.category).opacity(0.3), Theme.categoryColor(product.category).opacity(0.1)],
-                                                startPoint: .topLeading,
-                                                endPoint: .bottomTrailing
-                                            )
-                                        )
-                                        .frame(width: 150, height: 150)
-                                    
-                                    Image(systemName: product.category.icon)
-                                        .font(.system(size: 60))
-                                        .foregroundStyle(
-                                            LinearGradient(
-                                                colors: [Theme.accent, Theme.accentDark],
-                                                startPoint: .topLeading,
-                                                endPoint: .bottomTrailing
-                                            )
-                                        )
-                                }
-                            }
-                        }
-                        .padding(.top, 20)
-                    }
-                    
-                    // Product Title
-                    VStack(spacing: 8) {
-                        Text(product.name)
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .multilineTextAlignment(.center)
+                        // Product Info Section
+                        productInfoSection
                         
-                        Text(product.brand)
-                            .font(.headline)
-                            .foregroundColor(Theme.accent)
-                    }
-                    .padding(.horizontal)
-                    
-                    // Info cards
-                    HStack(spacing: 12) {
-                        infoCard(title: "Категория", value: product.category.rawValue, color: Theme.categoryColor(product.category))
-                        if let days = product.daysUntilExpiry {
-                            infoCard(
-                                title: product.isExpired ? "Статус" : "Осталось", 
-                                value: product.isExpired ? "Просрочено" : "\(days) дн.", 
-                                color: product.isExpired ? Theme.danger : (product.isExpiringSoon ? Theme.warning : Theme.success)
-                            )
-                        }
-                    }
-                    .padding(.horizontal)
-                    
-                    // Benefits
-                    if !product.benefits.isEmpty {
-                        detailSection(
-                            title: "Польза",
-                            icon: "sparkles",
-                            color: Theme.success
-                        ) {
-                            VStack(alignment: .leading, spacing: 8) {
-                                ForEach(product.benefits, id: \.self) { benefit in
-                                    HStack(alignment: .top, spacing: 8) {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundColor(Theme.success)
-                                            .font(.caption)
-                                        Text(benefit)
-                                            .font(.subheadline)
-                                            .foregroundColor(Theme.textPrimary)
-                                        Spacer()
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                    // How to Use
-                    if !product.howToUse.isEmpty {
-                        detailSection(
-                            title: "Как использовать",
-                            icon: "hand.raised.fill",
-                            color: Theme.info
-                        ) {
-                            Text(product.howToUse)
-                                .font(.subheadline)
-                                .foregroundColor(Theme.textSecondary)
-                        }
-                    }
-                    
-                    // Ingredients
-                    if !product.ingredients.isEmpty {
-                        detailSection(
-                            title: "Состав",
-                            icon: "flask.fill",
-                            color: Theme.accent
-                        ) {
-                            Text(product.ingredients)
-                                .font(.caption)
-                                .foregroundColor(Theme.textSecondary)
-                        }
-                    }
-                    
-                    // Warnings
-                    if !product.warnings.isEmpty {
-                        detailSection(
-                            title: "Предупреждения",
-                            icon: "exclamationmark.triangle.fill",
-                            color: Theme.warning
-                        ) {
-                            VStack(alignment: .leading, spacing: 8) {
-                                ForEach(product.warnings, id: \.self) { warning in
-                                    HStack(alignment: .top, spacing: 8) {
-                                        Image(systemName: "exclamationmark.circle.fill")
-                                            .foregroundColor(Theme.warning)
-                                            .font(.caption)
-                                        Text(warning)
-                                            .font(.subheadline)
-                                            .foregroundColor(Theme.textPrimary)
-                                        Spacer()
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                    // Notes
-                    if !product.notes.isEmpty {
-                        detailSection(
-                            title: "Заметки",
-                            icon: "note.text",
-                            color: Theme.neutral
-                        ) {
-                            Text(product.notes)
-                                .font(.subheadline)
-                                .foregroundColor(Theme.textSecondary)
-                        }
-                    }
-                    
-                    // Actions
-                    VStack(spacing: 12) {
-                        Button(action: { onMarkUsed?() }) {
-                            HStack {
-                                Image(systemName: "checkmark.circle.fill")
-                                Text("Израсходован")
-                            }
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .fill(Theme.success)
-                            )
+                        // Status Cards
+                        statusCardsSection
+                        
+                        // Benefits Section
+                        if !product.benefits.isEmpty {
+                            benefitsSection
                         }
                         
-                        Button(action: onDelete) {
-                            HStack {
-                                Image(systemName: "trash.fill")
-                                Text("Удалить")
-                            }
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .fill(Theme.danger)
-                            )
+                        // How to Use Section
+                        if !product.howToUse.isEmpty {
+                            howToUseSection
                         }
+                        
+                        // Ingredients Section
+                        if !product.ingredients.isEmpty {
+                            ingredientsSection
+                        }
+                        
+                        // Warnings Section
+                        if !product.warnings.isEmpty {
+                            warningsSection
+                        }
+                        
+                        // Notes Section
+                        if !product.notes.isEmpty {
+                            notesSection
+                        }
+                        
+                        // Actions Section
+                        actionsSection
+                        
+                        Spacer().frame(height: 20)
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 20)
+                    .padding(.horizontal, 24)
                 }
             }
-            .background(Theme.backgroundPowder)
             .navigationTitle("О продукте")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: onClose) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.secondary)
+                        Text("Готово")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(Theme.accent)
                     }
                 }
             }
         }
     }
     
-    private func infoCard(title: String, value: String, color: Color) -> some View {
-        VStack(spacing: 6) {
-            Text(value)
-                .font(.headline)
-                .fontWeight(.semibold)
-                .foregroundColor(color)
-            Text(title)
-                .font(.caption)
-                .foregroundColor(.secondary)
+    // MARK: - Product Image Section
+    private var productImageSection: some View {
+        VStack(spacing: 16) {
+            if let imageData = product.imageData, let uiImage = UIImage(data: imageData) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxWidth: 200, maxHeight: 200)
+                    .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
+            } else {
+                ZStack {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [Theme.categoryColor(product.category).opacity(0.2), Theme.categoryColor(product.category).opacity(0.05)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 150, height: 150)
+                    
+                    Image(systemName: product.category.icon)
+                        .font(.system(size: 60))
+                        .foregroundColor(Theme.categoryColor(product.category))
+                }
+            }
         }
-        .frame(maxWidth: .infinity)
-        .padding(16)
+        .padding(.top, 20)
+    }
+    
+    // MARK: - Product Info Section
+    private var productInfoSection: some View {
+        VStack(spacing: 8) {
+            Text(product.name)
+                .font(.system(size: 24, weight: .bold))
+                .multilineTextAlignment(.center)
+                .foregroundColor(.primary)
+            
+            Text(product.brand)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(Theme.accent)
+        }
+    }
+    
+    // MARK: - Status Cards Section
+    private var statusCardsSection: some View {
+        HStack(spacing: 12) {
+            // Category Card
+            statusCard(
+                title: product.category.rawValue,
+                subtitle: "Категория",
+                color: Theme.categoryColor(product.category)
+            )
+            
+            // Application Zone Card
+            statusCard(
+                title: product.applicationZone.rawValue,
+                subtitle: "Зона применения",
+                color: Theme.accent
+            )
+        }
+    }
+    
+    // MARK: - Benefits Section
+    private var benefitsSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 8) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(Theme.success)
+                Text("Польза")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.primary)
+            }
+            
+            VStack(alignment: .leading, spacing: 12) {
+                ForEach(product.benefits, id: \.self) { benefit in
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(Theme.success)
+                            .font(.system(size: 16))
+                        Text(benefit)
+                            .font(.system(size: 15))
+                            .foregroundColor(.primary)
+                        Spacer()
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(color.opacity(0.1))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(color.opacity(0.3), lineWidth: 1)
-                )
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
         )
     }
     
-    private func detailSection<Content: View>(
-        title: String,
-        icon: String,
-        color: Color,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+    // MARK: - How to Use Section
+    private var howToUseSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 8) {
-                Image(systemName: icon)
-                    .font(.subheadline)
-                    .foregroundColor(color)
-                Text(title)
-                    .font(.headline)
-                    .foregroundColor(Theme.textPrimary)
+                Image(systemName: "hand.raised.fill")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(Theme.info)
+                Text("Как использовать")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.primary)
             }
             
-            content()
+            Text(product.howToUse)
+                .font(.system(size: 15))
+                .foregroundColor(.secondary)
+                .lineSpacing(4)
         }
-        .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Theme.backgroundCard)
-                .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
         )
-        .padding(.horizontal)
     }
-
-    private func tagView(title: String) -> some View {
-        Text(title)
-            .font(.caption)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background(RoundedRectangle(cornerRadius: 12).fill(Theme.accent.opacity(0.12)))
+    
+    // MARK: - Ingredients Section
+    private var ingredientsSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 8) {
+                Image(systemName: "flask.fill")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(Theme.accent)
+                Text("Состав")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.primary)
+            }
+            
+            Text(product.ingredients)
+                .font(.system(size: 14))
+                .foregroundColor(.secondary)
+                .lineSpacing(4)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
+        )
+    }
+    
+    // MARK: - Warnings Section
+    private var warningsSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 8) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(Theme.warning)
+                Text("Предупреждения")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.primary)
+            }
+            
+            VStack(alignment: .leading, spacing: 12) {
+                ForEach(product.warnings, id: \.self) { warning in
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "exclamationmark.circle.fill")
+                            .foregroundColor(Theme.warning)
+                            .font(.system(size: 16))
+                        Text(warning)
+                            .font(.system(size: 15))
+                            .foregroundColor(.primary)
+                        Spacer()
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
+        )
+    }
+    
+    // MARK: - Notes Section
+    private var notesSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 8) {
+                Image(systemName: "note.text")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(Theme.neutral)
+                Text("Заметки")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.primary)
+            }
+            
+            Text(product.notes)
+                .font(.system(size: 15))
+                .foregroundColor(.secondary)
+                .lineSpacing(4)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
+        )
+    }
+    
+    // MARK: - Actions Section
+    private var actionsSection: some View {
+        VStack(spacing: 12) {
+            if let onMarkUsed = onMarkUsed {
+                Button(action: onMarkUsed) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 16, weight: .medium))
+                        Text("Израсходован")
+                            .font(.system(size: 16, weight: .semibold))
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Theme.success)
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+            
+            Button(action: onDelete) {
+                HStack(spacing: 8) {
+                    Image(systemName: "trash.fill")
+                        .font(.system(size: 16, weight: .medium))
+                    Text("Удалить")
+                        .font(.system(size: 16, weight: .semibold))
+                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Theme.danger)
+                )
+            }
+            .buttonStyle(PlainButtonStyle())
+        }
+    }
+    
+    // MARK: - Helper Views
+    private func statusCard(title: String, subtitle: String, color: Color) -> some View {
+        VStack(spacing: 6) {
+            Text(title)
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(color)
+            Text(subtitle)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
+        .padding(.horizontal, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(color.opacity(0.1))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(color.opacity(0.3), lineWidth: 1)
+                )
+        )
     }
 }
