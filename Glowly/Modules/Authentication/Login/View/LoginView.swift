@@ -63,13 +63,49 @@ struct LoginView: View {
             .sheet(isPresented: $showPrivacyPolicy) {
                 PrivacyPolicyView()
             }
-        }
-        .overlay(alignment: .bottom) {
-            if viewModel.showError, let error = viewModel.errorMessage {
-                ErrorToast(message: error) {
-                    viewModel.clearError()
+            .background(
+                NavigationLink(
+                    destination: OTPVerificationView(
+                        contactInfo: viewModel.loginType == .email ? viewModel.email : "+7\(viewModel.phone)",
+                        verificationType: viewModel.loginType == .email ? .email : .sms,
+                        onSuccess: {
+                            // OTP verified successfully - now authenticate
+                            Task {
+                                let identifier = viewModel.loginType == .email ? viewModel.email : "+7\(viewModel.phone)"
+                                do {
+                                    _ = try await viewModel.authManager.signIn(email: identifier, password: viewModel.password)
+                                    // Authentication successful - ContentView will handle navigation
+                                    print("✅ Authentication successful, isAuthenticated = \(viewModel.authManager.isAuthenticated)")
+                                } catch {
+                                    print("❌ Authentication error: \(error)")
+                                    // If auth fails, go back to login
+                                    await MainActor.run {
+                                        viewModel.showOTPVerification = false
+                                        viewModel.showError = true
+                                        viewModel.errorMessage = "Ошибка аутентификации"
+                                    }
+                                }
+                            }
+                        }
+                    ),
+                    isActive: $viewModel.showOTPVerification
+                ) {
+                    EmptyView()
                 }
-                .transition(.move(edge: .bottom).combined(with: .opacity))
+            )
+        }
+        .bottomSheetError(
+            isPresented: $viewModel.showError,
+            title: "ошибка",
+            message: viewModel.errorMessage ?? "",
+            buttonTitle: "понятно",
+            action: { viewModel.clearError() }
+        )
+        .onChange(of: viewModel.authManager.isAuthenticated) { _, isAuthenticated in
+            // When authentication succeeds, reset navigation state
+            if isAuthenticated {
+                print("🎉 Authentication detected in LoginView, resetting OTP state")
+                viewModel.showOTPVerification = false
             }
         }
     }
@@ -296,79 +332,6 @@ struct LoginView: View {
             }
         }
         .padding(.top, 8)
-    }
-}
-
-// MARK: - Error Toast
-struct ErrorToast: View {
-    let message: String
-    let onDismiss: () -> Void
-    
-    var body: some View {
-        VStack(spacing: 24) {
-            // Drag Indicator
-            RoundedRectangle(cornerRadius: 3)
-                .fill(Color.gray.opacity(0.3))
-                .frame(width: 40, height: 5)
-                .padding(.top, 12)
-            
-            // Content
-            VStack(spacing: 16) {
-                Text("ошибка")
-                    .font(.system(size: 28, weight: .bold))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                
-                Text(message)
-                    .font(.system(size: 16))
-                    .foregroundColor(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                
-                // OK Button
-                Button {
-                    onDismiss()
-                } label: {
-                    Text("понятно")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background(Theme.accent)
-                        .cornerRadius(26)
-                }
-                .padding(.top, 8)
-            }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 40)
-        }
-        .background(
-            Color(.systemBackground)
-                .cornerRadius(20, corners: [.topLeft, .topRight])
-        )
-        .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: -5)
-        .onAppear {
-            HapticsService.shared.impactMedium()
-        }
-    }
-}
-
-// MARK: - Corner Radius Extension
-extension View {
-    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
-        clipShape(RoundedCorner(radius: radius, corners: corners))
-    }
-}
-
-struct RoundedCorner: Shape {
-    var radius: CGFloat = .infinity
-    var corners: UIRectCorner = .allCorners
-    
-    func path(in rect: CGRect) -> Path {
-        let path = UIBezierPath(
-            roundedRect: rect,
-            byRoundingCorners: corners,
-            cornerRadii: CGSize(width: radius, height: radius)
-        )
-        return Path(path.cgPath)
     }
 }
 

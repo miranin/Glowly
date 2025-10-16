@@ -18,6 +18,7 @@ final class LoginViewModel: ObservableObject {
     @Published var loginType: LoginType = .email
     @Published var showPassword: Bool = false
     @Published var showForgotPassword: Bool = false
+    @Published var showOTPVerification: Bool = false
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
     @Published var showError: Bool = false
@@ -61,15 +62,55 @@ final class LoginViewModel: ObservableObject {
             return
         }
 
+        // Route to appropriate login flow
+        if loginType == .email {
+            await signInWithEmail()
+        } else {
+            await signInWithPhone()
+        }
+    }
+
+    // MARK: - Email Login Flow
+
+    private func signInWithEmail() async {
         isLoading = true
         defer { isLoading = false }
 
-        // Use email or phone as identifier
-        let identifier = loginType == .email ? email : "+7\(phone)"
+        do {
+            // Email login - direct authentication (no OTP for MVP)
+            _ = try await authManager.signIn(email: email, password: password)
+            HapticsService.shared.success()
+        } catch let error as AuthError {
+            showError(message: error.localizedDescription)
+            HapticsService.shared.warning()
+        } catch {
+            showError(message: "Произошла ошибка. Попробуйте снова.")
+            HapticsService.shared.warning()
+        }
+    }
+
+    // MARK: - Phone Login Flow
+
+    private func signInWithPhone() async {
+        isLoading = true
+        defer { isLoading = false }
+
+        let identifier = "+7\(phone)"
 
         do {
-            _ = try await authManager.signIn(email: identifier, password: password)
+            // Mock: Verify phone and password exist
+            // In production: Backend would verify and send OTP
+            try await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
+
+            // Check if user exists with this phone
+            let userKey = "user_\(identifier)"
+            guard UserDefaults.standard.data(forKey: userKey) != nil else {
+                throw AuthError.userNotFound
+            }
+
+            // Credentials are valid, show OTP screen
             HapticsService.shared.success()
+            showOTPVerification = true
         } catch let error as AuthError {
             showError(message: error.localizedDescription)
             HapticsService.shared.warning()
@@ -244,10 +285,15 @@ final class LoginViewModel: ObservableObject {
 
     func handleLoginTypeChange(_ newType: LoginType) {
         if newType != loginType {
-            // Clear both fields when switching
+            // Clear all form fields when switching between email and phone
+            // This ensures no mixed data between the two separate flows
             email = ""
             phone = ""
+            password = ""
+            // Note: showPassword state is preserved for UX consistency
+
             loginType = newType
+            HapticsService.shared.impactLight()
         }
     }
 }

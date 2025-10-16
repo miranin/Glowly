@@ -27,7 +27,7 @@ final class RegistrationViewModel: ObservableObject {
     @Published var showError: Bool = false
 
     // MARK: - Dependencies (Injected)
-    private let authManager: any AuthManagerProtocol
+    let authManager: any AuthManagerProtocol
 
     // MARK: - Types
     enum RegistrationType {
@@ -57,20 +57,75 @@ final class RegistrationViewModel: ObservableObject {
             return
         }
 
+        // Route to appropriate registration flow
+        if registrationType == .email {
+            await signUpWithEmail()
+        } else {
+            await signUpWithPhone()
+        }
+    }
+
+    // MARK: - Email Registration Flow
+
+    private func signUpWithEmail() async {
         isLoading = true
         defer { isLoading = false }
 
-        // Use email or phone as identifier
-        let identifier = registrationType == .email ? email : "+7\(phone)"
-
         do {
+            // Email registration - authenticate immediately (no OTP for MVP)
             _ = try await authManager.signUp(
-                email: identifier,
+                email: email,
                 password: password,
                 name: name.isEmpty ? nil : name
             )
             HapticsService.shared.success()
-            // Show OTP verification
+            // Email signup also shows OTP, but it will authenticate on success
+            showOTPVerification = true
+        } catch let error as AuthError {
+            showError(message: error.localizedDescription)
+            HapticsService.shared.warning()
+        } catch {
+            showError(message: "Произошла ошибка. Попробуйте снова.")
+            HapticsService.shared.warning()
+        }
+    }
+
+    // MARK: - Phone Registration Flow
+
+    private func signUpWithPhone() async {
+        isLoading = true
+        defer { isLoading = false }
+
+        let identifier = "+7\(phone)"
+
+        do {
+            // Mock: Create user account but don't authenticate yet
+            try await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 seconds
+
+            // Check if phone already exists
+            let userKey = "user_\(identifier)"
+            if UserDefaults.standard.data(forKey: userKey) != nil {
+                throw AuthError.emailAlreadyExists
+            }
+
+            // Create user but don't authenticate
+            let user = User(
+                id: UUID().uuidString,
+                email: identifier,
+                name: name.isEmpty ? nil : name,
+                profilePhotoURL: nil,
+                authProvider: .email,
+                createdAt: Date(),
+                lastLoginAt: Date()
+            )
+
+            // Save user data (but don't authenticate)
+            if let userData = try? JSONEncoder().encode(user) {
+                UserDefaults.standard.set(userData, forKey: userKey)
+            }
+
+            HapticsService.shared.success()
+            // Show OTP verification - user will be authenticated after OTP
             showOTPVerification = true
         } catch let error as AuthError {
             showError(message: error.localizedDescription)
@@ -148,12 +203,15 @@ final class RegistrationViewModel: ObservableObject {
             isValidEmail(email) :
             isValidPhone(phone)
 
+        // Password must be at least medium strength (3+) or strong (4+)
+        let hasStrongEnoughPassword = calculatePasswordStrength() >= 3
+
         return !name.isEmpty &&
                hasValidContact &&
                !password.isEmpty &&
                !confirmPassword.isEmpty &&
                passwordsMatch() &&
-               password.count >= 8
+               hasStrongEnoughPassword
     }
 
     func isValidEmail(_ email: String) -> Bool {
@@ -262,10 +320,16 @@ final class RegistrationViewModel: ObservableObject {
 
     func handleRegistrationTypeChange(_ newType: RegistrationType) {
         if newType != registrationType {
-            // Clear both fields when switching
+            // Clear all form fields when switching between email and phone
+            // This ensures no mixed data between the two separate flows
             email = ""
             phone = ""
+            password = ""
+            confirmPassword = ""
+            // Note: We preserve 'name' as it's common to both flows
+
             registrationType = newType
+            HapticsService.shared.impactLight()
         }
     }
 }

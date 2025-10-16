@@ -91,9 +91,12 @@ final class AuthManager: ObservableObject, AuthManagerProtocol {
         guard !email.isEmpty, !password.isEmpty else {
             throw AuthError.invalidCredentials
         }
-        
-        guard isValidEmail(email) else {
-            throw AuthError.invalidCredentials
+
+        // Skip email validation for phone numbers (starts with +7)
+        if !email.hasPrefix("+7") {
+            guard isValidEmail(email) else {
+                throw AuthError.invalidCredentials
+            }
         }
         
         // ⚠️ MOCK: Simulate API call delay

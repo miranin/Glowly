@@ -105,23 +105,17 @@ struct ForgotPasswordView: View {
                 }
             }
         }
-        .overlay(alignment: .bottom) {
-            if showError {
-                ErrorToast(message: errorMessage) {
-                    showError = false
-                }
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
-        }
-        .overlay(alignment: .bottom) {
-            if showSuccess {
-                SuccessToast(message: "Проверьте почту") {
-                    showSuccess = false
-                    dismiss()
-                }
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
-        }
+        .bottomSheetError(
+            isPresented: $showError,
+            title: "ошибка",
+            message: errorMessage,
+            buttonTitle: "понятно",
+            action: { showError = false }
+        )
+        .successNotice(
+            isPresented: $showSuccess,
+            message: "Проверьте почту. Мы отправили ссылку для восстановления пароля"
+        )
     }
     
     private func isValidEmail() -> Bool {
@@ -147,57 +141,6 @@ struct ForgotPasswordView: View {
                 errorMessage = "пользователь с таким email не найден"
                 withAnimation {
                     showError = true
-                }
-            }
-        }
-    }
-}
-
-// MARK: - Success Toast
-struct SuccessToast: View {
-    let message: String
-    let onDismiss: () -> Void
-    
-    var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 12) {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
-                
-                Text("успешно")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(.primary)
-                
-                Spacer()
-                
-                Button {
-                    onDismiss()
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
-                }
-            }
-            .padding()
-            .background(Color(.systemBackground))
-            
-            Divider()
-            
-            Text(message)
-                .font(.system(size: 14))
-                .foregroundColor(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding()
-                .background(Color(.systemBackground))
-        }
-        .cornerRadius(16, corners: [.topLeft, .topRight])
-        .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: -5)
-        .padding(.bottom, 20)
-        .onAppear {
-            HapticsService.shared.success()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                withAnimation {
-                    onDismiss()
                 }
             }
         }

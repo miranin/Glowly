@@ -11,6 +11,11 @@ struct RegistrationView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var viewModel: RegistrationViewModel
     @State private var showPrivacyPolicy = false
+    @FocusState private var focusedField: Field?
+
+    enum Field: Hashable {
+        case name, email, phone, password, confirmPassword
+    }
 
     nonisolated init(authManager: any AuthManagerProtocol) {
         _viewModel = StateObject(wrappedValue: RegistrationViewModel(authManager: authManager))
@@ -19,13 +24,14 @@ struct RegistrationView: View {
     init() {
         self.init(authManager: AuthManager())
     }
-    
+
     var body: some View {
         ZStack {
             Color(.systemBackground).ignoresSafeArea()
-            
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 24) {
+
+            ScrollViewReader { proxy in
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 24) {
                     Spacer().frame(height: 60)
                     
                     // Title
@@ -51,8 +57,9 @@ struct RegistrationView: View {
                     // Social Sign Up
                     socialSignUpSection
                 }
+                }
+                .dismissKeyboardOnTap()
             }
-            .dismissKeyboardOnTap()
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(false) // System back button only
@@ -65,7 +72,23 @@ struct RegistrationView: View {
                     contactInfo: viewModel.registrationType == .email ? viewModel.email : "+7\(viewModel.phone)",
                     verificationType: viewModel.registrationType == .email ? .email : .sms,
                     onSuccess: {
-                        // OTP verified successfully
+                        // OTP verified successfully - now authenticate the user
+                        Task {
+                            let identifier = viewModel.registrationType == .email ? viewModel.email : "+7\(viewModel.phone)"
+                            do {
+                                _ = try await viewModel.authManager.signIn(email: identifier, password: viewModel.password)
+                                // Authentication successful - ContentView will handle navigation
+                                print("✅ Authentication successful, isAuthenticated = \(viewModel.authManager.isAuthenticated)")
+                            } catch {
+                                print("❌ Authentication error: \(error)")
+                                // If auth fails, go back to registration
+                                await MainActor.run {
+                                    viewModel.showOTPVerification = false
+                                    viewModel.showError = true
+                                    viewModel.errorMessage = "Ошибка аутентификации"
+                                }
+                            }
+                        }
                     }
                 ),
                 isActive: $viewModel.showOTPVerification
@@ -73,12 +96,18 @@ struct RegistrationView: View {
                 EmptyView()
             }
         )
-        .overlay(alignment: .bottom) {
-            if viewModel.showError, let error = viewModel.errorMessage {
-                ErrorToast(message: error) {
-                    viewModel.clearError()
-                }
-                .transition(.move(edge: .bottom).combined(with: .opacity))
+        .bottomSheetError(
+            isPresented: $viewModel.showError,
+            title: "ошибка",
+            message: viewModel.errorMessage ?? "",
+            buttonTitle: "понятно",
+            action: { viewModel.clearError() }
+        )
+        .onChange(of: viewModel.authManager.isAuthenticated) { _, isAuthenticated in
+            // When authentication succeeds, reset navigation state
+            if isAuthenticated {
+                print("🎉 Authentication detected in RegistrationView, resetting OTP state")
+                viewModel.showOTPVerification = false
             }
         }
     }
@@ -134,27 +163,67 @@ struct RegistrationView: View {
     }
     
     private var nameInputField: some View {
-        TextField("имя", text: $viewModel.name)
-            .textContentType(.name)
-            .autocapitalization(.words)
-            .padding(16)
-            .background(Color(.systemGray6))
-            .cornerRadius(12)
+        HStack {
+            TextField("имя", text: $viewModel.name)
+                .textContentType(.name)
+                .autocapitalization(.words)
+                .focused($focusedField, equals: .name)
+                .submitLabel(.next)
+                .onSubmit {
+                    if !viewModel.name.isEmpty {
+                        focusedField = viewModel.registrationType == .email ? .email : .phone
+                    }
+                }
+
+            // Clear button (only show when focused)
+            if !viewModel.name.isEmpty && focusedField == .name {
+                Button(action: {
+                    viewModel.name = ""
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.gray)
+                }
+            }
+        }
+        .padding(16)
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+        .id(Field.name)
     }
     
     private var emailInputField: some View {
         VStack(alignment: .leading, spacing: 8) {
-            TextField("e-mail", text: $viewModel.email)
-                .textContentType(.emailAddress)
-                .autocapitalization(.none)
-                .keyboardType(.emailAddress)
-                .padding(16)
-                .background(Color(.systemGray6))
-                .cornerRadius(12)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(viewModel.emailBorderColor(), lineWidth: !viewModel.email.isEmpty ? 2 : 0)
-                )
+            HStack {
+                TextField("e-mail", text: $viewModel.email)
+                    .textContentType(.emailAddress)
+                    .autocapitalization(.none)
+                    .keyboardType(.emailAddress)
+                    .focused($focusedField, equals: .email)
+                    .submitLabel(.next)
+                    .onSubmit {
+                        if viewModel.isValidEmail(viewModel.email) {
+                            focusedField = .password
+                        }
+                    }
+
+                // Clear button (only show when focused)
+                if !viewModel.email.isEmpty && focusedField == .email {
+                    Button(action: {
+                        viewModel.email = ""
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.gray)
+                    }
+                }
+            }
+            .padding(16)
+            .background(Color(.systemGray6))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(viewModel.emailBorderColor(), lineWidth: !viewModel.email.isEmpty ? 2 : 0)
+            )
+            .id(Field.email)
             
             if !viewModel.email.isEmpty && !viewModel.isValidEmail(viewModel.email) {
                 HStack(spacing: 6) {
@@ -179,11 +248,27 @@ struct RegistrationView: View {
                 
                 TextField("700 123 45 67", text: $viewModel.phone)
                     .textContentType(.telephoneNumber)
-                    .keyboardType(.phonePad)
+                    .keyboardType(.numberPad)
+                    .focused($focusedField, equals: .phone)
                     .onChange(of: viewModel.phone) { _, newValue in
                         viewModel.handlePhoneInput(newValue)
                         viewModel.phone = viewModel.formatPhone(viewModel.phone)
+
+                        // Auto-move when phone is complete (10 digits)
+                        if viewModel.isValidPhone(viewModel.phone) {
+                            focusedField = .password
+                        }
                     }
+
+                // Clear button (only show when focused)
+                if !viewModel.phone.isEmpty && focusedField == .phone {
+                    Button(action: {
+                        viewModel.phone = ""
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.gray)
+                    }
+                }
             }
             .padding(16)
             .background(Color(.systemGray6))
@@ -192,6 +277,7 @@ struct RegistrationView: View {
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(viewModel.phoneBorderColor(), lineWidth: !viewModel.phone.isEmpty ? 2 : 0)
             )
+            .id(Field.phone)
             
             if !viewModel.phone.isEmpty && !viewModel.isValidPhone(viewModel.phone) {
                 HStack(spacing: 6) {
@@ -211,12 +297,47 @@ struct RegistrationView: View {
             HStack {
                 if viewModel.showPassword {
                     TextField("пароль (минимум 8 символов)", text: $viewModel.password)
+                        .focused($focusedField, equals: .password)
+                        .textContentType(.newPassword)
+                        .autocapitalization(.none)
+                        .submitLabel(.next)
+                        .onSubmit {
+                            if viewModel.calculatePasswordStrength() >= 3 {
+                                focusedField = .confirmPassword
+                            }
+                        }
                 } else {
                     SecureField("пароль (минимум 8 символов)", text: $viewModel.password)
+                        .focused($focusedField, equals: .password)
+                        .textContentType(.newPassword)
+                        .submitLabel(.next)
+                        .onSubmit {
+                            if viewModel.calculatePasswordStrength() >= 3 {
+                                focusedField = .confirmPassword
+                            }
+                        }
                 }
-                
+
+                // Clear button (only show when focused)
+                if !viewModel.password.isEmpty && focusedField == .password {
+                    Button(action: {
+                        viewModel.password = ""
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.gray)
+                    }
+                }
+
                 Button {
+                    // Store if this field was focused
+                    let wasFocused = focusedField == .password
                     viewModel.togglePasswordVisibility()
+                    // Restore focus after toggle
+                    if wasFocused {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            focusedField = .password
+                        }
+                    }
                 } label: {
                     Image(systemName: viewModel.showPassword ? "eye.slash" : "eye")
                         .foregroundColor(.gray)
@@ -229,6 +350,7 @@ struct RegistrationView: View {
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(viewModel.passwordBorderColor(), lineWidth: !viewModel.password.isEmpty ? 2 : 0)
             )
+            .id(Field.password)
             
             if !viewModel.password.isEmpty {
                 HStack(spacing: 6) {
@@ -248,12 +370,47 @@ struct RegistrationView: View {
             HStack {
                 if viewModel.showConfirmPassword {
                     TextField("подтвердите пароль", text: $viewModel.confirmPassword)
+                        .focused($focusedField, equals: .confirmPassword)
+                        .textContentType(.newPassword)
+                        .autocapitalization(.none)
+                        .submitLabel(.done)
+                        .onSubmit {
+                            if viewModel.passwordsMatch() {
+                                focusedField = nil // Dismiss keyboard
+                            }
+                        }
                 } else {
                     SecureField("подтвердите пароль", text: $viewModel.confirmPassword)
+                        .focused($focusedField, equals: .confirmPassword)
+                        .textContentType(.newPassword)
+                        .submitLabel(.done)
+                        .onSubmit {
+                            if viewModel.passwordsMatch() {
+                                focusedField = nil // Dismiss keyboard
+                            }
+                        }
                 }
-                
+
+                // Clear button (only show when focused)
+                if !viewModel.confirmPassword.isEmpty && focusedField == .confirmPassword {
+                    Button(action: {
+                        viewModel.confirmPassword = ""
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.gray)
+                    }
+                }
+
                 Button {
+                    // Store if this field was focused
+                    let wasFocused = focusedField == .confirmPassword
                     viewModel.toggleConfirmPasswordVisibility()
+                    // Restore focus after toggle
+                    if wasFocused {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            focusedField = .confirmPassword
+                        }
+                    }
                 } label: {
                     Image(systemName: viewModel.showConfirmPassword ? "eye.slash" : "eye")
                         .foregroundColor(.gray)
@@ -266,6 +423,7 @@ struct RegistrationView: View {
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(viewModel.confirmPasswordBorderColor(), lineWidth: !viewModel.confirmPassword.isEmpty ? 2 : 0)
             )
+            .id(Field.confirmPassword)
             
             if !viewModel.confirmPassword.isEmpty {
                 HStack(spacing: 6) {

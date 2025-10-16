@@ -14,8 +14,8 @@ struct ContentView: View {
     @StateObject private var userProfilePresenter = UserProfilePresenter()
     private let biometricService: BiometricAuthServiceProtocol
     @StateObject private var permissionsService: PermissionsService
-    @State private var isFirstLogin = false
-    
+    @State private var shouldRequestPermissions = false
+
     // MARK: - Initialization with Dependency Injection
     nonisolated init(
         authManager: AuthManager = AuthManager(),
@@ -25,7 +25,7 @@ struct ContentView: View {
         self.biometricService = biometricService
         _permissionsService = StateObject(wrappedValue: PermissionsService(biometricService: biometricService))
     }
-    
+
     var body: some View {
         Group {
             if !authManager.isAuthenticated {
@@ -44,20 +44,23 @@ struct ContentView: View {
             authManager.initialize()
         }
         .onChange(of: authManager.isAuthenticated) { oldValue, newValue in
-            // Check if user just authenticated (first login)
+            // Mark that permissions should be requested after onboarding
             if !oldValue && newValue {
-                // Check if it's first login (no biometric preference set)
-                let hasSetBiometric = UserDefaults.standard.object(forKey: "hasSetBiometricPreference") != nil
-                if !hasSetBiometric {
-                    isFirstLogin = true
-                    UserDefaults.standard.set(true, forKey: "hasSetBiometricPreference")
-                    
-                    // Request permissions after a short delay
-                    Task {
-                        try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
-                        await permissionsService.completeFirstTimeOnboarding()
-                        isFirstLogin = false
-                    }
+                let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+                if !hasCompletedOnboarding {
+                    shouldRequestPermissions = true
+                }
+            }
+        }
+        .onChange(of: userProfilePresenter.needsOnboarding) { oldValue, newValue in
+            // When onboarding completes (needsOnboarding changes from true to false)
+            if oldValue && !newValue && shouldRequestPermissions {
+                shouldRequestPermissions = false
+
+                // Request permissions after onboarding completion
+                Task {
+                    try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+                    await permissionsService.completeFirstTimeOnboarding()
                 }
             }
         }

@@ -12,10 +12,9 @@ struct OnboardingBasicInfoView: View {
     let onContinue: () -> Void
     let onBack: () -> Void
     
-    @State private var name: String = ""
     @State private var selectedAgeRange: AgeRange = .preferNotToSay
     @State private var selectedSex: Sex = .notSpecified
-    
+
     var body: some View {
         OnboardingStepContainer(
             title: "Основная информация",
@@ -24,19 +23,9 @@ struct OnboardingBasicInfoView: View {
                 saveAndContinue()
             },
             onBack: onBack,
-            canContinue: !name.isEmpty
+            canContinue: true // Always allow to continue (removed name requirement)
         ) {
             VStack(spacing: 24) {
-                // Name
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Как вас зовут?")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                    
-                    TextField("Введите имя", text: $name)
-                        .textFieldStyle(OnboardingTextFieldStyle())
-                }
-                
                 // Age Range
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Возрастная группа")
@@ -85,14 +74,13 @@ struct OnboardingBasicInfoView: View {
             }
         }
         .onAppear {
-            name = userProfile.name
             selectedAgeRange = userProfile.ageRange
             selectedSex = userProfile.sex
         }
     }
-    
+
     private func saveAndContinue() {
-        userProfile.name = name
+        // Name is already set from registration, only update age and sex
         userProfile.ageRange = selectedAgeRange
         userProfile.sex = selectedSex
         onContinue()

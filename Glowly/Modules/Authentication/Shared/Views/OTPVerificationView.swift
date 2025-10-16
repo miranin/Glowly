@@ -11,8 +11,8 @@ struct OTPVerificationView: View {
     let contactInfo: String
     let verificationType: VerificationType
     let onSuccess: () -> Void
-    
-    @Environment(\.dismiss) var dismiss
+
+    @Environment(\.dismiss) private var dismiss
     @State private var otpCode = ["", "", "", "", "", ""]
     @State private var isVerifying = false
     @State private var canResend = false
@@ -164,16 +164,17 @@ struct OTPVerificationView: View {
             startCountdown()
             focusedField = 0
         }
-        .overlay(alignment: .bottom) {
-            if showError {
-                ErrorToast(message: errorMessage) {
-                    withAnimation {
-                        showError = false
-                    }
+        .bottomSheetError(
+            isPresented: $showError,
+            title: "ошибка",
+            message: errorMessage,
+            buttonTitle: "понятно",
+            action: {
+                withAnimation {
+                    showError = false
                 }
-                .transition(.move(edge: .bottom).combined(with: .opacity))
             }
-        }
+        )
         .overlay(alignment: .center) {
             if showSuccess {
                 SuccessOverlay()
@@ -249,13 +250,16 @@ struct OTPVerificationView: View {
             // Mock: check if code is correct
             if code == "123456" {
                 HapticsService.shared.success()
+
+                // Show success briefly then trigger callback
                 withAnimation {
                     showSuccess = true
                 }
-                
-                // Call success callback after short delay
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+
+                // Call success callback after brief delay
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                     onSuccess()
+                    // ContentView will handle navigation when auth state changes
                 }
             } else {
                 errorMessage = "неверный код подтверждения"
