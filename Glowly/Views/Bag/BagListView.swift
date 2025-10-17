@@ -18,8 +18,9 @@ struct BagListView: View {
     
     private var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
-        let name = userProfilePresenter.userProfile.name ?? "Вика"
-        
+        // Use the registered name, or fallback to default if empty
+        let name = userProfilePresenter.userProfile.name.isEmpty ? "User" : userProfilePresenter.userProfile.name
+
         let greetingKey: String
         switch hour {
         case 0..<6: greetingKey = "bag_greeting_evening"
@@ -27,7 +28,7 @@ struct BagListView: View {
         case 12..<18: greetingKey = "bag_greeting_afternoon"
         default: greetingKey = "bag_greeting_evening"
         }
-        
+
         return "\(languageManager.translate(greetingKey)) \(name)!"
     }
     

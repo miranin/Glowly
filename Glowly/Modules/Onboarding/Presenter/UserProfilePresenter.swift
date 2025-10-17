@@ -8,6 +8,9 @@
 import Foundation
 import Combine
 
+// Import User model for sync functionality
+// User model is defined in: Modules/Authentication/Shared/Models/User.swift
+
 class UserProfilePresenter: ObservableObject {
     @Published var userProfile: UserProfile
     
@@ -72,9 +75,26 @@ class UserProfilePresenter: ObservableObject {
         userProfile = UserProfile()
         saveProfile()
     }
-    
+
     var needsOnboarding: Bool {
         return !userProfile.hasCompletedOnboarding
+    }
+
+    // MARK: - Sync with Authenticated User
+
+    /// Sync name from authenticated user to profile
+    /// This ensures the name entered during registration appears in the profile
+    /// Always updates profile name with the authenticated user's name
+    func syncWithAuthenticatedUser(_ user: User) {
+        print("🔄 Syncing user data - Current profile name: '\(userProfile.name)', User name from auth: '\(user.name ?? "nil")'")
+
+        if let userName = user.name, !userName.isEmpty {
+            print("✅ Syncing name from auth: '\(userName)'")
+            userProfile.name = userName
+            saveProfile()
+        } else {
+            print("⚠️ No valid name in auth user to sync")
+        }
     }
 }
 

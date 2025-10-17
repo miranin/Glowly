@@ -15,6 +15,7 @@ struct ContentView: View {
     private let biometricService: BiometricAuthServiceProtocol
     @StateObject private var permissionsService: PermissionsService
     @State private var shouldRequestPermissions = false
+    @State private var showSplash = true
 
     // MARK: - Initialization with Dependency Injection
     nonisolated init(
@@ -27,25 +28,44 @@ struct ContentView: View {
     }
 
     var body: some View {
-        Group {
-            if !authManager.isAuthenticated {
-                // Show login if not authenticated
-                LoginView(authManager: authManager)
-            } else if userProfilePresenter.needsOnboarding {
-                // Show onboarding after authentication if needed
-                OnboardingContainerView(userProfilePresenter: userProfilePresenter)
-            } else {
-                // Show main app
-                mainAppView
+        ZStack {
+            Group {
+                if !authManager.isAuthenticated {
+                    // Show login if not authenticated
+                    LoginView(authManager: authManager)
+                } else if userProfilePresenter.needsOnboarding {
+                    // Show onboarding after authentication if needed
+                    OnboardingContainerView(userProfilePresenter: userProfilePresenter)
+                } else {
+                    // Show main app
+                    mainAppView
+                }
+            }
+            .opacity(showSplash ? 0 : 1)
+
+            // Splash screen overlay
+            if showSplash {
+                SplashView()
+                    .transition(.opacity)
+                    .zIndex(1)
             }
         }
         .task {
-            // Initialize auth manager (but don't auto-authenticate)
             authManager.initialize()
+
+            try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
+            withAnimation(.easeOut(duration: 0.5)) {
+                showSplash = false
+            }
         }
         .onChange(of: authManager.isAuthenticated) { oldValue, newValue in
-            // Mark that permissions should be requested after onboarding
             if !oldValue && newValue {
+                if let currentUser = authManager.currentUser {
+                    userProfilePresenter.syncWithAuthenticatedUser(currentUser)
+                } else {
+                    print("⚠️ No current user found in authManager")
+                }
+
                 let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
                 if !hasCompletedOnboarding {
                     shouldRequestPermissions = true
