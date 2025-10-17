@@ -222,13 +222,13 @@ struct PostPreview: View {
                 .font(.system(size: 15))
                 .padding(.horizontal, 16)
             
-            // Image (if exists)
-            if post.imageUrl != nil {
+            // Media (if exists)
+            if post.hasMedia {
                 Rectangle()
                     .fill(Color.gray.opacity(0.1))
                     .frame(height: 200)
                     .overlay(
-                        Image(systemName: "photo")
+                        Image(systemName: post.media.first?.type == .video ? "play.circle" : "photo")
                             .font(.system(size: 32))
                             .foregroundColor(.gray)
                     )

@@ -15,7 +15,8 @@ struct User: Codable, Identifiable {
     var authProvider: AuthProvider
     var createdAt: Date
     var lastLoginAt: Date
-    
+    var isPremium: Bool = false  // Premium users can create posts with media
+
     enum AuthProvider: String, Codable {
         case email
         case google

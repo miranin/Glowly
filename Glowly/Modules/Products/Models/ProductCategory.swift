@@ -88,22 +88,5 @@ enum ProductCategory: String, CaseIterable, Codable {
         case .other: return "questionmark.circle"
         }
     }
-
-    // Suggested shelf life in days for MVP auto-expiry prefill
-    var suggestedShelfLifeDays: Int {
-        switch self {
-        case .mascara: return 90
-        case .foundation, .concealer: return 365
-        case .powder, .blush, .bronzer, .highlighter, .eyeshadow: return 730
-        case .cleanser: return 365
-        case .moisturizer, .serum: return 365
-        case .sunscreen: return 365
-        case .primer, .settingSpray: return 365
-        case .lipstick, .lipGloss, .lipLiner: return 540
-        case .mask: return 365
-        case .other: return 365
-        case .eyeliner: return 365
-        }
-    }
 }
 

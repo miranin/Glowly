@@ -247,3 +247,29 @@
 "product_detail_add_to_wishlist" = "Add to wishlist";
 "product_detail_remove_from_wishlist" = "Remove from wishlist";
 
+
+/* Premium / Subscription */
+"premium_title" = "Become a Premium Creator";
+"premium_subtitle" = "Monetize your content, attract followers, and earn from your beauty expertise";
+
+"premium_feature_viral_posts_title" = "Create Viral Posts";
+"premium_feature_viral_posts_desc" = "Share photos and videos, recommend products to your audience, and earn through partnerships";
+
+"premium_feature_ai_helper_title" = "Advanced AI Assistant";
+"premium_feature_ai_helper_desc" = "Create content with AI: idea generation, post writing, and beauty industry marketing";
+
+"premium_feature_monetize_title" = "Content Monetization";
+"premium_feature_monetize_desc" = "Get paid for exclusive content: routines, tips, cosmetic bag access. Like OnlyFans for beauty";
+
+"premium_feature_deeplinks_title" = "Links & Commissions";
+"premium_feature_deeplinks_desc" = "Add links to products, website, WhatsApp, Telegram. Earn commission on customer traffic";
+
+"premium_plan_monthly" = "Monthly Plan";
+"premium_plan_annual" = "Annual Plan";
+"premium_most_popular" = "MOST POPULAR";
+"premium_save_percent" = "Save 33%";
+"premium_per_month" = "per month";
+"premium_per_year" = "per year";
+"premium_continue" = "Continue";
+"premium_terms" = "Cancel anytime. Terms and conditions apply.";
+

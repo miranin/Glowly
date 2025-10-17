@@ -7,26 +7,57 @@
 
 import Foundation
 
+enum PostMediaType: String, Codable {
+    case image
+    case video
+}
+
+struct PostMedia: Identifiable, Codable {
+    let id: String
+    let type: PostMediaType
+    let url: String
+    let thumbnailUrl: String?  // For video thumbnails
+
+    init(id: String = UUID().uuidString, type: PostMediaType, url: String, thumbnailUrl: String? = nil) {
+        self.id = id
+        self.type = type
+        self.url = url
+        self.thumbnailUrl = thumbnailUrl
+    }
+}
+
 struct Post: Identifiable, Codable {
     let id: String
     let userId: String
     let userName: String
     let userAvatar: String?
     let content: String
-    let imageUrl: String?
+
+    // Premium users can attach multiple photos/videos
+    let media: [PostMedia]  // Replaces single imageUrl
+
     let createdAt: Date
     var likesCount: Int
     var commentsCount: Int
     var isLiked: Bool
-    
+
     // For premium users/stores
     let isPremium: Bool
     let userType: UserType
-    
+
     enum UserType: String, Codable {
         case regular = "regular"
         case premium = "premium"
         case store = "store"
+    }
+
+    // Helper computed properties
+    var hasMedia: Bool {
+        return !media.isEmpty
+    }
+
+    var canHaveMedia: Bool {
+        return userType == .premium || userType == .store
     }
 }
 
@@ -39,7 +70,9 @@ extension Post {
             userName: "Анна Иванова",
             userAvatar: nil,
             content: "Новая коллекция помад от Dior! 💄✨",
-            imageUrl: nil,
+            media: [
+                PostMedia(type: .image, url: "https://example.com/dior-lipstick.jpg")
+            ],
             createdAt: Date().addingTimeInterval(-3600),
             likesCount: 24,
             commentsCount: 5,
@@ -53,7 +86,10 @@ extension Post {
             userName: "Sephora Russia",
             userAvatar: nil,
             content: "Скидка 20% на всю косметику по уходу! 🎉",
-            imageUrl: nil,
+            media: [
+                PostMedia(type: .image, url: "https://example.com/sephora-sale.jpg"),
+                PostMedia(type: .video, url: "https://example.com/sephora-promo.mp4", thumbnailUrl: "https://example.com/sephora-promo-thumb.jpg")
+            ],
             createdAt: Date().addingTimeInterval(-7200),
             likesCount: 156,
             commentsCount: 23,
@@ -67,13 +103,13 @@ extension Post {
             userName: "Мария Петрова",
             userAvatar: nil,
             content: "Мой вечерний уход за кожей ✨",
-            imageUrl: nil,
+            media: [],  // Regular user without media
             createdAt: Date().addingTimeInterval(-10800),
             likesCount: 89,
             commentsCount: 12,
             isLiked: false,
-            isPremium: true,
-            userType: .premium
+            isPremium: false,
+            userType: .regular
         )
     ]
 }

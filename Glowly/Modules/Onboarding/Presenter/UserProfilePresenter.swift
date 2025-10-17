@@ -86,14 +86,9 @@ class UserProfilePresenter: ObservableObject {
     /// This ensures the name entered during registration appears in the profile
     /// Always updates profile name with the authenticated user's name
     func syncWithAuthenticatedUser(_ user: User) {
-        print("🔄 Syncing user data - Current profile name: '\(userProfile.name)', User name from auth: '\(user.name ?? "nil")'")
-
         if let userName = user.name, !userName.isEmpty {
-            print("✅ Syncing name from auth: '\(userName)'")
             userProfile.name = userName
             saveProfile()
-        } else {
-            print("⚠️ No valid name in auth user to sync")
         }
     }
 }

@@ -62,8 +62,6 @@ struct ContentView: View {
             if !oldValue && newValue {
                 if let currentUser = authManager.currentUser {
                     userProfilePresenter.syncWithAuthenticatedUser(currentUser)
-                } else {
-                    print("⚠️ No current user found in authManager")
                 }
 
                 let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")

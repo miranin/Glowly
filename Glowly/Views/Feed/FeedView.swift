@@ -10,10 +10,12 @@ import SwiftUI
 struct FeedView: View {
     @ObservedObject var productStore: ProductStore
     @ObservedObject var wishListService: WishListService
+    @ObservedObject var authManager: AuthManager
     @StateObject private var feedService = FeedService()
     @StateObject private var commentService = CommentService()
     @StateObject private var userProfileService = UserProfileService()
-    
+    @State private var showPaywall = false
+
     var body: some View {
         NavigationView {
             ZStack {
@@ -23,7 +25,7 @@ struct FeedView: View {
                         ProgressView()
                             .scaleEffect(1.2)
                             .tint(Theme.accent)
-                        
+
                         Text("Загружаем ленту...")
                             .font(.system(size: 16, weight: .medium))
                             .foregroundColor(.secondary)
@@ -43,7 +45,7 @@ struct FeedView: View {
                                         userProfileService: userProfileService,
                                         wishListService: wishListService
                                     )
-                                    
+
                                     // Divider между постами
                                     Divider()
                                         .padding(.vertical, 8)
@@ -51,6 +53,39 @@ struct FeedView: View {
                             }
                         }
                         .padding(.top, 8)
+                        .padding(.bottom, 100) // Space for tab bar + floating button
+                    }
+                }
+
+                // Floating Create Post Button
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        Button {
+                            handleCreatePost()
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "plus")
+                                    .font(.system(size: 20, weight: .semibold))
+                                Text("Create Post")
+                                    .font(.system(size: 16, weight: .semibold))
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 16)
+                            .background(
+                                LinearGradient(
+                                    colors: [Theme.accent, Theme.accentDark],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .cornerRadius(30)
+                            .shadow(color: Theme.accent.opacity(0.4), radius: 15, x: 0, y: 8)
+                        }
+                        .padding(.trailing, 20)
+                        .padding(.bottom, 90)
                     }
                 }
             }
@@ -63,6 +98,32 @@ struct FeedView: View {
                     feedService.loadMockPosts()
                 }
             }
+            .sheet(isPresented: $showPaywall) {
+                PremiumPaywallView { plan in
+                    handlePurchase(plan)
+                }
+            }
+        }
+    }
+
+    private func handleCreatePost() {
+        // Check if user is premium
+        if let currentUser = authManager.currentUser, currentUser.isPremium {
+            // TODO: Show create post screen
+            print("✨ Opening create post screen for premium user")
+        } else {
+            // Show paywall
+            showPaywall = true
+        }
+    }
+
+    private func handlePurchase(_ plan: SubscriptionPlan) {
+        // TODO: Integrate with StoreKit
+        print("💳 User selected \(plan.title) plan")
+        // For now, just mark user as premium
+        if var currentUser = authManager.currentUser {
+            currentUser.isPremium = true
+            authManager.currentUser = currentUser
         }
     }
 }
@@ -130,13 +191,13 @@ struct PostCard: View {
                 .font(.system(size: 15))
                 .padding(.horizontal, 16)
             
-            // Image (if exists)
-            if post.imageUrl != nil {
+            // Media (if exists - Premium users only)
+            if post.hasMedia {
                 Rectangle()
                     .fill(Color.gray.opacity(0.1))
                     .frame(height: 300)
                     .overlay(
-                        Image(systemName: "photo")
+                        Image(systemName: post.media.first?.type == .video ? "play.circle.fill" : "photo")
                             .font(.system(size: 40))
                             .foregroundColor(.gray)
                     )
@@ -205,6 +266,6 @@ struct PostCard: View {
 }
 
 #Preview {
-    FeedView(productStore: ProductStore(), wishListService: WishListService())
+    FeedView(productStore: ProductStore(), wishListService: WishListService(), authManager: AuthManager())
 }
 

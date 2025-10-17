@@ -247,3 +247,28 @@
 "product_detail_add_to_wishlist" = "Добавить в список желаний";
 "product_detail_remove_from_wishlist" = "Убрать из списка желаний";
 
+/* Premium / Subscription */
+"premium_title" = "Стань Премиум-Создателем";
+"premium_subtitle" = "Монетизируй свой контент, привлекай подписчиков и зарабатывай на своей экспертизе в бьюти-индустрии";
+
+"premium_feature_viral_posts_title" = "Создавай Вирусные Посты";
+"premium_feature_viral_posts_desc" = "Публикуй фото и видео, рекомендуй продукты своей аудитории и зарабатывай на партнерских программах";
+
+"premium_feature_ai_helper_title" = "Продвинутый AI-Помощник";
+"premium_feature_ai_helper_desc" = "Создавай контент с AI: генерация идей, написание постов, маркетинг в beauty-индустрии";
+
+"premium_feature_monetize_title" = "Монетизация Контента";
+"premium_feature_monetize_desc" = "Получай оплату за эксклюзивный контент: рутины, советы, доступ к косметичке. Система like OnlyFans для beauty";
+
+"premium_feature_deeplinks_title" = "Ссылки и Комиссии";
+"premium_feature_deeplinks_desc" = "Добавляй ссылки на продукты, сайт, WhatsApp, Telegram. Получай комиссию за переходы покупателей";
+
+"premium_plan_monthly" = "Месячная подписка";
+"premium_plan_annual" = "Годовая подписка";
+"premium_most_popular" = "САМЫЙ ПОПУЛЯРНЫЙ";
+"premium_save_percent" = "Экономия 33%";
+"premium_per_month" = "в месяц";
+"premium_per_year" = "в год";
+"premium_continue" = "Продолжить";
+"premium_terms" = "Отмена в любое время. Применяются условия использования.";
+

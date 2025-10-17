@@ -247,3 +247,29 @@
 "product_detail_add_to_wishlist" = "Тілектер тізіміне қосу";
 "product_detail_remove_from_wishlist" = "Тілектер тізімінен жою";
 
+
+/* Premium / Subscription */
+"premium_title" = "Премиум Жасаушы Болыңыз";
+"premium_subtitle" = "Контентіңізді монетизациялаңыз, қолдаушыларды тартыңыз және сұлулық саласындағы тәжірибеңізден табыс табыңыз";
+
+"premium_feature_viral_posts_title" = "Вирусты Посттар Жасаңыз";
+"premium_feature_viral_posts_desc" = "Фото мен видео жариялаңыз, аудиторияға өнімдерді ұсыныңыз және серіктестік арқылы табыс табыңыз";
+
+"premium_feature_ai_helper_title" = "Жетілдірілген AI-Көмекші";
+"premium_feature_ai_helper_desc" = "AI көмегімен контент жасаңыз: идеялар генерациясы, пост жазу, сұлулық индустриясында маркетинг";
+
+"premium_feature_monetize_title" = "Контентті Монетизациялау";
+"premium_feature_monetize_desc" = "Эксклюзивті контент үшін ақы алыңыз: рутиналар, кеңестер, косметикалық сөмкеге қол жеткізу. Beauty үшін OnlyFans сияқты";
+
+"premium_feature_deeplinks_title" = "Сілтемелер және Комиссиялар";
+"premium_feature_deeplinks_desc" = "Өнімдерге, сайтқа, WhatsApp, Telegram сілтемелерін қосыңыз. Сатып алушылар трафигінен комиссия алыңыз";
+
+"premium_plan_monthly" = "Айлық жазылым";
+"premium_plan_annual" = "Жылдық жазылым";
+"premium_most_popular" = "ЕҢ ТАНЫМАЛ";
+"premium_save_percent" = "33% үнемдеу";
+"premium_per_month" = "айына";
+"premium_per_year" = "жылына";
+"premium_continue" = "Жалғастыру";
+"premium_terms" = "Кез келген уақытта тоқтатыңыз. Шарттар қолданылады.";
+

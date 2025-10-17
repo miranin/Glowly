@@ -28,7 +28,7 @@ struct MainTabView: View {
                         .environmentObject(languageManager)
                     
                 case .feed:
-                    FeedView(productStore: productStore, wishListService: wishListService)
+                    FeedView(productStore: productStore, wishListService: wishListService, authManager: authManager)
                         .environmentObject(languageManager)
                     
                 case .add:
