@@ -15,6 +15,7 @@ struct FeedView: View {
     @StateObject private var commentService = CommentService()
     @StateObject private var userProfileService = UserProfileService()
     @State private var showPaywall = false
+    @State private var showCreatePost = false
 
     var body: some View {
         NavigationView {
@@ -57,35 +58,37 @@ struct FeedView: View {
                     }
                 }
 
-                // Floating Create Post Button
-                VStack {
-                    Spacer()
-                    HStack {
+                // Floating Create Post Button (Feature Flag Controlled)
+                if FeatureFlags.enablePostCreation {
+                    VStack {
                         Spacer()
-                        Button {
-                            handleCreatePost()
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "plus")
-                                    .font(.system(size: 20, weight: .semibold))
-                                Text("Create Post")
-                                    .font(.system(size: 16, weight: .semibold))
-                            }
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 24)
-                            .padding(.vertical, 16)
-                            .background(
-                                LinearGradient(
-                                    colors: [Theme.accent, Theme.accentDark],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
+                        HStack {
+                            Spacer()
+                            Button {
+                                handleCreatePost()
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "plus")
+                                        .font(.system(size: 20, weight: .semibold))
+                                    Text("Create Post")
+                                        .font(.system(size: 16, weight: .semibold))
+                                }
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 24)
+                                .padding(.vertical, 16)
+                                .background(
+                                    LinearGradient(
+                                        colors: [Theme.accent, Theme.accentDark],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
                                 )
-                            )
-                            .cornerRadius(30)
-                            .shadow(color: Theme.accent.opacity(0.4), radius: 15, x: 0, y: 8)
+                                .cornerRadius(30)
+                                .shadow(color: Theme.accent.opacity(0.4), radius: 15, x: 0, y: 8)
+                            }
+                            .padding(.trailing, 20)
+                            .padding(.bottom, 90)
                         }
-                        .padding(.trailing, 20)
-                        .padding(.bottom, 90)
                     }
                 }
             }
@@ -103,17 +106,35 @@ struct FeedView: View {
                     handlePurchase(plan)
                 }
             }
+            .fullScreenCover(isPresented: $showCreatePost) {
+                CreatePostView(
+                    authManager: authManager,
+                    feedService: feedService
+                )
+                .environmentObject(LanguageManager())
+            }
         }
     }
 
     private func handleCreatePost() {
-        // Check if user is premium
-        if let currentUser = authManager.currentUser, currentUser.isPremium {
-            // TODO: Show create post screen
-            print("✨ Opening create post screen for premium user")
+        // Check if premium is required for post creation
+        if FeatureFlags.isPremiumEnabled && FeatureFlags.requiresPremiumForPostCreation {
+            // Premium feature - check user status
+            if let currentUser = authManager.currentUser, currentUser.isPremium {
+                // Show create post screen for premium user
+                showCreatePost = true
+            } else {
+                // Show paywall for non-premium users
+                if FeatureFlags.showPremiumPaywall {
+                    showPaywall = true
+                } else {
+                    // Premium disabled, allow post creation
+                    showCreatePost = true
+                }
+            }
         } else {
-            // Show paywall
-            showPaywall = true
+            // Premium not required, allow all users to create posts
+            showCreatePost = true
         }
     }
 
@@ -160,8 +181,9 @@ struct PostCard: View {
                             Text(post.userName)
                                 .font(.system(size: 15, weight: .semibold))
                                 .foregroundColor(.primary)
-                            
-                            if post.isPremium {
+
+                            // Premium Badge (Feature Flag Controlled)
+                            if FeatureFlags.isPremiumEnabled && FeatureFlags.showPremiumBadge && post.isPremium {
                                 Image(systemName: "checkmark.seal.fill")
                                     .font(.system(size: 12))
                                     .foregroundColor(Theme.accent)
@@ -193,14 +215,39 @@ struct PostCard: View {
             
             // Media (if exists - Premium users only)
             if post.hasMedia {
-                Rectangle()
-                    .fill(Color.gray.opacity(0.1))
-                    .frame(height: 300)
-                    .overlay(
-                        Image(systemName: post.media.first?.type == .video ? "play.circle.fill" : "photo")
-                            .font(.system(size: 40))
-                            .foregroundColor(.gray)
-                    )
+                if post.media.count == 1 {
+                    // Single image
+                    if let mediaUrl = post.media.first?.url {
+                        CachedAsyncImage(url: mediaUrl, contentMode: .fill)
+                            .frame(height: 300)
+                            .clipped()
+                    }
+                } else if post.media.count > 1 {
+                    // Multiple images - show first with count indicator
+                    ZStack(alignment: .topTrailing) {
+                        if let mediaUrl = post.media.first?.url {
+                            CachedAsyncImage(url: mediaUrl, contentMode: .fill)
+                                .frame(height: 300)
+                                .clipped()
+                        }
+
+                        // Count indicator
+                        if post.media.count > 1 {
+                            HStack(spacing: 4) {
+                                Image(systemName: "photo.stack")
+                                    .font(.system(size: 12))
+                                Text("\(post.media.count)")
+                                    .font(.system(size: 12, weight: .semibold))
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(Color.black.opacity(0.6))
+                            .cornerRadius(12)
+                            .padding(12)
+                        }
+                    }
+                }
             }
             
             // Actions

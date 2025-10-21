@@ -28,8 +28,14 @@ struct MainTabView: View {
                         .environmentObject(languageManager)
                     
                 case .feed:
-                    FeedView(productStore: productStore, wishListService: wishListService, authManager: authManager)
-                        .environmentObject(languageManager)
+                    // Feature Flag: Switch between Reels and traditional Feed
+                    if FeatureFlags.useReelsFeed {
+                        ReelsView(feedService: FeedService(), authManager: authManager)
+                            .environmentObject(languageManager)
+                    } else {
+                        FeedView(productStore: productStore, wishListService: wishListService, authManager: authManager)
+                            .environmentObject(languageManager)
+                    }
                     
                 case .add:
                     Color.clear

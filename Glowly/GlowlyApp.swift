@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct GlowlyApp: App {
+    @StateObject private var imageCacheService = ImageCacheService()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(imageCacheService)
         }
     }
 }

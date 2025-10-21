@@ -64,52 +64,154 @@ struct Post: Identifiable, Codable {
 // MARK: - Mock Data
 extension Post {
     static let mockPosts: [Post] = [
+        // Post 1: Beauty Products - Single Image
         Post(
             id: "1",
             userId: "user1",
-            userName: "Анна Иванова",
+            userName: "Beauty by Anna",
             userAvatar: nil,
-            content: "Новая коллекция помад от Dior! 💄✨",
+            content: "✨ Just discovered this amazing product! Swipe to see the transformation 💫",
             media: [
-                PostMedia(type: .image, url: "https://example.com/dior-lipstick.jpg")
+                PostMedia(type: .image, url: "beauty-1")
             ],
             createdAt: Date().addingTimeInterval(-3600),
-            likesCount: 24,
-            commentsCount: 5,
+            likesCount: 1247,
+            commentsCount: 89,
             isLiked: false,
             isPremium: true,
             userType: .premium
         ),
+
+        // Post 2: Product Collection - Multiple Images
         Post(
             id: "2",
             userId: "store1",
             userName: "Sephora Russia",
             userAvatar: nil,
-            content: "Скидка 20% на всю косметику по уходу! 🎉",
+            content: "🎉 Новая коллекция от Dior! Скидка 20% на все помады до конца недели 💋",
             media: [
-                PostMedia(type: .image, url: "https://example.com/sephora-sale.jpg"),
-                PostMedia(type: .video, url: "https://example.com/sephora-promo.mp4", thumbnailUrl: "https://example.com/sephora-promo-thumb.jpg")
+                PostMedia(type: .image, url: "beauty-1"),
+                PostMedia(type: .image, url: "beauty-2"),
+                PostMedia(type: .image, url: "beauty-3")
             ],
             createdAt: Date().addingTimeInterval(-7200),
-            likesCount: 156,
-            commentsCount: 23,
+            likesCount: 2345,
+            commentsCount: 156,
             isLiked: true,
             isPremium: true,
             userType: .store
         ),
+
+        // Post 3: Skincare Routine
         Post(
             id: "3",
             userId: "user2",
-            userName: "Мария Петрова",
+            userName: "Skincare with Maria",
             userAvatar: nil,
-            content: "Мой вечерний уход за кожей ✨",
-            media: [],  // Regular user without media
+            content: "🌸 My 5-step morning routine for glowing skin! Which products do you use?",
+            media: [
+                PostMedia(type: .image, url: "beauty-2")
+            ],
             createdAt: Date().addingTimeInterval(-10800),
-            likesCount: 89,
-            commentsCount: 12,
+            likesCount: 892,
+            commentsCount: 67,
+            isLiked: false,
+            isPremium: true,
+            userType: .premium
+        ),
+
+        // Post 4: Makeup Haul
+        Post(
+            id: "4",
+            userId: "user3",
+            userName: "Makeup Artist Pro",
+            userAvatar: nil,
+            content: "My essential products for 2024 💖 Which one should I review next?",
+            media: [
+                PostMedia(type: .image, url: "beauty-3"),
+                PostMedia(type: .image, url: "beauty-1")
+            ],
+            createdAt: Date().addingTimeInterval(-14400),
+            likesCount: 567,
+            commentsCount: 43,
             isLiked: false,
             isPremium: false,
             userType: .regular
+        ),
+
+        // Post 5: Product Focus
+        Post(
+            id: "5",
+            userId: "store2",
+            userName: "MAC Cosmetics",
+            userAvatar: nil,
+            content: "💄 New Retro Matte Lipstick shades - perfect for autumn! Available now",
+            media: [
+                PostMedia(type: .image, url: "beauty-2")
+            ],
+            createdAt: Date().addingTimeInterval(-18000),
+            likesCount: 1823,
+            commentsCount: 134,
+            isLiked: true,
+            isPremium: true,
+            userType: .store
+        ),
+
+        // Post 6: Before/After Comparison
+        Post(
+            id: "6",
+            userId: "user4",
+            userName: "Glam Squad",
+            userAvatar: nil,
+            content: "Before & After: Natural glam look for everyday ✨ Which look do you prefer?",
+            media: [
+                PostMedia(type: .image, url: "beauty-1"),
+                PostMedia(type: .image, url: "beauty-3")
+            ],
+            createdAt: Date().addingTimeInterval(-21600),
+            likesCount: 456,
+            commentsCount: 32,
+            isLiked: false,
+            isPremium: true,
+            userType: .premium
+        ),
+
+        // Post 7: Product Recommendation
+        Post(
+            id: "7",
+            userId: "user5",
+            userName: "Beauty Blogger",
+            userAvatar: nil,
+            content: "This is the BEST moisturizer I've ever tried! 💧 Perfect for all skin types",
+            media: [
+                PostMedia(type: .image, url: "beauty-3")
+            ],
+            createdAt: Date().addingTimeInterval(-25200),
+            likesCount: 789,
+            commentsCount: 56,
+            isLiked: true,
+            isPremium: false,
+            userType: .regular
+        ),
+
+        // Post 8: Shopping Haul
+        Post(
+            id: "8",
+            userId: "user6",
+            userName: "Korean Beauty Lover",
+            userAvatar: nil,
+            content: "🇰🇷 My latest K-beauty haul! Trying these products for the next 30 days 🌸",
+            media: [
+                PostMedia(type: .image, url: "beauty-1"),
+                PostMedia(type: .image, url: "beauty-2"),
+                PostMedia(type: .image, url: "beauty-3")
+            ],
+            createdAt: Date().addingTimeInterval(-28800),
+            likesCount: 923,
+            commentsCount: 78,
+            isLiked: false,
+            isPremium: true,
+            userType: .premium
         )
     ]
 }

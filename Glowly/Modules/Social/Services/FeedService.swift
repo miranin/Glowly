@@ -40,5 +40,12 @@ final class FeedService: ObservableObject {
     func refresh() {
         loadMockPosts()
     }
+
+    // MARK: - Add New Post
+    func addPost(_ post: Post) {
+        // Insert at the beginning (most recent first)
+        posts.insert(post, at: 0)
+        print("📝 Post added to feed. Total posts: \(posts.count)")
+    }
 }
 

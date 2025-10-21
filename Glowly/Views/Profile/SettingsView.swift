@@ -174,16 +174,33 @@ struct SettingsView: View {
             .buttonStyle(ScaleButtonStyle())
             
             VStack(spacing: 8) {
-                Text(userProfilePresenter.userProfile.name.isEmpty ? "Glowly User" : userProfilePresenter.userProfile.name)
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(.primary)
-                
+                HStack(spacing: 8) {
+                    Text(userProfilePresenter.userProfile.name.isEmpty ? "Glowly User" : userProfilePresenter.userProfile.name)
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+
+                    // Premium Badge (Feature Flag Controlled)
+                    if FeatureFlags.isPremiumEnabled && FeatureFlags.showPremiumBadge {
+                        if let currentUser = authManager.currentUser, currentUser.isPremium {
+                            Image(systemName: "crown.fill")
+                                .font(.system(size: 20))
+                                .foregroundStyle(
+                                    LinearGradient(
+                                        colors: [Color(red: 0.85, green: 0.65, blue: 0.20), Color(red: 0.75, green: 0.55, blue: 0.10)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                        }
+                    }
+                }
+
                 HStack(spacing: 8) {
                     Image(systemName: "bag.fill")
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(Theme.accent)
-                    
+
                     Text("\(productStore.products.filter { $0.isActive }.count) \(languageManager.translate("profile_products_count"))")
                         .font(.system(size: 15, weight: .medium))
                         .foregroundColor(.secondary)
