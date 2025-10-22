@@ -21,54 +21,85 @@ struct CommentsView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                // Post Preview (чтобы видеть пост при комментировании)
-                ScrollView {
-                    VStack(spacing: 0) {
-                        PostPreview(post: post)
-                            .padding(.bottom, 16)
-                        
-                        Divider()
-                        
-                        // Comments List
-                        LazyVStack(spacing: 16) {
-                            ForEach(comments) { comment in
-                                CommentRow(comment: comment, commentService: commentService, postId: post.id)
+            ZStack {
+                Color(.systemGroupedBackground)
+                    .ignoresSafeArea()
+
+                VStack(spacing: 0) {
+                    // Post Preview (чтобы видеть пост при комментировании)
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            PostPreview(post: post)
+                                .padding(.bottom, 16)
+
+                            Divider()
+
+                            // Comments List
+                            if comments.isEmpty && commentService.isLoading {
+                                VStack(spacing: 16) {
+                                    ProgressView()
+                                        .scaleEffect(1.5)
+                                    Text("Loading comments...")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(.secondary)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.top, 60)
+                            } else if comments.isEmpty {
+                                VStack(spacing: 12) {
+                                    Image(systemName: "bubble.left.and.bubble.right")
+                                        .font(.system(size: 40))
+                                        .foregroundColor(.gray)
+                                    Text("No comments yet")
+                                        .font(.system(size: 16, weight: .medium))
+                                        .foregroundColor(.secondary)
+                                    Text("Be the first to comment!")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(.secondary)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.top, 60)
+                            } else {
+                                LazyVStack(spacing: 16) {
+                                    ForEach(comments) { comment in
+                                        CommentRow(comment: comment, commentService: commentService, postId: post.id)
+                                    }
+                                }
+                                .padding()
                             }
                         }
-                        .padding()
                     }
-                }
-                
-                Divider()
-                
-                // Input Field
-                HStack(spacing: 12) {
-                    Circle()
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(width: 32, height: 32)
-                        .overlay(
-                            Image(systemName: "person.fill")
-                                .font(.system(size: 14))
-                                .foregroundColor(.gray)
-                        )
-                    
-                    TextField("Добавить комментарий...", text: $commentText)
-                        .focused($isInputFocused)
-                        .textFieldStyle(.plain)
-                    
-                    if !commentText.isEmpty {
-                        Button {
-                            addComment()
-                        } label: {
-                            Text("Отправить")
-                                .font(.system(size: 15, weight: .semibold))
-                                .foregroundColor(Theme.accent)
+
+                    Divider()
+
+                    // Input Field
+                    HStack(spacing: 12) {
+                        Circle()
+                            .fill(Color.gray.opacity(0.2))
+                            .frame(width: 32, height: 32)
+                            .overlay(
+                                Image(systemName: "person.fill")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.gray)
+                            )
+
+                        TextField("Добавить комментарий...", text: $commentText)
+                            .focused($isInputFocused)
+                            .textFieldStyle(.plain)
+
+                        if !commentText.isEmpty {
+                            Button {
+                                addComment()
+                            } label: {
+                                Text("Отправить")
+                                    .font(.system(size: 15, weight: .semibold))
+                                    .foregroundColor(Theme.accent)
+                            }
                         }
                     }
+                    .padding()
+                    .background(Color(.systemBackground))
                 }
-                .padding()
-                .background(Color(.systemBackground))
             }
             .navigationTitle("Комментарии")
             .navigationBarTitleDisplayMode(.inline)
@@ -83,9 +114,8 @@ struct CommentsView: View {
                 }
             }
             .onAppear {
-                if comments.isEmpty {
-                    commentService.loadComments(for: post.id)
-                }
+                // Always trigger load - the service will handle if already loaded
+                commentService.loadComments(for: post.id)
             }
         }
     }

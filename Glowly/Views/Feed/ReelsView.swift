@@ -12,6 +12,9 @@ import SwiftUI
 struct ReelsView: View {
     @StateObject var feedService: FeedService
     @StateObject var authManager: AuthManager
+    @ObservedObject var wishListService: WishListService
+    @StateObject private var userProfileService = UserProfileService()
+    @StateObject private var commentService = CommentService()
     @State private var currentIndex: Int = 0
     @State private var scrollPosition: Int? = 0
     @State private var showComments: Bool = false
@@ -97,15 +100,15 @@ struct ReelsView: View {
         }
         .sheet(isPresented: $showComments) {
             if let post = selectedPost {
-                CommentsView(post: post, commentService: CommentService())
+                CommentsView(post: post, commentService: commentService)
             }
         }
         .sheet(isPresented: $showUserProfile) {
             if let userId = selectedUserId {
                 UserProfileView(
                     userId: userId,
-                    userProfileService: UserProfileService(),
-                    wishListService: WishListService()
+                    userProfileService: userProfileService,
+                    wishListService: wishListService
                 )
             }
         }
@@ -123,6 +126,13 @@ struct ReelsView: View {
             if feedService.posts.isEmpty {
                 feedService.refresh()
             }
+
+            // Pre-load user profiles and comments for first few posts to avoid white screens
+            preloadData()
+        }
+        .onChange(of: currentIndex) { _, newIndex in
+            // Pre-load data for current and next post
+            preloadDataForIndex(newIndex)
         }
     }
 
@@ -193,12 +203,40 @@ struct ReelsView: View {
         // TODO: Implement share sheet
         print("📤 Share post: \(post.id)")
     }
+
+    // MARK: - Data Preloading
+    private func preloadData() {
+        // Pre-load data for first 3 posts
+        let postsToPreload = min(3, feedService.posts.count)
+        for i in 0..<postsToPreload {
+            let post = feedService.posts[i]
+            userProfileService.loadUserProfile(userId: post.userId)
+            commentService.loadComments(for: post.id)
+        }
+    }
+
+    private func preloadDataForIndex(_ index: Int) {
+        guard index < feedService.posts.count else { return }
+
+        // Load current post data
+        let currentPost = feedService.posts[index]
+        userProfileService.loadUserProfile(userId: currentPost.userId)
+        commentService.loadComments(for: currentPost.id)
+
+        // Pre-load next post data (look ahead)
+        if index + 1 < feedService.posts.count {
+            let nextPost = feedService.posts[index + 1]
+            userProfileService.loadUserProfile(userId: nextPost.userId)
+            commentService.loadComments(for: nextPost.id)
+        }
+    }
 }
 
 // MARK: - Preview
 #Preview {
     ReelsView(
         feedService: FeedService(),
-        authManager: AuthManager()
+        authManager: AuthManager(),
+        wishListService: WishListService()
     )
 }

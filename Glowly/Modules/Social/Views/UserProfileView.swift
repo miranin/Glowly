@@ -19,9 +19,13 @@ struct UserProfileView: View {
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                if let profile = userProfile {
-                    VStack(spacing: 24) {
+            ZStack {
+                Color(.systemGroupedBackground)
+                    .ignoresSafeArea()
+
+                ScrollView {
+                    if let profile = userProfile {
+                        VStack(spacing: 24) {
                         // Header
                         VStack(spacing: 16) {
                             // Avatar
@@ -131,10 +135,18 @@ struct UserProfileView: View {
                             }
                             .padding(.horizontal)
                         }
-                    }
-                } else {
-                    ProgressView()
+                        }
+                    } else {
+                        VStack(spacing: 16) {
+                            ProgressView()
+                                .scaleEffect(1.5)
+                            Text("Loading profile...")
+                                .font(.system(size: 14))
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .padding(.top, 100)
+                    }
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -149,9 +161,8 @@ struct UserProfileView: View {
                 }
             }
             .onAppear {
-                if userProfile == nil {
-                    userProfileService.loadUserProfile(userId: userId)
-                }
+                // Always trigger load - the service will handle if already loaded
+                userProfileService.loadUserProfile(userId: userId)
             }
         }
     }

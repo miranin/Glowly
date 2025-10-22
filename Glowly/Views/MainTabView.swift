@@ -30,7 +30,7 @@ struct MainTabView: View {
                 case .feed:
                     // Feature Flag: Switch between Reels and traditional Feed
                     if FeatureFlags.useReelsFeed {
-                        ReelsView(feedService: FeedService(), authManager: authManager)
+                        ReelsView(feedService: FeedService(), authManager: authManager, wishListService: wishListService)
                             .environmentObject(languageManager)
                     } else {
                         FeedView(productStore: productStore, wishListService: wishListService, authManager: authManager)

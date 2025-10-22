@@ -10,13 +10,22 @@ import Foundation
 final class CommentService: ObservableObject {
     @Published var comments: [String: [Comment]] = [:] // postId: [Comment]
     @Published var isLoading = false
-    
+    private var loadingPostIds: Set<String> = []
+
     func loadComments(for postId: String) {
+        // Skip if already loaded or currently loading this specific post
+        if comments[postId] != nil || loadingPostIds.contains(postId) {
+            return
+        }
+
+        loadingPostIds.insert(postId)
         isLoading = true
+
         // Simulate API delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             self.comments[postId] = Comment.mockComments(for: postId)
-            self.isLoading = false
+            self.loadingPostIds.remove(postId)
+            self.isLoading = self.loadingPostIds.isEmpty
         }
     }
     
