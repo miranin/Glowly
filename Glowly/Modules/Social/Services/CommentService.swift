@@ -49,14 +49,15 @@ final class CommentService: ObservableObject {
               let index = postComments.firstIndex(where: { $0.id == commentId }) else {
             return
         }
-        
+
         postComments[index].isLiked.toggle()
         if postComments[index].isLiked {
             postComments[index].likesCount += 1
         } else {
-            postComments[index].likesCount -= 1
+            // Prevent negative like counts
+            postComments[index].likesCount = max(0, postComments[index].likesCount - 1)
         }
-        
+
         comments[postId] = postComments
     }
     

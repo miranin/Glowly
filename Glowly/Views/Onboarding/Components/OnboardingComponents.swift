@@ -41,7 +41,10 @@ struct OnboardingStepContainer<Content: View>: View {
             
             // Navigation Buttons
             HStack(spacing: 12) {
-                Button(action: onBack) {
+                Button(action: {
+                    HapticManager.shared.lightImpact()
+                    onBack()
+                }) {
                     HStack {
                         Image(systemName: "chevron.left")
                         Text("Назад")
@@ -55,8 +58,11 @@ struct OnboardingStepContainer<Content: View>: View {
                             .fill(Theme.accent.opacity(0.1))
                     )
                 }
-                
-                Button(action: onContinue) {
+
+                Button(action: {
+                    HapticManager.shared.progression()
+                    onContinue()
+                }) {
                     HStack {
                         Text("Далее")
                         Image(systemName: "chevron.right")
@@ -85,25 +91,30 @@ struct SelectionButton: View {
     var subtitle: String? = nil
     let isSelected: Bool
     let action: () -> Void
-    
+
+    @State private var isPressed = false
+
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            HapticManager.shared.selection()
+            action()
+        }) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                         .font(.body)
                         .fontWeight(.medium)
                         .foregroundColor(.primary)
-                    
+
                     if let subtitle = subtitle {
                         Text(subtitle)
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
                 }
-                
+
                 Spacer()
-                
+
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .font(.title3)
                     .foregroundColor(isSelected ? Theme.accent : Theme.neutral)
@@ -117,8 +128,22 @@ struct SelectionButton: View {
                             .stroke(isSelected ? Theme.accent : Color.clear, lineWidth: 2)
                     )
             )
+            .scaleEffect(isPressed ? 0.97 : 1.0)
         }
         .buttonStyle(PlainButtonStyle())
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        isPressed = true
+                    }
+                }
+                .onEnded { _ in
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        isPressed = false
+                    }
+                }
+        )
     }
 }
 
@@ -128,9 +153,14 @@ struct MultiSelectButton: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void
-    
+
+    @State private var isPressed = false
+
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            HapticManager.shared.lightImpact()
+            action()
+        }) {
             Text(title)
                 .font(.caption)
                 .fontWeight(.medium)
@@ -147,8 +177,22 @@ struct MultiSelectButton: View {
                                 .stroke(isSelected ? Theme.accent : Color.clear, lineWidth: 2)
                         )
                 )
+                .scaleEffect(isPressed ? 0.95 : 1.0)
         }
         .buttonStyle(PlainButtonStyle())
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        isPressed = true
+                    }
+                }
+                .onEnded { _ in
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        isPressed = false
+                    }
+                }
+        )
     }
 }
 

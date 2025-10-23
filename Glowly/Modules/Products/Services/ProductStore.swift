@@ -30,16 +30,22 @@ class ProductStore: ObservableObject {
     private let notificationService = NotificationService.shared
     
     init() {
-        // TEMPORARY: Clear products to load corrected ones matching actual images
-        userDefaults.removeObject(forKey: productsKey)
-        
         loadProducts()
         setupNotifications()
-        
-        // Add sample products for demo if empty
-        if products.isEmpty {
+
+        // Add sample products only on first launch
+        if products.isEmpty && !hasLaunchedBefore {
             addSampleProducts()
+            markFirstLaunch()
         }
+    }
+
+    private var hasLaunchedBefore: Bool {
+        userDefaults.bool(forKey: "hasLaunchedBefore")
+    }
+
+    private func markFirstLaunch() {
+        userDefaults.set(true, forKey: "hasLaunchedBefore")
     }
     
     func addProduct(_ product: Product) {
@@ -124,6 +130,13 @@ class ProductStore: ObservableObject {
         // 2. Redirects to App Store if user doesn't have it
         // 3. Shows a web preview with product list
         return "https://glowly.app/share/\(UUID().uuidString)"
+    }
+
+    /// Clears all products and resets storage (used for account deletion)
+    func clearAllData() {
+        products.removeAll()
+        userDefaults.removeObject(forKey: productsKey)
+        userDefaults.removeObject(forKey: "hasLaunchedBefore")
     }
     
     private func addSampleProducts() {

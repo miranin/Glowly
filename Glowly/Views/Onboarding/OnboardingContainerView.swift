@@ -27,106 +27,139 @@ struct OnboardingContainerView: View {
                 // Content
                 TabView(selection: $currentStep) {
                     OnboardingWelcomeView(onContinue: {
-                        withAnimation {
+                        withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                             currentStep = .basicInfo
                         }
                     })
                     .tag(OnboardingStep.welcome)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
                     
                     OnboardingBasicInfoView(
                         userProfile: $userProfilePresenter.userProfile,
                         onContinue: {
-                            withAnimation {
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                                 currentStep = .skinType
                             }
                         },
                         onBack: {
-                            withAnimation {
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                                 currentStep = .welcome
                             }
                         }
                     )
                     .tag(OnboardingStep.basicInfo)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
                     
                     OnboardingSkinTypeView(
                         userProfile: $userProfilePresenter.userProfile,
                         onContinue: {
-                            withAnimation {
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                                 currentStep = .skinConditions
                             }
                         },
                         onBack: {
-                            withAnimation {
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                                 currentStep = .basicInfo
                             }
                         }
                     )
                     .tag(OnboardingStep.skinType)
-                    
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
+
                     OnboardingSkinConditionsView(
                         userProfile: $userProfilePresenter.userProfile,
                         onContinue: {
-                            withAnimation {
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                                 currentStep = .allergies
                             }
                         },
                         onBack: {
-                            withAnimation {
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                                 currentStep = .skinType
                             }
                         }
                     )
                     .tag(OnboardingStep.skinConditions)
-                    
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
+
                     OnboardingAllergiesView(
                         userProfile: $userProfilePresenter.userProfile,
                         onContinue: {
-                            withAnimation {
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                                 currentStep = .beautyProfile
                             }
                         },
                         onBack: {
-                            withAnimation {
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                                 currentStep = .skinConditions
                             }
                         }
                     )
                     .tag(OnboardingStep.allergies)
-                    
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
+
                     OnboardingBeautyProfileView(
                         userProfile: $userProfilePresenter.userProfile,
                         onContinue: {
-                            withAnimation {
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                                 currentStep = .preferences
                             }
                         },
                         onBack: {
-                            withAnimation {
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                                 currentStep = .allergies
                             }
                         }
                     )
                     .tag(OnboardingStep.beautyProfile)
-                    
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
+
                     OnboardingPreferencesView(
                         userProfile: $userProfilePresenter.userProfile,
                         onContinue: {
-                            withAnimation {
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                                 currentStep = .completion
                             }
                         },
                         onBack: {
-                            withAnimation {
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                                 currentStep = .beautyProfile
                             }
                         }
                     )
                     .tag(OnboardingStep.preferences)
-                    
-                    OnboardingCompletionView(onComplete: {
-                        userProfilePresenter.completeOnboarding()
-                    })
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
+
+                    OnboardingCompletionView(
+                        userProfile: userProfilePresenter.userProfile,
+                        onComplete: {
+                            HapticManager.shared.completion()
+                            userProfilePresenter.completeOnboarding()
+                        }
+                    )
                     .tag(OnboardingStep.completion)
+                    .transition(.scale.combined(with: .opacity))
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
             }

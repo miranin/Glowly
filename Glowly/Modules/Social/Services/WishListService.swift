@@ -36,5 +36,10 @@ final class WishListService: ObservableObject {
     func isInWishList(productId: String) -> Bool {
         wishListItems.contains { $0.productId == productId }
     }
+
+    /// Clears all wishlist items (used for account deletion)
+    func clearAllWishList() {
+        wishListItems.removeAll()
+    }
 }
 

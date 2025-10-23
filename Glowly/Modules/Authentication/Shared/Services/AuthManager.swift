@@ -288,16 +288,48 @@ final class AuthManager: ObservableObject, AuthManagerProtocol {
     func signOut() {
         currentUser = nil
         isAuthenticated = false
-        
+
         // Clear tokens
         _ = keychain.delete(forKey: KeychainService.Keys.userToken)
         _ = keychain.delete(forKey: KeychainService.Keys.userId)
         _ = keychain.delete(forKey: KeychainService.Keys.refreshToken)
-        
+
         // Don't clear email if biometric is enabled
         if !isBiometricEnabled {
             _ = keychain.delete(forKey: KeychainService.Keys.userEmail)
         }
+    }
+
+    // MARK: - Account Deletion
+
+    /// Permanently deletes the user account and all associated data
+    /// - Note: This action is irreversible
+    func deleteAccount() {
+        guard let user = currentUser else { return }
+
+        // 1. Delete user data from UserDefaults
+        let userKey = "user_\(user.email)"
+        UserDefaults.standard.removeObject(forKey: userKey)
+        UserDefaults.standard.removeObject(forKey: "currentUser_\(user.id)")
+
+        // 2. Clear all keychain data
+        _ = keychain.delete(forKey: KeychainService.Keys.userToken)
+        _ = keychain.delete(forKey: KeychainService.Keys.userId)
+        _ = keychain.delete(forKey: KeychainService.Keys.refreshToken)
+        _ = keychain.delete(forKey: KeychainService.Keys.userEmail)
+
+        // 3. Disable biometrics
+        disableBiometrics()
+
+        // 4. Clear authentication state
+        currentUser = nil
+        isAuthenticated = false
+
+        // In production, this would also:
+        // - Send DELETE request to backend API
+        // - Backend would remove user from database
+        // - Backend would delete user's files from cloud storage
+        // - Backend would cancel subscriptions
     }
     
     // MARK: - Helper Methods

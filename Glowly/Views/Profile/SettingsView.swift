@@ -15,12 +15,13 @@ struct SettingsView: View {
     let biometricService: BiometricAuthServiceProtocol
     @ObservedObject var wishListService: WishListService
     @EnvironmentObject var languageManager: LanguageManager
-    @State private var showingProfileEdit = false
     @State private var showingImagePicker = false
     @State private var showingPhotoActionSheet = false
     @State private var photoSourceType: UIImagePickerController.SourceType = .photoLibrary
     @State private var showingLogoutAlert = false
     @State private var showingWishListSheet = false
+    @State private var showingResetPersonalizationAlert = false
+    @State private var showingDeleteAccountAlert = false
 
     var body: some View {
         NavigationView {
@@ -38,13 +39,13 @@ struct SettingsView: View {
                         profileHeader
                         
                         VStack(spacing: 16) {
-                            profileEditButton
                             wishListSection
+                            accountManagementSection
                             languageSection
                             aboutSection
                         }
                         .padding(.horizontal, 20)
-                        
+
                         logoutButton
                             .padding(.horizontal, 20)
                             .padding(.top, 8)
@@ -64,9 +65,24 @@ struct SettingsView: View {
         } message: {
             Text(languageManager.translate("profile_logout_confirm"))
         }
-        .sheet(isPresented: $showingProfileEdit) {
-            ModernProfileEditView(userProfilePresenter: userProfilePresenter)
-                .environmentObject(languageManager)
+        .alert("Сбросить персонализацию?", isPresented: $showingResetPersonalizationAlert) {
+            Button("Отмена", role: .cancel) {}
+            Button("Сбросить", role: .destructive) {
+                HapticManager.shared.warning()
+                userProfilePresenter.resetPersonalizationAndRestartOnboarding()
+                HapticManager.shared.success()
+            }
+        } message: {
+            Text("Все данные вашей персонализации будут удалены, и вы пройдете онбординг заново. Это поможет настроить более точные рекомендации.")
+        }
+        .alert("Удалить аккаунт?", isPresented: $showingDeleteAccountAlert) {
+            Button("Отмена", role: .cancel) {}
+            Button("Удалить навсегда", role: .destructive) {
+                HapticManager.shared.error()
+                deleteAccountCompletely()
+            }
+        } message: {
+            Text("Это действие необратимо. Будут удалены все ваши данные: профиль, продукты, посты и настройки. Вы выйдете из аккаунта.")
         }
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(selectedImage: .init(
@@ -217,54 +233,13 @@ struct SettingsView: View {
         .padding(.horizontal, 20)
     }
     
-    private var profileEditButton: some View {
-        Button(action: { 
-            HapticsService.shared.impactLight()
-            showingProfileEdit = true 
-        }) {
-            HStack(spacing: 16) {
-                Circle()
-                    .fill(Theme.accent.opacity(0.15))
-                    .frame(width: 44, height: 44)
-                    .overlay(
-                        Image(systemName: "person.crop.circle.badge.checkmark")
-                            .font(.system(size: 20, weight: .medium))
-                            .foregroundColor(Theme.accent)
-                    )
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(languageManager.translate("profile_edit"))
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.primary)
-                    
-                }
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.secondary)
-            }
-            .padding(20)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(.systemBackground))
-                    .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 4)
-            )
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-    
-    
     private var languageSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(languageManager.translate("profile_language"))
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.secondary)
-                .padding(.horizontal, 20)
-            
+
             LanguageSwitcher(languageManager: languageManager)
-                .padding(.horizontal, 20)
         }
     }
     
@@ -273,14 +248,13 @@ struct SettingsView: View {
             Text(languageManager.translate("profile_version"))
                 .font(.system(size: 14))
                 .foregroundColor(.secondary)
-            
+
             Spacer()
-            
+
             Text("1.0.0")
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.primary)
         }
-        .padding(.horizontal, 20)
         .padding(.vertical, 12)
     }
     
@@ -445,6 +419,96 @@ struct SettingsView: View {
         }
     }
     
+    private var accountManagementSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Управление профилем")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.secondary)
+
+            VStack(spacing: 12) {
+                // Reset Personalization Button
+                Button(action: {
+                    HapticManager.shared.lightImpact()
+                    showingResetPersonalizationAlert = true
+                }) {
+                    HStack(spacing: 16) {
+                        Circle()
+                            .fill(Color.orange.opacity(0.15))
+                            .frame(width: 44, height: 44)
+                            .overlay(
+                                Image(systemName: "arrow.counterclockwise")
+                                    .font(.system(size: 20, weight: .medium))
+                                    .foregroundColor(.orange)
+                            )
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Сбросить персонализацию")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.primary)
+
+                            Text("Пройти онбординг заново")
+                                .font(.system(size: 13))
+                                .foregroundColor(.secondary)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color(.systemBackground))
+                            .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 4)
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
+
+                // Delete Account Button
+                Button(action: {
+                    HapticManager.shared.warning()
+                    showingDeleteAccountAlert = true
+                }) {
+                    HStack(spacing: 16) {
+                        Circle()
+                            .fill(Theme.danger.opacity(0.15))
+                            .frame(width: 44, height: 44)
+                            .overlay(
+                                Image(systemName: "trash.fill")
+                                    .font(.system(size: 20, weight: .medium))
+                                    .foregroundColor(Theme.danger)
+                            )
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Удалить аккаунт")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(Theme.danger)
+
+                            Text("Необратимое действие")
+                                .font(.system(size: 13))
+                                .foregroundColor(.secondary)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color(.systemBackground))
+                            .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 4)
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+        }
+    }
+
     private var logoutButton: some View {
         Button(action: {
             HapticsService.shared.impactMedium()
@@ -470,7 +534,28 @@ struct SettingsView: View {
         }
         .buttonStyle(ScaleButtonStyle())
     }
-    
+
+    // MARK: - Account Deletion
+
+    private func deleteAccountCompletely() {
+        // 1. Delete user account from authentication system
+        // This removes the user from UserDefaults and Keychain
+        // User won't be able to sign in with these credentials anymore
+        authManager.deleteAccount()
+
+        // 2. Reset user profile and personalization
+        userProfilePresenter.resetProfile()
+
+        // 3. Clear all products
+        productStore.clearAllData()
+
+        // 4. Clear wishlist
+        wishListService.clearAllWishList()
+
+        // 5. Success haptic
+        HapticManager.shared.success()
+    }
+
 }
 
 struct ShareSheet: UIViewControllerRepresentable {

@@ -76,6 +76,16 @@ class UserProfilePresenter: ObservableObject {
         saveProfile()
     }
 
+    /// Resets personalization and restarts onboarding flow
+    /// Preserves user name but clears all other profile data
+    func resetPersonalizationAndRestartOnboarding() {
+        let currentName = userProfile.name
+        userProfile = UserProfile()
+        userProfile.name = currentName
+        userProfile.hasCompletedOnboarding = false
+        saveProfile()
+    }
+
     var needsOnboarding: Bool {
         return !userProfile.hasCompletedOnboarding
     }
