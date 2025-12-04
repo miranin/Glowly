@@ -77,8 +77,11 @@ final class LoginViewModel: ObservableObject {
         defer { isLoading = false }
 
         do {
+            // Create login request
+            let request = LoginRequest(usernameOrEmail: email, password: password)
+
             // Email login - direct authentication (no OTP for MVP)
-            _ = try await authManager.signIn(email: email, password: password)
+            _ = try await authManager.signIn(request)
             HapticsService.shared.success()
         } catch let error as AuthError {
             showError(message: error.localizedDescription)
@@ -95,18 +98,15 @@ final class LoginViewModel: ObservableObject {
         isLoading = true
         defer { isLoading = false }
 
-        let identifier = "+7\(phone)"
+        let identifier = "+7\(phone.filter { $0.isNumber })"
 
         do {
-            // Mock: Verify phone and password exist
-            // In production: Backend would verify and send OTP
-            try await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
+            // Create login request
+            let request = LoginRequest(usernameOrEmail: identifier, password: password)
 
-            // Check if user exists with this phone
-            let userKey = "user_\(identifier)"
-            guard UserDefaults.standard.data(forKey: userKey) != nil else {
-                throw AuthError.userNotFound
-            }
+            // Phone login - authenticate with backend API
+            // Backend will send OTP for verification
+            _ = try await authManager.signIn(request)
 
             // Credentials are valid, show OTP screen
             HapticsService.shared.success()

@@ -21,6 +21,8 @@ struct OTPVerificationView: View {
     @State private var errorMessage = ""
     @State private var showSuccess = false
     @FocusState private var focusedField: Int?
+
+    private let networkService: NetworkServiceProtocol = NetworkService()
     
     enum VerificationType {
         case email
@@ -239,36 +241,54 @@ struct OTPVerificationView: View {
     private func verifyOTP() {
         let code = otpCode.joined()
         guard code.count == 6 else { return }
-        
+
         isVerifying = true
         HapticsService.shared.impactMedium()
-        
-        // Simulate API verification
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            isVerifying = false
-            
-            // Mock: check if code is correct
-            if code == "123456" {
-                HapticsService.shared.success()
 
-                // Show success briefly then trigger callback
-                withAnimation {
-                    showSuccess = true
-                }
+        Task {
+            do {
+                // Call backend API to verify OTP
+                let request = VerifyOtpRequest(identifier: contactInfo, otpCode: code)
+                let endpoint = AuthEndpoints.verifyOtp(request)
+                let response: VerifyOtpResponse = try await networkService.request(endpoint)
 
-                // Call success callback after brief delay
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                    onSuccess()
-                    // ContentView will handle navigation when auth state changes
+                await MainActor.run {
+                    isVerifying = false
+
+                    if response.verified {
+                        HapticsService.shared.success()
+
+                        // Show success briefly then trigger callback
+                        withAnimation {
+                            showSuccess = true
+                        }
+
+                        // Call success callback after brief delay
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                            onSuccess()
+                            // ContentView will handle navigation when auth state changes
+                        }
+                    } else {
+                        errorMessage = "неверный код подтверждения"
+                        withAnimation {
+                            showError = true
+                        }
+                        // Clear code
+                        otpCode = ["", "", "", "", "", ""]
+                        focusedField = 0
+                    }
                 }
-            } else {
-                errorMessage = "неверный код подтверждения"
-                withAnimation {
-                    showError = true
+            } catch {
+                await MainActor.run {
+                    isVerifying = false
+                    errorMessage = "Ошибка проверки кода. Попробуйте еще раз."
+                    withAnimation {
+                        showError = true
+                    }
+                    // Clear code
+                    otpCode = ["", "", "", "", "", ""]
+                    focusedField = 0
                 }
-                // Clear code
-                otpCode = ["", "", "", "", "", ""]
-                focusedField = 0
             }
         }
     }
@@ -278,9 +298,31 @@ struct OTPVerificationView: View {
         canResend = false
         countdown = 60
         startCountdown()
-        
-        // Simulate API call
-        // TODO: Implement actual resend logic
+
+        Task {
+            do {
+                // Call backend API to resend OTP
+                let request = ResendOtpRequest(identifier: contactInfo)
+                let endpoint = AuthEndpoints.resendOtp(request)
+                let response: ResendOtpResponse = try await networkService.request(endpoint)
+
+                await MainActor.run {
+                    // Update countdown with the actual expiry time from backend
+                    countdown = response.expiresIn
+                    print("✅ OTP resent successfully to \(response.maskedIdentifier)")
+                }
+            } catch {
+                await MainActor.run {
+                    // Show error if resend fails
+                    errorMessage = "Не удалось отправить код повторно. Попробуйте еще раз."
+                    withAnimation {
+                        showError = true
+                    }
+                    // Reset countdown even if resend failed
+                    canResend = true
+                }
+            }
+        }
     }
     
     private func startCountdown() {

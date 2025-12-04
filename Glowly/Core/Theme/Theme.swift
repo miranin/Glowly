@@ -8,6 +8,7 @@
 import SwiftUI
 
 extension Color {
+    /// Initialize color from hex string
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         var int: UInt64 = 0
@@ -32,29 +33,93 @@ extension Color {
             opacity: Double(a) / 255
         )
     }
+
+    /// Initialize adaptive color for light and dark mode
+    init(light: Color, dark: Color) {
+        self.init(uiColor: UIColor(dynamicProvider: { traitCollection in
+            switch traitCollection.userInterfaceStyle {
+            case .dark:
+                return UIColor(dark)
+            default:
+                return UIColor(light)
+            }
+        }))
+    }
 }
 
 enum Theme {
-    // Modern blue-cyan palette (fresh and clean) - matching Figma design
-    static let accent: Color = Color(hex: "#7DD3FC") // sky blue (cyan)
-    static let accentDark: Color = Color(hex: "#38BDF8") // deeper blue
-    static let accentLight: Color = Color(hex: "#BAE6FD") // light cyan
-    
-    // Backgrounds
-    static let backgroundPowder: Color = Color(hex: "#FFF8F6") // warm white
-    static let backgroundCard: Color = Color(hex: "#FFFFFF") // pure white
-    
-    // Neutrals
-    static let neutral: Color = Color(hex: "#8B8B8B") // medium gray
-    static let neutralLight: Color = Color(hex: "#F5F5F5") // light gray
-    static let textPrimary: Color = Color(hex: "#2D2D2D") // dark gray
-    static let textSecondary: Color = Color(hex: "#999999") // medium gray
-    
-    // Status colors
-    static let warning: Color = Color(hex: "#FFB347") // warm orange
-    static let danger: Color = Color(hex: "#FF6B6B") // coral red
-    static let success: Color = Color(hex: "#51CF66") // fresh green
-    static let info: Color = Color(hex: "#74C0FC") // sky blue
+    // MARK: - Accent Colors (Adaptive for Dark Mode)
+    static var accent: Color {
+        Color(light: Color(hex: "#38BDF8"), dark: Color(hex: "#7DD3FC"))
+    }
+
+    static var accentDark: Color {
+        Color(light: Color(hex: "#0284C7"), dark: Color(hex: "#38BDF8"))
+    }
+
+    static var accentLight: Color {
+        Color(light: Color(hex: "#BAE6FD"), dark: Color(hex: "#0C4A6E"))
+    }
+
+    // MARK: - Backgrounds (Adaptive)
+    static var backgroundPrimary: Color {
+        Color(light: Color(hex: "#FFFFFF"), dark: Color(hex: "#1A1A1A"))
+    }
+
+    static var backgroundSecondary: Color {
+        Color(light: Color(hex: "#F5F5F5"), dark: Color(hex: "#2D2D2D"))
+    }
+
+    static var backgroundPowder: Color {
+        Color(light: Color(hex: "#FFF8F6"), dark: Color(hex: "#1F1F1F"))
+    }
+
+    static var backgroundCard: Color {
+        Color(light: Color(hex: "#FFFFFF"), dark: Color(hex: "#262626"))
+    }
+
+    // MARK: - Text Colors (Adaptive)
+    static var textPrimary: Color {
+        Color(light: Color(hex: "#2D2D2D"), dark: Color(hex: "#FFFFFF"))
+    }
+
+    static var textSecondary: Color {
+        Color(light: Color(hex: "#666666"), dark: Color(hex: "#B3B3B3"))
+    }
+
+    static var textTertiary: Color {
+        Color(light: Color(hex: "#999999"), dark: Color(hex: "#808080"))
+    }
+
+    // MARK: - Neutral Colors (Adaptive)
+    static var neutral: Color {
+        Color(light: Color(hex: "#8B8B8B"), dark: Color(hex: "#A0A0A0"))
+    }
+
+    static var neutralLight: Color {
+        Color(light: Color(hex: "#F5F5F5"), dark: Color(hex: "#333333"))
+    }
+
+    static var border: Color {
+        Color(light: Color(hex: "#E0E0E0"), dark: Color(hex: "#404040"))
+    }
+
+    // MARK: - Status Colors (Same for both modes but brighter in dark)
+    static var warning: Color {
+        Color(light: Color(hex: "#FFB347"), dark: Color(hex: "#FFD580"))
+    }
+
+    static var danger: Color {
+        Color(light: Color(hex: "#FF6B6B"), dark: Color(hex: "#FF8A8A"))
+    }
+
+    static var success: Color {
+        Color(light: Color(hex: "#51CF66"), dark: Color(hex: "#69DB7C"))
+    }
+
+    static var info: Color {
+        Color(light: Color(hex: "#74C0FC"), dark: Color(hex: "#A5D8FF"))
+    }
 
     static var accentGradient: LinearGradient {
         LinearGradient(
@@ -72,29 +137,84 @@ enum Theme {
         )
     }
 
+    // MARK: - Category Colors (Adaptive)
     static func categoryColor(_ category: ProductCategory) -> Color {
         switch category {
-        case .foundation: return Color(hex: "#FFB4A2") // peachy
-        case .concealer: return Color(hex: "#FFD5C2") // light peach
-        case .powder: return Color(hex: "#E8B4E8") // lavender
-        case .blush: return Color(hex: "#FFB6D9") // pink
-        case .bronzer: return Color(hex: "#D4A574") // bronze
-        case .highlighter: return Color(hex: "#FFE4B5") // champagne
-        case .eyeshadow: return Color(hex: "#B4C7E7") // soft blue
-        case .eyeliner: return Color(hex: "#8B8B8B") // gray
-        case .mascara: return Color(hex: "#5D5D5D") // charcoal
-        case .lipstick: return Color(hex: "#FF8FAB") // rose
-        case .lipGloss: return Color(hex: "#FFB6C1") // light pink
-        case .lipLiner: return Color(hex: "#D8869C") // mauve
-        case .primer: return Color(hex: "#C8D8E4") // blue-gray
-        case .settingSpray: return Color(hex: "#B4E4FF") // sky blue
-        case .cleanser: return Color(hex: "#B4E7D5") // mint
-        case .moisturizer: return Color(hex: "#C8E6C9") // sage
-        case .serum: return Color(hex: "#D4B4E7") // lilac
-        case .sunscreen: return Color(hex: "#FFE4B5") // yellow
-        case .mask: return Color(hex: "#B4E7E0") // aqua
-        case .other: return neutral
+        case .foundation:
+            return Color(light: Color(hex: "#FFB4A2"), dark: Color(hex: "#CC9082"))
+        case .concealer:
+            return Color(light: Color(hex: "#FFD5C2"), dark: Color(hex: "#CCAA9B"))
+        case .powder:
+            return Color(light: Color(hex: "#E8B4E8"), dark: Color(hex: "#B890B8"))
+        case .blush:
+            return Color(light: Color(hex: "#FFB6D9"), dark: Color(hex: "#CC91AD"))
+        case .bronzer:
+            return Color(light: Color(hex: "#D4A574"), dark: Color(hex: "#A6835D"))
+        case .highlighter:
+            return Color(light: Color(hex: "#FFE4B5"), dark: Color(hex: "#CCB690"))
+        case .eyeshadow:
+            return Color(light: Color(hex: "#B4C7E7"), dark: Color(hex: "#8F9FB8"))
+        case .eyeliner:
+            return Color(light: Color(hex: "#8B8B8B"), dark: Color(hex: "#A6A6A6"))
+        case .mascara:
+            return Color(light: Color(hex: "#5D5D5D"), dark: Color(hex: "#8F8F8F"))
+        case .lipstick:
+            return Color(light: Color(hex: "#FF8FAB"), dark: Color(hex: "#CC7288"))
+        case .lipGloss:
+            return Color(light: Color(hex: "#FFB6C1"), dark: Color(hex: "#CC919A"))
+        case .lipLiner:
+            return Color(light: Color(hex: "#D8869C"), dark: Color(hex: "#AD6B7D"))
+        case .primer:
+            return Color(light: Color(hex: "#C8D8E4"), dark: Color(hex: "#9FADB6"))
+        case .settingSpray:
+            return Color(light: Color(hex: "#B4E4FF"), dark: Color(hex: "#8FB6CC"))
+        case .cleanser:
+            return Color(light: Color(hex: "#B4E7D5"), dark: Color(hex: "#8FB8A9"))
+        case .moisturizer:
+            return Color(light: Color(hex: "#C8E6C9"), dark: Color(hex: "#9FB8A1"))
+        case .serum:
+            return Color(light: Color(hex: "#D4B4E7"), dark: Color(hex: "#A990B8"))
+        case .sunscreen:
+            return Color(light: Color(hex: "#FFE4B5"), dark: Color(hex: "#CCB690"))
+        case .mask:
+            return Color(light: Color(hex: "#B4E7E0"), dark: Color(hex: "#8FB8B3"))
+        case .other:
+            return neutral
         }
+    }
+}
+
+// MARK: - View Modifiers for Easy Theme Application
+
+extension View {
+    /// Apply primary text color (adaptive for dark mode)
+    func primaryTextColor() -> some View {
+        self.foregroundColor(Theme.textPrimary)
+    }
+
+    /// Apply secondary text color (adaptive for dark mode)
+    func secondaryTextColor() -> some View {
+        self.foregroundColor(Theme.textSecondary)
+    }
+
+    /// Apply tertiary text color (adaptive for dark mode)
+    func tertiaryTextColor() -> some View {
+        self.foregroundColor(Theme.textTertiary)
+    }
+
+    /// Apply primary background (adaptive for dark mode)
+    func primaryBackground() -> some View {
+        self.background(Theme.backgroundPrimary)
+    }
+
+    /// Apply secondary background (adaptive for dark mode)
+    func secondaryBackground() -> some View {
+        self.background(Theme.backgroundSecondary)
+    }
+
+    /// Apply card background (adaptive for dark mode)
+    func cardBackground() -> some View {
+        self.background(Theme.backgroundCard)
     }
 }
 

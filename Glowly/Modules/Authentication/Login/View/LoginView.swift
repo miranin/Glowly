@@ -22,7 +22,7 @@ struct LoginView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Color(.systemBackground).ignoresSafeArea()
+                Theme.backgroundPowder.ignoresSafeArea()
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 24) {
@@ -73,7 +73,8 @@ struct LoginView: View {
                             Task {
                                 let identifier = viewModel.loginType == .email ? viewModel.email : "+7\(viewModel.phone)"
                                 do {
-                                    _ = try await viewModel.authManager.signIn(email: identifier, password: viewModel.password)
+                                    let loginRequest = LoginRequest(usernameOrEmail: identifier, password: viewModel.password)
+                                    _ = try await viewModel.authManager.signIn(loginRequest)
                                     // Authentication successful - ContentView will handle navigation
                                     print("✅ Authentication successful, isAuthenticated = \(viewModel.authManager.isAuthenticated)")
                                 } catch {
@@ -119,7 +120,7 @@ struct LoginView: View {
             
             Text("введите почту и пароль, чтобы войти\nв приложение")
                 .font(.system(size: 15))
-                .foregroundColor(.secondary)
+                .secondaryTextColor()
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.horizontal, 24)

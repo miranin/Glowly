@@ -72,12 +72,17 @@ final class RegistrationViewModel: ObservableObject {
         defer { isLoading = false }
 
         do {
-            // Email registration - authenticate immediately (no OTP for MVP)
-            _ = try await authManager.signUp(
+            // Create registration request
+            let request = RegisterRequest(
+                username: name.isEmpty ? email.components(separatedBy: "@").first ?? "user" : name,
                 email: email,
+                phoneNumber: "", // Empty for email registration
                 password: password,
-                name: name.isEmpty ? nil : name
+                valid: true
             )
+
+            // Email registration - authenticate with backend API
+            _ = try await authManager.signUp(request)
             HapticsService.shared.success()
             // Email signup also shows OTP, but it will authenticate on success
             showOTPVerification = true
@@ -96,34 +101,20 @@ final class RegistrationViewModel: ObservableObject {
         isLoading = true
         defer { isLoading = false }
 
-        let identifier = "+7\(phone)"
+        let phoneNumber = "+7\(phone.filter { $0.isNumber })"
 
         do {
-            // Mock: Create user account but don't authenticate yet
-            try await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 seconds
-
-            // Check if phone already exists
-            let userKey = "user_\(identifier)"
-            if UserDefaults.standard.data(forKey: userKey) != nil {
-                throw AuthError.emailAlreadyExists
-            }
-
-            // Create user but don't authenticate
-            let user = User(
-                id: UUID().uuidString,
-                email: identifier,
-                name: name.isEmpty ? nil : name,
-                profilePhotoURL: nil,
-                authProvider: .email,
-                createdAt: Date(),
-                lastLoginAt: Date()
+            // Create registration request
+            let request = RegisterRequest(
+                username: name.isEmpty ? "user" : name,
+                email: "", // Empty for phone registration (backend will use phone as identifier)
+                phoneNumber: phoneNumber,
+                password: password,
+                valid: true
             )
 
-            // Save user data (but don't authenticate)
-            if let userData = try? JSONEncoder().encode(user) {
-                UserDefaults.standard.set(userData, forKey: userKey)
-            }
-
+            // Phone registration - authenticate with backend API
+            _ = try await authManager.signUp(request)
             HapticsService.shared.success()
             // Show OTP verification - user will be authenticated after OTP
             showOTPVerification = true

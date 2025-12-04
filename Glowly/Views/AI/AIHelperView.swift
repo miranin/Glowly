@@ -12,9 +12,13 @@ struct AIHelperView: View {
     @ObservedObject var productStore: ProductStore
     @ObservedObject var userProfilePresenter: UserProfilePresenter
     @EnvironmentObject var languageManager: LanguageManager
+    @StateObject private var aiService = AIService.shared
     @State private var messages: [ChatMessage] = []
     @State private var inputText = ""
     @State private var isTyping = false
+    @State private var streamingText = ""
+    @State private var showError = false
+    @State private var errorMessage = ""
     @FocusState private var isInputFocused: Bool
     
     var body: some View {
@@ -83,6 +87,11 @@ struct AIHelperView: View {
                 handleProfileUpdate()
             }
             .dismissKeyboardOnTap()
+            .alert("AI Error", isPresented: $showError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(errorMessage)
+            }
         }
     }
     
@@ -204,10 +213,10 @@ struct AIHelperView: View {
     private func sendMessage(_ text: String? = nil) {
         let messageText = text ?? inputText
         guard !messageText.isEmpty else { return }
-        
+
         // Dismiss keyboard
         isInputFocused = false
-        
+
         // Add user message
         let userMessage = ChatMessage(
             content: messageText,
@@ -215,22 +224,75 @@ struct AIHelperView: View {
             timestamp: Date()
         )
         messages.append(userMessage)
-        
+
         if text == nil {
             inputText = ""
         }
-        
-        // Simulate AI response
+
+        // Send to real AI service
         isTyping = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            let aiResponse = generateAIResponse(for: messageText)
-            let aiMessage = ChatMessage(
-                content: aiResponse,
-                isUser: false,
-                timestamp: Date()
-            )
-            messages.append(aiMessage)
-            isTyping = false
+        streamingText = ""
+
+        Task {
+            do {
+                // Build system prompt with user context
+                let systemPrompt = AISystemPrompts.getSystemPrompt(
+                    userProfile: userProfilePresenter.userProfile,
+                    products: productStore.products
+                )
+
+                // Convert chat history to AI messages
+                let aiMessages = messages.map { message in
+                    AIMessage(
+                        role: message.isUser ? .user : .assistant,
+                        content: message.content
+                    )
+                }
+
+                // Use streaming for better UX
+                try await aiService.sendMessageStream(
+                    messages: aiMessages,
+                    systemPrompt: systemPrompt
+                ) { chunk in
+                    streamingText += chunk
+                }
+
+                // Add complete AI response
+                let aiMessage = ChatMessage(
+                    content: streamingText,
+                    isUser: false,
+                    timestamp: Date()
+                )
+                messages.append(aiMessage)
+                streamingText = ""
+                isTyping = false
+
+                HapticsService.shared.success()
+
+            } catch let error as AIServiceError {
+                isTyping = false
+                streamingText = ""
+                errorMessage = error.localizedDescription
+                showError = true
+
+                // Fallback to mock response if API fails
+                let fallbackResponse = generateMockResponse(for: messageText)
+                let aiMessage = ChatMessage(
+                    content: fallbackResponse,
+                    isUser: false,
+                    timestamp: Date()
+                )
+                messages.append(aiMessage)
+
+                HapticsService.shared.warning()
+            } catch {
+                isTyping = false
+                streamingText = ""
+                errorMessage = "Unexpected error: \(error.localizedDescription)"
+                showError = true
+
+                HapticsService.shared.warning()
+            }
         }
     }
     
@@ -257,9 +319,10 @@ struct AIHelperView: View {
         HapticsService.shared.success()
     }
     
-    private func generateAIResponse(for input: String) -> String {
+    // MARK: - Fallback Mock Response (used when API fails)
+    private func generateMockResponse(for input: String) -> String {
         let lowercaseInput = input.lowercased()
-        
+
         if lowercaseInput.contains("рутин") || lowercaseInput.contains("утренн") {
             return generateRoutineAdvice()
         } else if lowercaseInput.contains("макияж") || lowercaseInput.contains("макияж") {

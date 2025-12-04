@@ -23,7 +23,6 @@ struct CachedAsyncImage: View {
     var body: some View {
         Group {
             if url.hasPrefix("cache://") {
-                // Load from memory cache (user-created posts)
                 let cacheKey = String(url.dropFirst(8))
                 if let cachedImage = imageCacheService.getImage(forKey: cacheKey) {
                     Image(uiImage: cachedImage)
@@ -33,7 +32,6 @@ struct CachedAsyncImage: View {
                     placeholderView
                 }
             } else if url.hasPrefix("http://") || url.hasPrefix("https://") {
-                // Load from remote URL
                 AsyncImage(url: URL(string: url)) { phase in
                     switch phase {
                     case .empty:
@@ -49,7 +47,6 @@ struct CachedAsyncImage: View {
                     }
                 }
             } else {
-                // Load from Xcode Assets (demo content)
                 Image(url)
                     .resizable()
                     .aspectRatio(contentMode: contentMode)

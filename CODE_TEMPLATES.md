@@ -277,7 +277,7 @@ class AuthManager: ObservableObject {
             let token: AuthToken
         }
         
-        let request = LoginRequest(email: email, password: password)
+        let request = LoginRequest(usernameOrEmail: email, password: password)
         
         // Call REAL backend API
         let response: LoginResponse = try await network.request(

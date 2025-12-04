@@ -36,11 +36,11 @@ final class NetworkService: NetworkServiceProtocol {
         
         // Configure decoder for common date formats
         decoder.dateDecodingStrategy = .iso8601
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        
+        // Note: Backend uses camelCase, so no key conversion needed
+
         // Configure encoder
         encoder.dateEncodingStrategy = .iso8601
-        encoder.keyEncodingStrategy = .convertToSnakeCase
+        // Note: Backend expects camelCase, so no key conversion needed
     }
     
     // MARK: - Request with Response (Async/Await - Rule #3)

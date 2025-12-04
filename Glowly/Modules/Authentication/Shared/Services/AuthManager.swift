@@ -15,9 +15,9 @@ protocol AuthManagerProtocol: ObservableObject {
     var isAuthenticated: Bool { get set }
     var isLoading: Bool { get set }
     var isBiometricEnabled: Bool { get set }
-    
-    func signIn(email: String, password: String) async throws -> User
-    func signUp(email: String, password: String, name: String?) async throws -> User
+
+    func signIn(_ request: LoginRequest) async throws -> User
+    func signUp(_ request: RegisterRequest) async throws -> User
     func signInWithGoogle(credentials: GoogleAuthCredentials) async throws -> User
     func signInWithBiometrics() async throws -> User
     func enableBiometrics()
@@ -37,17 +37,20 @@ final class AuthManager: ObservableObject, AuthManagerProtocol {
     // MARK: - Dependencies (Injected)
     private let keychain: KeychainServiceProtocol
     private let biometric: BiometricAuthServiceProtocol
+    private let networkService: NetworkServiceProtocol
     private var cancellables = Set<AnyCancellable>()
-    
+
     // MARK: - Initialization with Dependency Injection
     nonisolated init(
         keychainService: KeychainServiceProtocol = KeychainService(),
-        biometricService: BiometricAuthServiceProtocol = BiometricAuthService()
+        biometricService: BiometricAuthServiceProtocol = BiometricAuthService(),
+        networkService: NetworkServiceProtocol = NetworkService()
     ) {
         self.keychain = keychainService
         self.biometric = biometricService
-        
-        // Note: checkAuthenticationStatus() and loadBiometricPreference() 
+        self.networkService = networkService
+
+        // Note: checkAuthenticationStatus() and loadBiometricPreference()
         // will be called in onAppear or task modifier instead
     }
     
@@ -79,110 +82,88 @@ final class AuthManager: ObservableObject, AuthManagerProtocol {
     // MARK: - Email/Password Authentication (Async/Await)
     
     /// Sign in with email and password
-    /// - Note: ⚠️ This is a MOCK implementation. In production:
-    ///   1. Send credentials to backend
-    ///   2. Backend validates and returns JWT token
-    ///   3. Store token in Keychain (NEVER store passwords)
-    func signIn(email: String, password: String) async throws -> User {
+    /// Sends credentials to backend API and receives JWT token
+    func signIn(_ request: LoginRequest) async throws -> User {
         isLoading = true
         defer { isLoading = false }
-        
+
         // Validate input
-        guard !email.isEmpty, !password.isEmpty else {
+        guard !request.usernameOrEmail.isEmpty, !request.password.isEmpty else {
             throw AuthError.invalidCredentials
         }
 
         // Skip email validation for phone numbers (starts with +7)
-        if !email.hasPrefix("+7") {
-            guard isValidEmail(email) else {
+        if !request.usernameOrEmail.hasPrefix("+7") {
+            guard isValidEmail(request.usernameOrEmail) else {
                 throw AuthError.invalidCredentials
             }
         }
-        
-        // ⚠️ MOCK: Simulate API call delay
-        try await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 seconds
-        
-        // ⚠️ MOCK: In production, send to backend API:
-        // let response = try await networkService.post("/auth/login", body: ["email": email, "password": password])
-        // let token = response.token
-        // let user = response.user
-        
-        // For mock, check if user exists
-        let userKey = "user_\(email)"
-        guard let userData = UserDefaults.standard.data(forKey: userKey),
-              let user = try? JSONDecoder().decode(User.self, from: userData) else {
-            throw AuthError.userNotFound
+
+        do {
+            // Call backend API
+            let endpoint = AuthEndpoints.login(request)
+            let response: AuthResponse = try await networkService.request(endpoint)
+
+            // Convert AuthResponse to User model
+            let user = response.toUser(authProvider: .email)
+
+            // Store access token securely
+            _ = keychain.save(response.accessToken, forKey: KeychainService.Keys.userToken)
+            // Note: Backend doesn't return refresh token for login
+
+            // Update auth state
+            handleSuccessfulAuth(user: user)
+            return user
+        } catch let error as NetworkError {
+            // Map network errors to auth errors
+            throw mapNetworkErrorToAuthError(error)
+        } catch {
+            throw AuthError.unknown(error.localizedDescription)
         }
-        
-        // ✅ SECURITY FIX: NO password storage or verification locally
-        // In production: Backend validates password and returns token
-        // For mock: Just simulate successful login
-        
-        handleSuccessfulAuth(user: user)
-        return user
     }
     
     /// Sign up with email and password
-    /// - Note: ⚠️ This is a MOCK implementation. In production:
-    ///   1. Send credentials to backend
-    ///   2. Backend creates user and returns JWT token
-    ///   3. Store token in Keychain (NEVER store passwords)
-    func signUp(email: String, password: String, name: String?) async throws -> User {
+    /// Sends registration data to backend API and receives JWT token
+    func signUp(_ request: RegisterRequest) async throws -> User {
         isLoading = true
         defer { isLoading = false }
-        
+
         // Validate input
-        guard !email.isEmpty, !password.isEmpty else {
+        guard !request.email.isEmpty, !request.password.isEmpty, !request.username.isEmpty else {
             throw AuthError.invalidCredentials
         }
-        
-        // ⚠️ MOCK: Skip email validation for phone numbers (starts with +7)
-        if !email.hasPrefix("+7") {
-            guard isValidEmail(email) else {
+
+        // Validate email format if provided (skip for phone-only registration)
+        if !request.email.isEmpty && !request.email.hasPrefix("+7") {
+            guard isValidEmail(request.email) else {
                 throw AuthError.invalidCredentials
             }
         }
-        
-        guard password.count >= 8 else {
+
+        guard request.password.count >= 8 else {
             throw AuthError.weakPassword
         }
-        
-        // ⚠️ MOCK: Simulate API call delay
-        try await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 seconds
-        
-        // ⚠️ MOCK: In production, send to backend API:
-        // let response = try await networkService.post("/auth/register", body: ["email": email, "password": password, "name": name])
-        // let token = response.token
-        // let user = response.user
-        
-        // For mock, check if user already exists
-        let userKey = "user_\(email)"
-        if UserDefaults.standard.data(forKey: userKey) != nil {
-            throw AuthError.emailAlreadyExists
-        }
-        
-        // Create new user
-        let user = User(
-            id: UUID().uuidString,
-            email: email,
-            name: name,
-            profilePhotoURL: nil,
-            authProvider: .email,
-            createdAt: Date(),
-            lastLoginAt: Date()
-        )
-        
-        // ✅ SECURITY FIX: NO password storage
-        // In production: Backend stores hashed password
-        // For mock: Just save user data
-        if let userData = try? JSONEncoder().encode(user) {
-            UserDefaults.standard.set(userData, forKey: userKey)
-            // ❌ REMOVED: UserDefaults.standard.set(password, forKey: "password_\(email)")
-            
+
+        do {
+            // Call backend API
+            let endpoint = AuthEndpoints.register(request)
+            let response: AuthResponse = try await networkService.request(endpoint)
+
+            // Convert AuthResponse to User model
+            let user = response.toUser(authProvider: .email)
+
+            // Store access token securely
+            _ = keychain.save(response.accessToken, forKey: KeychainService.Keys.userToken)
+            // Note: Backend doesn't return refresh token for registration
+
+            // Update auth state
             handleSuccessfulAuth(user: user)
             return user
-        } else {
-            throw AuthError.unknown("Не удалось создать пользователя")
+        } catch let error as NetworkError {
+            // Map network errors to auth errors
+            throw mapNetworkErrorToAuthError(error)
+        } catch {
+            throw AuthError.unknown(error.localizedDescription)
         }
     }
     
@@ -355,5 +336,32 @@ final class AuthManager: ObservableObject, AuthManagerProtocol {
         let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
         let emailPredicate = NSPredicate(format:"SELF MATCHES %@", emailRegex)
         return emailPredicate.evaluate(with: email)
+    }
+
+    /// Maps NetworkError to AuthError for better error handling
+    private func mapNetworkErrorToAuthError(_ error: NetworkError) -> AuthError {
+        switch error {
+        case .unauthorized:
+            return .invalidCredentials
+        case .forbidden:
+            return .unknown("Access forbidden")
+        case .notFound:
+            return .userNotFound
+        case .serverError:
+            return .unknown("Server error. Please try again later.")
+        case .noInternetConnection:
+            return .unknown("No internet connection")
+        case .timeout:
+            return .unknown("Request timed out")
+        case .decodingFailed:
+            return .unknown("Invalid response from server")
+        case .httpError(let statusCode, _):
+            if statusCode == 400 {
+                return .emailAlreadyExists
+            }
+            return .unknown("HTTP error: \(statusCode)")
+        default:
+            return .unknown(error.localizedDescription)
+        }
     }
 }

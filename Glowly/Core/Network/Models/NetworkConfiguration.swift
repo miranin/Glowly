@@ -29,7 +29,7 @@ struct NetworkConfiguration {
     
     /// Development configuration
     static let development = NetworkConfiguration(
-        baseURL: "https://api-dev.glowly.app",
+        baseURL: "http://172.234.116.129:8080",
         defaultHeaders: [
             "Content-Type": "application/json",
             "Accept": "application/json"

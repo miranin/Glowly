@@ -76,7 +76,8 @@ struct RegistrationView: View {
                         Task {
                             let identifier = viewModel.registrationType == .email ? viewModel.email : "+7\(viewModel.phone)"
                             do {
-                                _ = try await viewModel.authManager.signIn(email: identifier, password: viewModel.password)
+                                let loginRequest = LoginRequest(usernameOrEmail: identifier, password: viewModel.password)
+                                _ = try await viewModel.authManager.signIn(loginRequest)
                                 // Authentication successful - ContentView will handle navigation
                                 print("✅ Authentication successful, isAuthenticated = \(viewModel.authManager.isAuthenticated)")
                             } catch {
