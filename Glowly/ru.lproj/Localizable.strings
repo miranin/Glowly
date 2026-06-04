@@ -225,10 +225,18 @@
 "category_primer" = "Праймер";
 "category_setting_spray" = "Фиксирующий спрей";
 "category_cleanser" = "Очищающее средство";
+"category_toner" = "Тонер";
+"category_essence" = "Эссенция";
 "category_moisturizer" = "Увлажняющий крем";
 "category_serum" = "Сыворотка";
+"category_eye_cream" = "Крем для глаз";
+"category_face_oil" = "Масло для лица";
+"category_exfoliant" = "Эксфолиант";
+"category_spot_treatment" = "Точечное средство";
+"category_mist" = "Мист";
 "category_sunscreen" = "Солнцезащитный крем";
 "category_mask" = "Маска";
+"category_lip_care" = "Уход за губами";
 "category_other" = "Другое";
 
 /* Social Product Detail Sheet */

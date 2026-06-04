@@ -23,10 +23,18 @@ enum ProductCategory: String, CaseIterable, Codable {
     case primer = "Праймер"
     case settingSpray = "Фиксирующий спрей"
     case cleanser = "Очищающее средство"
-    case moisturizer = "Увлажняющий крем"
+    case toner = "Тонер"
+    case essence = "Эссенция"
     case serum = "Сыворотка"
+    case moisturizer = "Увлажняющий крем"
+    case eyeCream = "Крем для глаз"
+    case faceOil = "Масло для лица"
+    case exfoliant = "Эксфолиант"
+    case spotTreatment = "Точечное средство"
+    case mist = "Мист"
     case sunscreen = "Солнцезащитный крем"
     case mask = "Маска"
+    case lipCare = "Уход за губами"
     case other = "Другое"
     
     func localizedName(languageManager: LanguageManager) -> String {
@@ -46,10 +54,18 @@ enum ProductCategory: String, CaseIterable, Codable {
         case .primer: return languageManager.translate("category_primer")
         case .settingSpray: return languageManager.translate("category_setting_spray")
         case .cleanser: return languageManager.translate("category_cleanser")
-        case .moisturizer: return languageManager.translate("category_moisturizer")
+        case .toner: return languageManager.translate("category_toner")
+        case .essence: return languageManager.translate("category_essence")
         case .serum: return languageManager.translate("category_serum")
+        case .moisturizer: return languageManager.translate("category_moisturizer")
+        case .eyeCream: return languageManager.translate("category_eye_cream")
+        case .faceOil: return languageManager.translate("category_face_oil")
+        case .exfoliant: return languageManager.translate("category_exfoliant")
+        case .spotTreatment: return languageManager.translate("category_spot_treatment")
+        case .mist: return languageManager.translate("category_mist")
         case .sunscreen: return languageManager.translate("category_sunscreen")
         case .mask: return languageManager.translate("category_mask")
+        case .lipCare: return languageManager.translate("category_lip_care")
         case .other: return languageManager.translate("category_other")
         }
     }
@@ -81,10 +97,18 @@ enum ProductCategory: String, CaseIterable, Codable {
         case .primer: return "paintbrush.fill"
         case .settingSpray: return "spray"
         case .cleanser: return "drop"
-        case .moisturizer: return "leaf.fill"
+        case .toner: return "humidity"
+        case .essence: return "drop.degreesign"
         case .serum: return "flask.fill"
+        case .moisturizer: return "leaf.fill"
+        case .eyeCream: return "eye.circle"
+        case .faceOil: return "drop.halffull"
+        case .exfoliant: return "circle.grid.cross"
+        case .spotTreatment: return "scope"
+        case .mist: return "humidity.fill"
         case .sunscreen: return "sun.max"
         case .mask: return "face.smiling"
+        case .lipCare: return "mouth"
         case .other: return "questionmark.circle"
         }
     }

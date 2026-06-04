@@ -23,6 +23,11 @@ AI-powered beauty assistant that helps users organize their cosmetic collection,
 
 | Document | Purpose | When to Use |
 |----------|---------|-------------|
+| **[CLAUDE.md](CLAUDE.md)** | AI assistant guidance & architecture | Reference for AI tools |
+| **[BACKEND_INTEGRATION_PLAN.md](BACKEND_INTEGRATION_PLAN.md)** | **Complete backend setup guide** | **Server setup & API implementation** |
+| **[DATABASE_SCHEMA.md](DATABASE_SCHEMA.md)** | **Database schema & SQL** | **Database setup** |
+| **[AUTH_IMPLEMENTATION.md](AUTH_IMPLEMENTATION.md)** | **Authentication code examples** | **Auth endpoint implementation** |
+| **[API_REFERENCE.md](API_REFERENCE.md)** | **Complete API endpoint reference** | **API contract & testing** |
 | **[START_HERE.md](START_HERE.md)** | Quick overview & navigation | First time setup |
 | **[PRODUCTION_READINESS_PLAN.md](PRODUCTION_READINESS_PLAN.md)** | Complete 6-week roadmap | Planning & reference |
 | **[QUICK_START_GUIDE.md](QUICK_START_GUIDE.md)** | Daily tasks & actions | Daily development |
@@ -31,16 +36,25 @@ AI-powered beauty assistant that helps users organize their cosmetic collection,
 
 ### 🚨 Critical Issues (Fix First!)
 
-1. **🔴 Security Vulnerability** - Plain-text password storage
-2. **🔴 No Backend Integration** - All API calls are mocked  
-3. **🔴 No Error Handling** - App crashes on errors
-4. **🟡 Scalability Issues** - Using UserDefaults instead of Core Data
+1. **🔴 No Backend Server** - Need to rent server and set up API
+   - **Solution:** Follow [BACKEND_INTEGRATION_PLAN.md](BACKEND_INTEGRATION_PLAN.md) for step-by-step server rental and setup
+   - **Cost:** Starting at $5-12/month for basic VPS
+2. **🔴 No Database** - Database schema ready but not deployed
+   - **Solution:** Use [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) to set up PostgreSQL
+3. **🔴 No SMS Service** - OTP verification requires SMS provider
+   - **Solution:** See [SMS Service Integration](BACKEND_INTEGRATION_PLAN.md#sms-service-integration) for provider options ($5-20/month)
+4. **🔴 API Endpoints Not Implemented** - iOS app ready, backend needed
+   - **Solution:** Use [AUTH_IMPLEMENTATION.md](AUTH_IMPLEMENTATION.md) for authentication code examples
+5. **🟡 Scalability Issues** - Using UserDefaults instead of Core Data
 
 ### 📅 Timeline to Production
 
-- **Week 1-2:** Security fixes + Backend integration
-- **Week 3-4:** Core Data + Offline sync  
-- **Week 5-6:** Testing + Polish + Release
+- **Week 1:** Set up server, database, and SMS service (See [BACKEND_INTEGRATION_PLAN.md](BACKEND_INTEGRATION_PLAN.md))
+- **Week 2:** Implement authentication API endpoints (See [AUTH_IMPLEMENTATION.md](AUTH_IMPLEMENTATION.md))
+- **Week 3:** Implement product and user profile APIs
+- **Week 4:** Implement social features (posts, comments, likes)
+- **Week 5:** Core Data migration + Offline sync
+- **Week 6:** Testing + Polish + Release
 
 ---
 
@@ -65,17 +79,26 @@ AI-powered beauty assistant that helps users organize their cosmetic collection,
 
 ## 🎯 Quick Start
 
-### For Development:
-1. **Read** [START_HERE.md](START_HERE.md) (5 min)
-2. **Fix** password security issue (30 min)  
-3. **Follow** [QUICK_START_GUIDE.md](QUICK_START_GUIDE.md) Week 1
-4. **Use** [CODE_TEMPLATES.md](CODE_TEMPLATES.md) for implementation
+### For Backend Developer (Start Here!):
+1. **Read** [BACKEND_INTEGRATION_PLAN.md](BACKEND_INTEGRATION_PLAN.md) - Complete guide (30 min read)
+2. **Rent Server** - Follow server setup instructions (~2 hours)
+3. **Set Up Database** - Use [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) to create tables (~1 hour)
+4. **Implement Auth** - Use [AUTH_IMPLEMENTATION.md](AUTH_IMPLEMENTATION.md) code examples (~1 day)
+5. **Set Up SMS** - Configure SMS provider for OTP (~1 hour)
+6. **Test Integration** - Use iOS app's APITestView for testing
+
+### For iOS Developer:
+1. **Read** [CLAUDE.md](CLAUDE.md) - Understand architecture (15 min)
+2. **Review** Network layer in Core/Network/ - Already 100% complete
+3. **Wait** for backend team to deploy API
+4. **Update** NetworkConfiguration.swift with production URL
+5. **Test** integration with real backend
 
 ### For Project Management:
 1. **Copy** [NOTION_ROADMAP.md](NOTION_ROADMAP.md) to Notion
-2. **Assign** tasks to team members
+2. **Assign** backend tasks from [BACKEND_INTEGRATION_PLAN.md](BACKEND_INTEGRATION_PLAN.md)
 3. **Track** progress weekly
-4. **Coordinate** with backend/AI teams
+4. **Coordinate** server access and API contracts
 
 ---
 
@@ -126,13 +149,21 @@ AI-powered beauty assistant that helps users organize their cosmetic collection,
 
 ## 🚀 Next Steps
 
-### This Week (Critical):
-1. Fix password storage security issue
-2. Create NetworkService for backend integration
-3. Connect authentication to real API
-4. Coordinate with backend team on API contracts
+### Immediate (This Week):
+1. **Rent Server** - Choose provider from [BACKEND_INTEGRATION_PLAN.md](BACKEND_INTEGRATION_PLAN.md#step-1-choose-a-server-provider)
+   - Recommended: Hetzner CX11 ($5/month) or DigitalOcean Basic ($6/month)
+2. **Set Up Database** - Deploy PostgreSQL schema from [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md)
+3. **Choose SMS Provider** - See [SMS Service Integration](BACKEND_INTEGRATION_PLAN.md#sms-service-integration)
+   - Recommended: SMS.RU for CIS ($5-20/month) or Twilio for global ($20-50/month)
+4. **Implement Auth API** - Copy code from [AUTH_IMPLEMENTATION.md](AUTH_IMPLEMENTATION.md)
 
-### Next 6 Weeks:
+### Next 2 Weeks:
+1. Complete all authentication endpoints
+2. Implement user profile and product APIs
+3. Set up file upload for product images
+4. Test integration with iOS app
+
+### Long Term (6 Weeks):
 Follow the detailed roadmap in [PRODUCTION_READINESS_PLAN.md](PRODUCTION_READINESS_PLAN.md)
 
 ---

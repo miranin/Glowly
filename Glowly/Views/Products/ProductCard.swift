@@ -2,8 +2,6 @@
 //  ProductCard.swift
 //  Glowly
 //
-//  Created by Tamirlan Aubakirov on 02/10/25.
-//
 
 import SwiftUI
 
@@ -11,138 +9,149 @@ struct ProductCard: View {
     let product: Product
     let productStore: ProductStore
     @State private var showingDeleteAlert = false
-    
+
     var body: some View {
         HStack(spacing: 14) {
-            // Product Icon with gradient and proper aspect ratio
-            ZStack {
-                Circle()
-                    .fill(Theme.backgroundCard)
-                    .frame(width: 56, height: 56)
-                    .overlay(
-                        Circle()
-                            .stroke(Theme.categoryColor(product.category).opacity(0.2), lineWidth: 2)
-                    )
-                
-                if let imageData = product.imageData, let uiImage = UIImage(data: imageData) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit) // Changed to .fit to show full product
-                        .frame(width: 52, height: 52) // Slightly smaller to add padding
-                        .clipShape(Circle())
-                } else {
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [Theme.categoryColor(product.category).opacity(0.8), Theme.categoryColor(product.category).opacity(0.4)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 56, height: 56)
-                        .overlay(
-                            Image(systemName: product.category.icon)
-                                .font(.title2)
-                                .foregroundColor(.white)
-                        )
-                }
-            }
-            
-            // Product Info
-            VStack(alignment: .leading, spacing: 6) {
+            // Image / icon
+            productThumbnail
+
+            // Info
+            VStack(alignment: .leading, spacing: 5) {
                 Text(product.name)
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.primary)
                     .lineLimit(1)
-                
+
                 Text(product.brand)
-                    .font(.system(size: 14))
+                    .font(.system(size: 13))
                     .foregroundColor(.secondary)
-                
-                Text(product.category.rawValue)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(Theme.categoryColor(product.category))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(
-                        Capsule()
-                            .fill(Theme.categoryColor(product.category).opacity(0.15))
-                    )
+                    .lineLimit(1)
+
+                HStack(spacing: 6) {
+                    categoryBadge
+
+                    if product.isSensitiveSafe {
+                        tagBadge("Sensitive", color: .green)
+                    }
+                    if !product.isAcneSafe {
+                        tagBadge("Comedogenic", color: .orange)
+                    }
+                }
+                .padding(.top, 2)
             }
-            
-            Spacer()
-            
+
+            Spacer(minLength: 0)
+
             // Menu
             Menu {
-                Button("Редактировать", action: {})
-                Button("Удалить", role: .destructive) {
+                Button("Редактировать", systemImage: "pencil", action: {})
+                Divider()
+                Button("Удалить", systemImage: "trash", role: .destructive) {
                     showingDeleteAlert = true
                 }
             } label: {
                 Image(systemName: "ellipsis")
-                    .font(.system(size: 18))
-                    .foregroundColor(.secondary)
+                    .font(.system(size: 16))
+                    .foregroundColor(Color(.tertiaryLabel))
+                    .frame(width: 32, height: 32)
+                    .contentShape(Rectangle())
             }
         }
-        .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.systemBackground))
-                .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
-        )
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Theme.categoryColor(product.category).opacity(0.2), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(Color(.systemGray5), lineWidth: 1)
         )
-        .alert("Удалить продукт", isPresented: $showingDeleteAlert) {
-            Button("Отмена", role: .cancel) { }
+        .alert("Удалить продукт?", isPresented: $showingDeleteAlert) {
+            Button("Отмена", role: .cancel) {}
             Button("Удалить", role: .destructive) {
                 productStore.deleteProduct(product)
             }
         } message: {
-            Text("Вы уверены, что хотите удалить \(product.name)?")
+            Text("\(product.name) будет удалён из вашего косметического набора.")
         }
     }
-    
-    private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd.MM.yy"
-        return formatter.string(from: date)
+
+    // MARK: - Thumbnail
+
+    @ViewBuilder
+    private var productThumbnail: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(categoryTint.opacity(0.1))
+                .frame(width: 54, height: 54)
+
+            if let imageData = product.imageData, let uiImage = UIImage(data: imageData) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 54, height: 54)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+            } else {
+                Image(systemName: product.category.icon)
+                    .font(.system(size: 22, weight: .light))
+                    .foregroundColor(categoryTint)
+            }
+        }
     }
-    
-    private func formatDateShort(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd.MM.yy"
-        return formatter.string(from: date)
+
+    // MARK: - Badges
+
+    private var categoryBadge: some View {
+        Text(product.category.rawValue)
+            .font(.system(size: 10, weight: .medium))
+            .foregroundColor(categoryTint)
+            .padding(.horizontal, 7)
+            .padding(.vertical, 3)
+            .background(categoryTint.opacity(0.1))
+            .clipShape(Capsule())
+    }
+
+    private func tagBadge(_ text: String, color: Color) -> some View {
+        Text(text)
+            .font(.system(size: 10, weight: .medium))
+            .foregroundColor(color)
+            .padding(.horizontal, 7)
+            .padding(.vertical, 3)
+            .background(color.opacity(0.1))
+            .clipShape(Capsule())
+    }
+
+    private var categoryTint: Color {
+        Theme.categoryColor(product.category)
     }
 }
 
 #Preview {
-    VStack(spacing: 12) {
+    VStack(spacing: 10) {
         ProductCard(
             product: Product(
-                name: "Тональный крем",
-                brand: "L'Oréal",
-                category: .foundation,
+                name: "Dermaclear Cleansing Foam",
+                brand: "Dr.Jart+",
+                category: .cleanser,
                 applicationZone: .face,
                 purchaseDate: Date(),
                 barcode: nil,
                 imageData: nil,
-                notes: "Любимый оттенок"
+                notes: "",
+                isSensitiveSafe: true,
+                isAcneSafe: true
             ),
             productStore: ProductStore()
         )
-        
         ProductCard(
             product: Product(
-                name: "Помада",
-                brand: "MAC",
-                category: .lipstick,
-                applicationZone: .lips,
+                name: "Moisturizing Cream",
+                brand: "CeraVe",
+                category: .moisturizer,
+                applicationZone: .face,
                 purchaseDate: Date(),
                 barcode: nil,
                 imageData: nil,
-                notes: "Классический красный"
+                notes: ""
             ),
             productStore: ProductStore()
         )

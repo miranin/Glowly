@@ -181,7 +181,7 @@ struct APITestView: View {
         let request = RegisterRequest(
             username: username,
             email: email,
-            phoneNumber: phone,
+//            phoneNumber: phone,
             password: testPassword,
             valid: true
         )

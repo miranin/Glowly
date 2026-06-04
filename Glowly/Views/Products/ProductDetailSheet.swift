@@ -29,17 +29,30 @@ struct ProductDetailSheet: View {
                         
                         // Status Cards
                         statusCardsSection
-                        
+
+                        // AI Description
+                        if !product.productDescription.isEmpty {
+                            descriptionSection
+                        }
+
+                        // Usage time + skin types + concerns
+                        metaChipsSection
+
+                        // Key Ingredients (with roles)
+                        if !product.keyIngredients.isEmpty {
+                            keyIngredientsSection
+                        }
+
                         // Benefits Section
                         if !product.benefits.isEmpty {
                             benefitsSection
                         }
-                        
+
                         // How to Use Section
                         if !product.howToUse.isEmpty {
                             howToUseSection
                         }
-                        
+
                         // Ingredients Section
                         if !product.ingredients.isEmpty {
                             ingredientsSection
@@ -140,6 +153,178 @@ struct ProductDetailSheet: View {
         }
     }
     
+    // MARK: - AI Description Section
+    private var descriptionSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(Theme.accent)
+                Text("Описание")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.primary)
+            }
+            Text(product.productDescription)
+                .font(.system(size: 15))
+                .foregroundColor(.secondary)
+                .lineSpacing(4)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
+        )
+    }
+
+    // MARK: - Meta Chips (usage time, skin types, concerns)
+    @ViewBuilder
+    private var metaChipsSection: some View {
+        let hasContent = !product.skinTypes.isEmpty || !product.concerns.isEmpty
+        if hasContent {
+            VStack(alignment: .leading, spacing: 16) {
+                // Usage time badge
+                HStack(spacing: 8) {
+                    Image(systemName: usageIcon)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(Theme.accent)
+                    Text(usageLabel)
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(.primary)
+                }
+
+                if !product.skinTypes.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        chipGroupTitle("Подходит для", icon: "person.fill", color: Theme.info)
+                        TagFlow(items: product.skinTypes.map { skinTypeLabel($0) }, tint: Theme.info)
+                    }
+                }
+
+                if !product.concerns.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        chipGroupTitle("Решает проблемы", icon: "target", color: Theme.success)
+                        TagFlow(items: product.concerns.map { concernLabel($0) }, tint: Theme.success)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(20)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(.systemBackground))
+                    .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
+            )
+        }
+    }
+
+    private func chipGroupTitle(_ title: String, icon: String, color: Color) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(color)
+            Text(title)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.primary)
+        }
+    }
+
+    // MARK: - Key Ingredients Section (with roles)
+    private var keyIngredientsSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 8) {
+                Image(systemName: "leaf.fill")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(Theme.success)
+                Text("Активные ингредиенты")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.primary)
+            }
+
+            VStack(alignment: .leading, spacing: 14) {
+                ForEach(product.keyIngredients, id: \.self) { ing in
+                    let parts = ing.components(separatedBy: " — ")
+                    let name = parts.first ?? ing
+                    let role = parts.count > 1 ? parts.dropFirst().joined(separator: " — ") : ""
+                    HStack(alignment: .top, spacing: 12) {
+                        Circle()
+                            .fill(Theme.success.opacity(0.5))
+                            .frame(width: 7, height: 7)
+                            .padding(.top, 6)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(name)
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundColor(.primary)
+                            if !role.isEmpty {
+                                Text(role)
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.secondary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                        Spacer(minLength: 0)
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
+        )
+    }
+
+    // MARK: - Label helpers
+
+    private var usageLabel: String {
+        switch product.usageTime.lowercased() {
+        case "morning": return "Использовать утром"
+        case "night": return "Использовать вечером"
+        default: return "Утром и вечером"
+        }
+    }
+
+    private var usageIcon: String {
+        switch product.usageTime.lowercased() {
+        case "morning": return "sun.max.fill"
+        case "night": return "moon.fill"
+        default: return "sun.and.horizon.fill"
+        }
+    }
+
+    private func skinTypeLabel(_ key: String) -> String {
+        switch key.lowercased() {
+        case "oily": return "Жирная"
+        case "dry": return "Сухая"
+        case "combination": return "Комбинированная"
+        case "sensitive": return "Чувствительная"
+        case "normal": return "Нормальная"
+        case "all": return "Все типы"
+        case "acne_prone", "acne": return "Склонная к акне"
+        case "mature": return "Зрелая"
+        default: return key.capitalized
+        }
+    }
+
+    private func concernLabel(_ key: String) -> String {
+        switch key.lowercased() {
+        case "acne": return "Акне"
+        case "aging": return "Старение"
+        case "dryness": return "Сухость"
+        case "hyperpigmentation": return "Пигментация"
+        case "pores": return "Поры"
+        case "redness": return "Покраснения"
+        case "sensitivity": return "Чувствительность"
+        case "brightening": return "Сияние"
+        case "firmness": return "Упругость"
+        case "dark_circles": return "Тёмные круги"
+        default: return key.capitalized
+        }
+    }
+
     // MARK: - Benefits Section
     private var benefitsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -350,5 +535,26 @@ struct ProductDetailSheet: View {
                         .stroke(color.opacity(0.3), lineWidth: 1)
                 )
         )
+    }
+}
+
+// MARK: - Tag Flow (wraps chips onto multiple lines)
+
+private struct TagFlow: View {
+    let items: [String]
+    let tint: Color
+
+    var body: some View {
+        FlowLayout(spacing: 8) {
+            ForEach(items, id: \.self) { item in
+                Text(item)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(tint)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .background(tint.opacity(0.12))
+                    .clipShape(Capsule())
+            }
+        }
     }
 }

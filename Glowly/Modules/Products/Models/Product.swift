@@ -58,9 +58,16 @@ struct Product: Identifiable, Codable {
     var howToUse: String = ""
     var benefits: [String] = []
     var warnings: [String] = []
-    
+
+    // AI-extracted rich information
+    var productDescription: String = ""
+    var keyIngredients: [String] = []      // role-annotated, e.g. "Niacinamide — brightening"
+    var skinTypes: [String] = []           // e.g. ["oily", "combination"]
+    var concerns: [String] = []            // e.g. ["acne", "pores"]
+    var usageTime: String = "both"         // "morning" | "night" | "both"
+
     // Personalization tags
     var isSensitiveSafe: Bool = false
     var isAcneSafe: Bool = true
-    
+
 }

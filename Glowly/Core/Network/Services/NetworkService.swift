@@ -25,22 +25,31 @@ final class NetworkService: NetworkServiceProtocol {
     // MARK: - Initialization with Dependency Injection (Rule #2)
     init(
         configuration: NetworkConfiguration = .development,
-        session: URLSession = .shared,
+        session: URLSession? = nil,
         decoder: JSONDecoder = JSONDecoder(),
         encoder: JSONEncoder = JSONEncoder()
     ) {
         self.configuration = configuration
-        self.session = session
+        // Dedicated session with generous timeouts so long AI calls (Claude
+        // vision ~15-20s) never get cut off by the default 60s idle limit.
+        if let session = session {
+            self.session = session
+        } else {
+            let config = URLSessionConfiguration.default
+            config.timeoutIntervalForRequest = 90
+            config.timeoutIntervalForResource = 120
+            self.session = URLSession(configuration: config)
+        }
         self.decoder = decoder
         self.encoder = encoder
         
         // Configure decoder for common date formats
         decoder.dateDecodingStrategy = .iso8601
-        // Note: Backend uses camelCase, so no key conversion needed
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
 
         // Configure encoder
         encoder.dateEncodingStrategy = .iso8601
-        // Note: Backend expects camelCase, so no key conversion needed
+        encoder.keyEncodingStrategy = .convertToSnakeCase
     }
     
     // MARK: - Request with Response (Async/Await - Rule #3)

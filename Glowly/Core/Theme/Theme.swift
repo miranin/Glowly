@@ -170,14 +170,30 @@ enum Theme {
             return Color(light: Color(hex: "#B4E4FF"), dark: Color(hex: "#8FB6CC"))
         case .cleanser:
             return Color(light: Color(hex: "#B4E7D5"), dark: Color(hex: "#8FB8A9"))
+        case .toner:
+            return Color(light: Color(hex: "#B4DCE7"), dark: Color(hex: "#8FAFB8"))
+        case .essence:
+            return Color(light: Color(hex: "#C4E0F0"), dark: Color(hex: "#9BB2C0"))
         case .moisturizer:
             return Color(light: Color(hex: "#C8E6C9"), dark: Color(hex: "#9FB8A1"))
+        case .eyeCream:
+            return Color(light: Color(hex: "#C7D2F0"), dark: Color(hex: "#9CA5C0"))
+        case .faceOil:
+            return Color(light: Color(hex: "#F0E0A8"), dark: Color(hex: "#C0B286"))
+        case .exfoliant:
+            return Color(light: Color(hex: "#F0C4B4"), dark: Color(hex: "#C09B8F"))
+        case .spotTreatment:
+            return Color(light: Color(hex: "#F0B4B4"), dark: Color(hex: "#C08F8F"))
+        case .mist:
+            return Color(light: Color(hex: "#B4E4FF"), dark: Color(hex: "#8FB6CC"))
         case .serum:
             return Color(light: Color(hex: "#D4B4E7"), dark: Color(hex: "#A990B8"))
         case .sunscreen:
             return Color(light: Color(hex: "#FFE4B5"), dark: Color(hex: "#CCB690"))
         case .mask:
             return Color(light: Color(hex: "#B4E7E0"), dark: Color(hex: "#8FB8B3"))
+        case .lipCare:
+            return Color(light: Color(hex: "#F0B6C9"), dark: Color(hex: "#C0919E"))
         case .other:
             return neutral
         }

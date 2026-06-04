@@ -225,10 +225,18 @@
 "category_primer" = "Primer";
 "category_setting_spray" = "Setting Spray";
 "category_cleanser" = "Cleanser";
+"category_toner" = "Toner";
+"category_essence" = "Essence";
 "category_moisturizer" = "Moisturizer";
 "category_serum" = "Serum";
+"category_eye_cream" = "Eye Cream";
+"category_face_oil" = "Face Oil";
+"category_exfoliant" = "Exfoliant";
+"category_spot_treatment" = "Spot Treatment";
+"category_mist" = "Mist";
 "category_sunscreen" = "Sunscreen";
 "category_mask" = "Mask";
+"category_lip_care" = "Lip Care";
 "category_other" = "Other";
 
 /* Social Product Detail Sheet */

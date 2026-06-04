@@ -27,9 +27,11 @@ struct NetworkConfiguration {
     
     // MARK: - Predefined Configurations
     
-    /// Development configuration
+    /// Development configuration.
+    /// For local testing on device: change baseURL to your Mac's local WiFi IP, e.g. "http://192.168.1.X:8080"
+    /// Run `ifconfig | grep "inet " | grep -v 127` on Mac to find the IP.
     static let development = NetworkConfiguration(
-        baseURL: "http://172.234.116.129:8080",
+        baseURL: "http://192.168.0.102:8080",
         defaultHeaders: [
             "Content-Type": "application/json",
             "Accept": "application/json"

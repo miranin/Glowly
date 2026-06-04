@@ -1,0 +1,43 @@
+# Core API
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-multipart==0.0.12
+
+# Database
+sqlalchemy==2.0.36
+aiosqlite==0.20.0
+alembic==1.14.0
+
+# Auth
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# Validation
+pydantic[email]==2.10.3
+pydantic-settings==2.6.1
+
+# LLM / LangChain
+langchain==0.3.14
+langchain-anthropic==0.3.3
+langchain-openai==0.2.14
+langchain-community==0.3.14
+langgraph==0.2.60
+langsmith==0.2.3
+
+# Anthropic SDK (direct vision calls)
+anthropic==0.40.0
+
+# RAG / Vector DB
+qdrant-client==1.12.1
+openai==1.57.4
+
+# Utilities
+python-dotenv==1.0.1
+httpx==0.28.1
+aiofiles==24.1.0
+Pillow==11.0.0
+
+# Sentence embeddings (local fallback, no API key needed)
+sentence-transformers==3.3.1
+beautifulsoup4==4.14.3
+lxml==6.1.1

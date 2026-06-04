@@ -1,0 +1,596 @@
+{
+  "version": "1.1",
+  "description": "Golden dataset for Glowly AI pipeline evaluation. Covers product classification accuracy, recommendation relevance, and ingredient analysis.",
+  "created": "2026-05-28",
+  "updated": "2026-05-28",
+
+  "classification_examples": [
+    {
+      "id": "cls_001",
+      "description": "CeraVe moisturizing cream — widely recognized brand, simple product type",
+      "vision_description": "A white pump bottle with blue and white label. CeraVe logo prominently displayed at top. Text reads 'Moisturizing Cream' in large letters. 'Developed with Dermatologists' tagline visible. 16 oz / 453g size marking visible.",
+      "ocr_text": "CeraVe\nMoisturizing Cream\nDeveloped with Dermatologists\nWith Ceramides & Hyaluronic Acid\n16 oz / 453g\nIngredients: Water, Glycerin, Cetearyl Alcohol, Caprylic/Capric Triglyceride, Behentrimonium Methosulfate, Ceramide NP, Ceramide AP, Ceramide EOP, Carbomer, Cetyl Alcohol, Dimethicone, Hyaluronic Acid, Sodium Lauroyl Lactylate, Cholesterol, Phenoxyethanol, Disodium EDTA, Dipotassium Phosphate, Potassium Phosphate, Niacinamide",
+      "expected": {
+        "brand": "CeraVe",
+        "product_name": "Moisturizing Cream",
+        "category": "moisturizer",
+        "application_zone": "face",
+        "confidence_min": 0.85,
+        "key_ingredients": ["ceramides", "hyaluronic acid", "niacinamide", "glycerin"]
+      }
+    },
+    {
+      "id": "cls_002",
+      "description": "La Roche-Posay Effaclar cleanser — French brand, slightly harder to read",
+      "vision_description": "Rectangular white tube with gold and white label. La Roche-Posay logo visible. 'Effaclar' written in large text followed by 'Purifying Foaming Gel Cleanser'. Blue and gold color scheme. 200ml indicated on bottom.",
+      "ocr_text": "LA ROCHE-POSAY\nEFFACLAR\nPurifying Foaming Gel Cleanser\nFor Oily & Acne-Prone Skin\nOil-Free | Non-Comedogenic\n200ml\nWith Zinc PCA + LHA\n",
+      "expected": {
+        "brand": "La Roche-Posay",
+        "product_name": "Effaclar Purifying Foaming Gel Cleanser",
+        "category": "cleanser",
+        "application_zone": "face",
+        "confidence_min": 0.80,
+        "key_ingredients": ["zinc pca"]
+      }
+    },
+    {
+      "id": "cls_003",
+      "description": "The Ordinary Niacinamide serum — minimal design, small bottle",
+      "vision_description": "Small dropper bottle with simple white label on clear bottle. 'The Ordinary' text visible. 'Niacinamide 10% + Zinc 1%' product name. Brown dropper cap. Minimal design aesthetic.",
+      "ocr_text": "The Ordinary\nNiacinamide 10% + Zinc 1%\nA serum with niacinamide and zinc\n30ml\nApply a few drops to face AM and PM after cleansing. Do not use with vitamin C products directly.\nIngredients: Aqua (Water), Niacinamide, Pentylene Glycol, Zinc PCA, Dimethyl Isosorbide, Tamarindus Indica Seed Gum, Xanthan Gum, Isoceteth-20, Ethoxydiglycol, Phenoxyethanol, Chlorphenesin",
+      "expected": {
+        "brand": "The Ordinary",
+        "product_name": "Niacinamide 10% + Zinc 1%",
+        "category": "serum",
+        "application_zone": "face",
+        "confidence_min": 0.85,
+        "key_ingredients": ["niacinamide", "zinc pca"]
+      }
+    },
+    {
+      "id": "cls_004",
+      "description": "Paula's Choice BHA exfoliant — chemical exfoliant, not immediately obvious",
+      "vision_description": "White pump bottle with black and white label. 'Paula's Choice' brand name at top. 'SKIN PERFECTING 2% BHA LIQUID EXFOLIANT' in large black text. Simple modern design.",
+      "ocr_text": "PAULA'S CHOICE\nSKIN PERFECTING\n2% BHA LIQUID\nEXFOLIANT\nUnclogs & Minimizes Pores | Smooths Wrinkles\n4 fl oz / 118ml\nIngredients: Water, Methylpropanediol, Butylene Glycol, Salicylic Acid (2%), Polysorbate 20, Camellia Oleifera (Green Tea) Leaf Extract",
+      "expected": {
+        "brand": "Paula's Choice",
+        "product_name": "Skin Perfecting 2% BHA Liquid Exfoliant",
+        "category": "exfoliant",
+        "application_zone": "face",
+        "confidence_min": 0.80,
+        "key_ingredients": ["salicylic acid"]
+      }
+    },
+    {
+      "id": "cls_005",
+      "description": "Maybelline mascara — makeup product, very different from skincare",
+      "vision_description": "Black cylindrical tube with pink and black label. Maybelline New York logo visible. 'Lash Sensational Sky High' text. Pink wand/brush visible. 7.2ml volume.",
+      "ocr_text": "MAYBELLINE\nNEW YORK\nLASH SENSATIONAL\nSKY HIGH\nMascara\nBlackest Black\n0.24 fl oz / 7.2ml",
+      "expected": {
+        "brand": "Maybelline",
+        "product_name": "Lash Sensational Sky High Mascara",
+        "category": "mascara",
+        "application_zone": "eyes",
+        "confidence_min": 0.85,
+        "key_ingredients": []
+      }
+    },
+    {
+      "id": "cls_006",
+      "description": "Fenty Beauty lip gloss — luxury lip product",
+      "vision_description": "Small clear tube with gold cap. Fenty Beauty logo in gold text. 'Gloss Bomb Universal Lip Luminizer' text. The product inside appears to be a clear/pink gloss.",
+      "ocr_text": "FENTY BEAUTY\nby Rihanna\nGloss Bomb\nUniversal Lip Luminizer\n9ml / 0.3 fl oz\nShade: Hot Chocolit",
+      "expected": {
+        "brand": "Fenty Beauty",
+        "product_name": "Gloss Bomb Universal Lip Luminizer",
+        "category": "lip_gloss",
+        "application_zone": "lips",
+        "confidence_min": 0.80,
+        "key_ingredients": []
+      }
+    },
+    {
+      "id": "cls_007",
+      "description": "Bioré UV sunscreen — Japanese brand, SPF product",
+      "vision_description": "Blue and white squeeze tube. Bioré logo visible. 'UV Aqua Rich Watery Essence SPF50+' text. Japanese characters also visible on label. 85ml.",
+      "ocr_text": "Bioré UV\nAqua Rich Watery Essence\nSPF50+ PA++++\n85g\nKeeps skin cool and moisturized\nIngredients: Water, Alcohol, Dimethicone, Glycerin, Uvinul T 150, Tinosorb S",
+      "expected": {
+        "brand": "Bioré",
+        "product_name": "UV Aqua Rich Watery Essence SPF50+",
+        "category": "sunscreen",
+        "application_zone": "face",
+        "confidence_min": 0.80,
+        "key_ingredients": ["spf50"]
+      }
+    },
+    {
+      "id": "cls_008",
+      "description": "Laneige sleeping mask — Korean brand, harder to classify (mask vs moisturizer)",
+      "vision_description": "Tub/jar container with mint green lid. Laneige logo visible. 'Water Sleeping Mask' text in white. Korean-inspired minimalist design. 70ml.",
+      "ocr_text": "LANEIGE\nWater Sleeping Mask\n70ml / 2.4 fl oz\nApply as the last step of your PM routine. Rinse off in morning.\nKey ingredient: SLEEPSCENT™ technology",
+      "expected": {
+        "brand": "Laneige",
+        "product_name": "Water Sleeping Mask",
+        "category": "mask",
+        "application_zone": "face",
+        "confidence_min": 0.75,
+        "key_ingredients": []
+      }
+    },
+    {
+      "id": "cls_009",
+      "description": "Low confidence case — blurry or unclear label, expect needs_confirmation=true",
+      "vision_description": "The image is blurry and partially obscured. A container is visible but the label text is not clearly readable. Appears to be some kind of cream or lotion product.",
+      "ocr_text": "",
+      "expected": {
+        "brand": "",
+        "product_name": "",
+        "category": "other",
+        "application_zone": "face",
+        "confidence_max": 0.50,
+        "needs_confirmation": true
+      }
+    },
+    {
+      "id": "cls_010",
+      "description": "Non-cosmetic object — confidence should be very low",
+      "vision_description": "A coffee mug with a handle. Brown ceramic material. No cosmetic branding visible.",
+      "ocr_text": "",
+      "expected": {
+        "brand": "",
+        "product_name": "",
+        "category": "other",
+        "confidence_max": 0.20,
+        "needs_confirmation": true
+      }
+    },
+    {
+      "id": "cls_011",
+      "description": "COSRX snail mucin essence — K-beauty, unusual ingredient name",
+      "vision_description": "Small rectangular bottle with white and orange label. COSRX logo at top. 'Advanced Snail 96 Mucin Power Essence' text. 100ml. Clean Korean minimal design.",
+      "ocr_text": "COSRX\nAdvanced Snail 96 Mucin Power Essence\n100ml / 3.38 fl oz\nSnail Secretion Filtrate 96%\nHow to use: After toner, apply an adequate amount to face and gently pat for absorption.\nIngredients: Snail Secretion Filtrate 96%, Butylene Glycol, Sodium Hyaluronate, Phenoxyethanol",
+      "expected": {
+        "brand": "COSRX",
+        "product_name": "Advanced Snail 96 Mucin Power Essence",
+        "category": "serum",
+        "application_zone": "face",
+        "confidence_min": 0.78,
+        "key_ingredients": ["snail secretion filtrate", "sodium hyaluronate"]
+      }
+    },
+    {
+      "id": "cls_012",
+      "description": "Drunk Elephant Protini cream — luxury clean beauty moisturizer",
+      "vision_description": "Frosted pink jar with a dark pink lid. Drunk Elephant logo visible with the elephant icon. 'Protini Polypeptide Cream' text on label. 50ml size.",
+      "ocr_text": "DRUNK ELEPHANT\nProtini™\nPolypeptide Moisturizer\n50ml\nA protein-rich moisturizer formulated with signal peptides, amino acids and pygmy waterlily stem cell extract.\nIngredients: Water, Dicaprylyl Carbonate, Pentylene Glycol, Glycerin, SH-Polypeptide-1, SH-Oligopeptide-2, Arginine, Pygmy Waterlily Stem Cell Extract",
+      "expected": {
+        "brand": "Drunk Elephant",
+        "product_name": "Protini Polypeptide Moisturizer",
+        "category": "moisturizer",
+        "application_zone": "face",
+        "confidence_min": 0.80,
+        "key_ingredients": ["peptides", "glycerin", "pygmy waterlily"]
+      }
+    },
+    {
+      "id": "cls_013",
+      "description": "Charlotte Tilbury lip liner — luxury makeup, edge case (not lipstick but lip product)",
+      "vision_description": "Sleek gold pencil/liner with Charlotte Tilbury logo in pink cursive. 'Lip Cheat' text visible. Rose-beige color shown at tip. 1.2g.",
+      "ocr_text": "CHARLOTTE TILBURY\nLip Cheat\nReshape & Resize Lip Liner\nShade: Pillow Talk\n1.2g",
+      "expected": {
+        "brand": "Charlotte Tilbury",
+        "product_name": "Lip Cheat Lip Liner",
+        "category": "lip_liner",
+        "application_zone": "lips",
+        "confidence_min": 0.80,
+        "key_ingredients": []
+      }
+    },
+    {
+      "id": "cls_014",
+      "description": "Neutrogena Hydro Boost — gel moisturizer, widely known",
+      "vision_description": "Blue rectangular box with a white and blue tube inside. Neutrogena logo in orange. 'HYDRO BOOST Water Gel' text. 50ml visible on packaging.",
+      "ocr_text": "NEUTROGENA\nHYDRO BOOST\nWater Gel\nHyaluronic Acid\nFor Normal to Oily Skin\n50ml\nOil-Free | Non-Comedogenic\nIngredients: Water, Dimethicone, Glycerin, Dimethicone/Vinyl Dimethicone Crosspolymer, Sodium Hyaluronate, Phenoxyethanol",
+      "expected": {
+        "brand": "Neutrogena",
+        "product_name": "Hydro Boost Water Gel",
+        "category": "moisturizer",
+        "application_zone": "face",
+        "confidence_min": 0.85,
+        "key_ingredients": ["sodium hyaluronate", "glycerin"]
+      }
+    },
+    {
+      "id": "cls_015",
+      "description": "MAC Studio Fix foundation — luxury makeup foundation, needs body zone detection",
+      "vision_description": "Square compact case with MAC logo on the lid. Studio Fix Powder Plus Foundation text visible. Pan of pressed powder visible when opened. Medium coverage finish.",
+      "ocr_text": "MAC\nStudio Fix\nPowder Plus Foundation\nShade: NC25\nNet Wt. 15g\nSPF 15",
+      "expected": {
+        "brand": "MAC",
+        "product_name": "Studio Fix Powder Plus Foundation",
+        "category": "foundation",
+        "application_zone": "face",
+        "confidence_min": 0.82,
+        "key_ingredients": []
+      }
+    },
+    {
+      "id": "cls_016",
+      "description": "Urban Decay eyeshadow palette — complex makeup product",
+      "vision_description": "Large rectangular palette with a magnetic closure. Urban Decay logo on cover. 'Naked' written in bold gold text. Multiple shades of eyeshadow visible in 12 pans when opened. Brown, nude, and shimmer shades.",
+      "ocr_text": "URBAN DECAY\nNAKED\nEyeshadow Palette\n12 pan\nNet Wt. 12.6g\nShades: Virgin, Sin, Naked, Sidecar, Buck, Half Baked, Smog, Darkhorse, Toasted, Hustle, Creep, Gunmetal",
+      "expected": {
+        "brand": "Urban Decay",
+        "product_name": "Naked Eyeshadow Palette",
+        "category": "eyeshadow",
+        "application_zone": "eyes",
+        "confidence_min": 0.85,
+        "key_ingredients": []
+      }
+    },
+    {
+      "id": "cls_017",
+      "description": "Glossier Boy Brow — minimal packaging, niche brand",
+      "vision_description": "Small tube with a brushed-gold cap. Glossier logo in white. 'Boy Brow' text. Mascara-wand style applicator. Very minimalist pink and white packaging. 3g.",
+      "ocr_text": "Glossier\nBoy Brow\nGrooming Pomade\nShade: Brown\n3g",
+      "expected": {
+        "brand": "Glossier",
+        "product_name": "Boy Brow Grooming Pomade",
+        "category": "brow_product",
+        "application_zone": "eyes",
+        "confidence_min": 0.75,
+        "key_ingredients": []
+      }
+    },
+    {
+      "id": "cls_018",
+      "description": "SK-II Facial Treatment Essence — Japanese luxury, 'essence' category",
+      "vision_description": "Clear glass bottle with distinctive red and gold label. SK-II logo prominent. 'Facial Treatment Essence' text. Large bottle, 230ml. Japanese-style packaging with gold accents.",
+      "ocr_text": "SK-II\nFacial Treatment Essence\n230ml\nPitera Essence\nKey ingredient: 90%+ Pitera (Galactomyces Ferment Filtrate)\nMade in Japan\nIngredients: Galactomyces Ferment Filtrate, Butylene Glycol, Water, Pentylene Glycol, Niacinamide",
+      "expected": {
+        "brand": "SK-II",
+        "product_name": "Facial Treatment Essence",
+        "category": "toner",
+        "application_zone": "face",
+        "confidence_min": 0.75,
+        "key_ingredients": ["galactomyces ferment filtrate", "niacinamide"]
+      }
+    },
+    {
+      "id": "cls_019",
+      "description": "Cetaphil cleanser — medical skincare, minimalist label",
+      "vision_description": "White rectangular bottle with a simple blue and white label. Cetaphil logo in blue. 'Gentle Skin Cleanser' text. Blue flip cap. 473ml.",
+      "ocr_text": "Cetaphil\nGentle Skin Cleanser\nFor All Skin Types\n473ml / 16 fl oz\nFragrance-Free | Non-Comedogenic\nIngredients: Water, Cetyl Alcohol, Propylene Glycol, Sodium Lauryl Sulfate, Stearyl Alcohol, Methylparaben, Propylparaben, Butylparaben",
+      "expected": {
+        "brand": "Cetaphil",
+        "product_name": "Gentle Skin Cleanser",
+        "category": "cleanser",
+        "application_zone": "face",
+        "confidence_min": 0.85,
+        "key_ingredients": ["glycerin"]
+      }
+    },
+    {
+      "id": "cls_020",
+      "description": "Olay Regenerist serum — mass market anti-aging, peptide serum",
+      "vision_description": "White and gold pump bottle. Olay logo in white on gold background. 'Regenerist Micro-Sculpting Serum' text. 50ml. Premium mass-market aesthetic.",
+      "ocr_text": "Olay\nREGENERIST\nMicro-Sculpting Serum\nAmino-Peptide Complex II\n50ml / 1.7 fl oz\nIngredients: Water, Glycerin, Niacinamide, Pentapeptide-4, Dimethicone, Sodium Hyaluronate, Fragrance",
+      "expected": {
+        "brand": "Olay",
+        "product_name": "Regenerist Micro-Sculpting Serum",
+        "category": "serum",
+        "application_zone": "face",
+        "confidence_min": 0.82,
+        "key_ingredients": ["niacinamide", "peptides", "sodium hyaluronate"]
+      }
+    },
+    {
+      "id": "cls_021",
+      "description": "NARS blush — makeup blush compact, face zone",
+      "vision_description": "Matte black square compact with NARS logo in gold. Pressed powder blush in deep rosy-pink color visible. Full-size compact with brush not included.",
+      "ocr_text": "NARS\nBLUSH\nShade: ORGASM\nNet Wt. 4.8g / 0.16 oz",
+      "expected": {
+        "brand": "NARS",
+        "product_name": "Blush in Orgasm",
+        "category": "blush",
+        "application_zone": "face",
+        "confidence_min": 0.85,
+        "key_ingredients": []
+      }
+    },
+    {
+      "id": "cls_022",
+      "description": "The Ordinary Squalane — single-ingredient product, clear oil",
+      "vision_description": "Small dark glass dropper bottle. 'The Ordinary' white text on black label. 'Squalane 100%' text. 30ml. Minimalist design.",
+      "ocr_text": "The Ordinary\nSqualane\n100%\nA lightweight, stable plant-derived oil.\n30ml\nIngredients: Squalane",
+      "expected": {
+        "brand": "The Ordinary",
+        "product_name": "Squalane 100%",
+        "category": "facial_oil",
+        "application_zone": "face",
+        "confidence_min": 0.88,
+        "key_ingredients": ["squalane"]
+      }
+    },
+    {
+      "id": "cls_023",
+      "description": "EltaMD UV Clear sunscreen — medical-grade SPF, fragrance-free",
+      "vision_description": "White pump bottle with clean clinical design. EltaMD logo in blue. 'UV Clear Broad-Spectrum SPF 46' text. 48g. Medical aesthetic, plain white packaging.",
+      "ocr_text": "EltaMD\nUV Clear\nBroad-Spectrum SPF 46\nFor Sensitive & Acne-Prone Skin\n48g / 1.7 oz\nActive Ingredients: Zinc Oxide 9.0%, Octinoxate 7.5%\nInactive Ingredients: Water, Cyclopentasiloxane, Niacinamide, Hyaluronic Acid, Lactic Acid",
+      "expected": {
+        "brand": "EltaMD",
+        "product_name": "UV Clear Broad-Spectrum SPF 46",
+        "category": "sunscreen",
+        "application_zone": "face",
+        "confidence_min": 0.85,
+        "key_ingredients": ["zinc oxide", "niacinamide", "hyaluronic acid"]
+      }
+    },
+    {
+      "id": "cls_024",
+      "description": "Hand cream — body product, different application zone",
+      "vision_description": "Small tube with a floral-patterned label. 'L'Occitane' brand visible. 'Shea Butter Hand Cream' text. 30ml travel size. Beige and gold packaging with Provençal design.",
+      "ocr_text": "L'OCCITANE\nen Provence\nShea Butter\nHand Cream\n20% Shea Butter\n30ml\nIngredients: Aqua, Butyrospermum Parkii Butter, Glycerin, Prunus Amygdalus Dulcis Oil",
+      "expected": {
+        "brand": "L'Occitane",
+        "product_name": "Shea Butter Hand Cream",
+        "category": "hand_cream",
+        "application_zone": "body",
+        "confidence_min": 0.82,
+        "key_ingredients": ["shea butter", "glycerin"]
+      }
+    },
+    {
+      "id": "cls_025",
+      "description": "SkinCeuticals C E Ferulic — premium vitamin C serum, high confidence expected",
+      "vision_description": "Small amber glass bottle with a white label and distinctive SkinCeuticals branding. 'C E Ferulic' product name. 30ml. Clinical-looking, sold primarily through dermatologist offices.",
+      "ocr_text": "SkinCeuticals\nC E FERULIC\nWith 15% L-Ascorbic Acid\nCombination Antioxidant Treatment\n30ml / 1 fl oz\nIngredients: Water, Ethoxydiglycol, Ascorbic Acid (15%), Glycerin, Propylene Glycol, Laureth-23, Phenoxyethanol, Tocopherol (Vitamin E), Ferulic Acid (0.5%), Panthenol, Sodium Hydroxide",
+      "expected": {
+        "brand": "SkinCeuticals",
+        "product_name": "C E Ferulic",
+        "category": "serum",
+        "application_zone": "face",
+        "confidence_min": 0.88,
+        "key_ingredients": ["l-ascorbic acid", "vitamin e", "ferulic acid", "panthenol"]
+      }
+    }
+  ],
+
+  "recommendation_examples": [
+    {
+      "id": "rec_001",
+      "description": "Dry skin beginner with no existing products",
+      "user_profile": {
+        "skin_type": "dry",
+        "skin_conditions": ["dryPatches"],
+        "beauty_goals": ["hydration"],
+        "experience_level": "beginner",
+        "allergies": []
+      },
+      "existing_products": [],
+      "expected_recommendations": {
+        "min_count": 3,
+        "required_categories": ["cleanser", "moisturizer", "sunscreen"],
+        "must_mention_ingredients": ["ceramides", "hyaluronic acid"],
+        "must_not_recommend_categories": ["exfoliant"]
+      }
+    },
+    {
+      "id": "rec_002",
+      "description": "Oily acne-prone skin with some products already present",
+      "user_profile": {
+        "skin_type": "oily",
+        "skin_conditions": ["acne"],
+        "beauty_goals": ["acneTreatment", "pore minimization"],
+        "experience_level": "intermediate",
+        "allergies": []
+      },
+      "existing_products": ["cleanser", "moisturizer"],
+      "expected_recommendations": {
+        "min_count": 3,
+        "required_categories": ["serum", "sunscreen"],
+        "must_mention_ingredients": ["niacinamide", "salicylic acid"],
+        "should_not_recommend": ["heavy oils", "rich creams"]
+      }
+    },
+    {
+      "id": "rec_003",
+      "description": "Sensitive skin with fragrance allergy",
+      "user_profile": {
+        "skin_type": "sensitive",
+        "skin_conditions": ["redness"],
+        "beauty_goals": ["calm skin", "barrier repair"],
+        "experience_level": "beginner",
+        "allergies": ["fragrance", "essential oils"]
+      },
+      "existing_products": [],
+      "expected_recommendations": {
+        "min_count": 3,
+        "required_categories": ["cleanser", "moisturizer"],
+        "must_mention": ["fragrance-free", "gentle", "sensitive"],
+        "must_not_mention": ["fragrance", "essential oil", "parfum"]
+      }
+    },
+    {
+      "id": "rec_004",
+      "description": "Mature skin with anti-aging goals, already has basics",
+      "user_profile": {
+        "skin_type": "normal",
+        "skin_conditions": ["fineLines", "dullness"],
+        "beauty_goals": ["antiAging", "brightening", "firmness"],
+        "experience_level": "advanced",
+        "allergies": []
+      },
+      "existing_products": ["cleanser", "moisturizer", "sunscreen"],
+      "expected_recommendations": {
+        "min_count": 2,
+        "required_categories": ["serum"],
+        "must_mention_ingredients": ["retinol", "peptides", "vitamin c"],
+        "should_mention": ["collagen", "antioxidant"]
+      }
+    },
+    {
+      "id": "rec_005",
+      "description": "Hyperpigmented skin looking to fade dark spots",
+      "user_profile": {
+        "skin_type": "combination",
+        "skin_conditions": ["hyperpigmentation", "acneScars"],
+        "beauty_goals": ["brightening", "evenTone"],
+        "experience_level": "intermediate",
+        "allergies": []
+      },
+      "existing_products": ["cleanser"],
+      "expected_recommendations": {
+        "min_count": 3,
+        "required_categories": ["serum", "sunscreen"],
+        "must_mention_ingredients": ["vitamin c", "niacinamide", "alpha arbutin"],
+        "must_mention": ["spf", "sun protection"],
+        "should_mention": ["consistent use", "weeks"]
+      }
+    },
+    {
+      "id": "rec_006",
+      "description": "Pregnant user seeking skincare — must avoid retinol and chemical SPF",
+      "user_profile": {
+        "skin_type": "normal",
+        "skin_conditions": ["dryness", "sensitivity"],
+        "beauty_goals": ["hydration", "safety"],
+        "experience_level": "intermediate",
+        "allergies": [],
+        "special_conditions": ["pregnancy"]
+      },
+      "existing_products": [],
+      "expected_recommendations": {
+        "min_count": 3,
+        "required_categories": ["cleanser", "moisturizer", "sunscreen"],
+        "must_mention": ["safe", "pregnancy", "mineral"],
+        "must_not_mention_ingredients": ["retinol", "salicylic acid", "benzoyl peroxide"],
+        "must_mention_alternatives": ["bakuchiol", "azelaic acid", "zinc oxide"]
+      }
+    },
+    {
+      "id": "rec_007",
+      "description": "Rosacea-prone skin with extreme sensitivity",
+      "user_profile": {
+        "skin_type": "sensitive",
+        "skin_conditions": ["rosacea", "redness", "reactivity"],
+        "beauty_goals": ["calm skin", "redness reduction"],
+        "experience_level": "beginner",
+        "allergies": ["fragrance", "alcohol"]
+      },
+      "existing_products": [],
+      "expected_recommendations": {
+        "min_count": 3,
+        "required_categories": ["cleanser", "moisturizer"],
+        "must_mention_ingredients": ["centella asiatica", "niacinamide"],
+        "must_mention": ["fragrance-free", "gentle", "mineral spf"],
+        "must_not_recommend_ingredients": ["retinol", "aha", "bha", "vitamin c high concentration"]
+      }
+    },
+    {
+      "id": "rec_008",
+      "description": "Teen (16yo) with oily skin and mild acne, first skincare routine",
+      "user_profile": {
+        "skin_type": "oily",
+        "skin_conditions": ["acne", "blackheads"],
+        "beauty_goals": ["acneTreatment", "pore minimization"],
+        "experience_level": "beginner",
+        "allergies": [],
+        "age_group": "teen"
+      },
+      "existing_products": [],
+      "expected_recommendations": {
+        "min_count": 3,
+        "required_categories": ["cleanser", "moisturizer", "sunscreen"],
+        "must_mention_ingredients": ["salicylic acid", "niacinamide"],
+        "should_mention": ["gentle", "start slow", "non-comedogenic"],
+        "should_not_recommend_ingredients": ["retinol", "aha high concentration"]
+      }
+    }
+  ],
+
+  "ingredient_analysis_examples": [
+    {
+      "id": "ing_001",
+      "ingredients": ["retinol", "glycolic acid"],
+      "skin_type": "normal",
+      "expected": {
+        "must_identify_conflict": true,
+        "conflict_keywords": ["irritation", "alternate", "not together", "conflict"],
+        "must_mention_spf": true
+      }
+    },
+    {
+      "id": "ing_002",
+      "ingredients": ["hyaluronic acid", "niacinamide", "ceramides"],
+      "skin_type": "dry",
+      "expected": {
+        "must_identify_conflict": false,
+        "must_identify_synergy": true,
+        "synergy_keywords": ["work well", "complement", "layer", "compatible"]
+      }
+    },
+    {
+      "id": "ing_003",
+      "ingredients": ["benzoyl peroxide", "vitamin c"],
+      "skin_type": "acne-prone",
+      "expected": {
+        "must_identify_conflict": true,
+        "conflict_keywords": ["oxidize", "inactivate", "avoid", "separate"]
+      }
+    },
+    {
+      "id": "ing_004",
+      "ingredients": ["benzoyl peroxide", "retinol"],
+      "skin_type": "oily",
+      "expected": {
+        "must_identify_conflict": true,
+        "conflict_keywords": ["inactivate", "oxidize", "separate", "morning", "evening"],
+        "safe_usage": "benzoyl peroxide in AM, retinol in PM"
+      }
+    },
+    {
+      "id": "ing_005",
+      "ingredients": ["vitamin c", "vitamin e", "ferulic acid"],
+      "skin_type": "normal",
+      "expected": {
+        "must_identify_conflict": false,
+        "must_identify_synergy": true,
+        "synergy_keywords": ["synergy", "boost", "antioxidant", "stable", "enhance"],
+        "must_mention_spf": true
+      }
+    },
+    {
+      "id": "ing_006",
+      "ingredients": ["azelaic acid", "niacinamide", "centella asiatica"],
+      "skin_type": "sensitive",
+      "expected": {
+        "must_identify_conflict": false,
+        "must_identify_synergy": true,
+        "synergy_keywords": ["gentle", "compatible", "redness", "brighten", "soothe"],
+        "appropriate_for_pregnant": true
+      }
+    },
+    {
+      "id": "ing_007",
+      "ingredients": ["copper peptides", "vitamin c"],
+      "skin_type": "mature",
+      "expected": {
+        "must_identify_conflict": true,
+        "conflict_keywords": ["efficacy", "chelate", "reduce", "separate", "morning", "evening"],
+        "impact": "reduced efficacy not a skin safety issue"
+      }
+    },
+    {
+      "id": "ing_008",
+      "ingredients": ["salicylic acid", "niacinamide", "zinc"],
+      "skin_type": "acne-prone",
+      "expected": {
+        "must_identify_conflict": false,
+        "must_identify_synergy": true,
+        "synergy_keywords": ["acne", "pores", "oil control", "anti-inflammatory", "complement"],
+        "must_mention": ["blackheads", "sebum"]
+      }
+    }
+  ]
+}

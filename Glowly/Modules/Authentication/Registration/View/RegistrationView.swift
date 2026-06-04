@@ -14,7 +14,7 @@ struct RegistrationView: View {
     @FocusState private var focusedField: Field?
 
     enum Field: Hashable {
-        case name, email, phone, password, confirmPassword
+        case name, email, password, confirmPassword
     }
 
     nonisolated init(authManager: any AuthManagerProtocol) {
@@ -33,16 +33,13 @@ struct RegistrationView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 24) {
                     Spacer().frame(height: 60)
-                    
+
                     // Title
                     titleSection
-                    
-                    // Segmented Control
-                    segmentedControl
-                    
-                    // Form
+
+                    // Form (Email-only)
                     formSection
-                    
+
                     // Register Button
                     registerButton
                     
@@ -69,14 +66,13 @@ struct RegistrationView: View {
         .background(
             NavigationLink(
                 destination: OTPVerificationView(
-                    contactInfo: viewModel.registrationType == .email ? viewModel.email : "+7\(viewModel.phone)",
-                    verificationType: viewModel.registrationType == .email ? .email : .sms,
+                    contactInfo: viewModel.email,
+                    verificationType: .email,
                     onSuccess: {
                         // OTP verified successfully - now authenticate the user
                         Task {
-                            let identifier = viewModel.registrationType == .email ? viewModel.email : "+7\(viewModel.phone)"
                             do {
-                                let loginRequest = LoginRequest(usernameOrEmail: identifier, password: viewModel.password)
+                                let loginRequest = LoginRequest(usernameOrEmail: viewModel.email, password: viewModel.password)
                                 _ = try await viewModel.authManager.signIn(loginRequest)
                                 // Authentication successful - ContentView will handle navigation
                                 print("✅ Authentication successful, isAuthenticated = \(viewModel.authManager.isAuthenticated)")
@@ -128,35 +124,18 @@ struct RegistrationView: View {
         .padding(.horizontal, 24)
     }
     
-    // MARK: - Segmented Control
-    private var segmentedControl: some View {
-        Picker("", selection: $viewModel.registrationType) {
-            Text("Email").tag(RegistrationViewModel.RegistrationType.email)
-            Text("Телефон").tag(RegistrationViewModel.RegistrationType.phone)
-        }
-        .pickerStyle(.segmented)
-        .padding(.horizontal, 24)
-        .onChange(of: viewModel.registrationType) { _, newValue in
-            viewModel.handleRegistrationTypeChange(newValue)
-        }
-    }
-    
-    // MARK: - Form Section
+    // MARK: - Form Section (Email-only)
     private var formSection: some View {
         VStack(spacing: 16) {
             // Name
             nameInputField
-            
-            // Email or Phone
-            if viewModel.registrationType == .email {
-                emailInputField
-            } else {
-                phoneInputField
-            }
-            
+
+            // Email
+            emailInputField
+
             // Password
             passwordInputField
-            
+
             // Confirm Password
             confirmPasswordInputField
         }
@@ -172,7 +151,7 @@ struct RegistrationView: View {
                 .submitLabel(.next)
                 .onSubmit {
                     if !viewModel.name.isEmpty {
-                        focusedField = viewModel.registrationType == .email ? .email : .phone
+                        focusedField = .email
                     }
                 }
 
@@ -232,60 +211,6 @@ struct RegistrationView: View {
                         .font(.system(size: 12))
                         .foregroundColor(.red)
                     Text("неверный формат email")
-                        .font(.system(size: 12))
-                        .foregroundColor(.red)
-                }
-            }
-        }
-    }
-    
-    private var phoneInputField: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("+7")
-                    .font(.system(size: 16))
-                    .foregroundColor(.primary)
-                    .padding(.leading, 4)
-                
-                TextField("700 123 45 67", text: $viewModel.phone)
-                    .textContentType(.telephoneNumber)
-                    .keyboardType(.numberPad)
-                    .focused($focusedField, equals: .phone)
-                    .onChange(of: viewModel.phone) { _, newValue in
-                        viewModel.handlePhoneInput(newValue)
-                        viewModel.phone = viewModel.formatPhone(viewModel.phone)
-
-                        // Auto-move when phone is complete (10 digits)
-                        if viewModel.isValidPhone(viewModel.phone) {
-                            focusedField = .password
-                        }
-                    }
-
-                // Clear button (only show when focused)
-                if !viewModel.phone.isEmpty && focusedField == .phone {
-                    Button(action: {
-                        viewModel.phone = ""
-                    }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.gray)
-                    }
-                }
-            }
-            .padding(16)
-            .background(Color(.systemGray6))
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(viewModel.phoneBorderColor(), lineWidth: !viewModel.phone.isEmpty ? 2 : 0)
-            )
-            .id(Field.phone)
-            
-            if !viewModel.phone.isEmpty && !viewModel.isValidPhone(viewModel.phone) {
-                HStack(spacing: 6) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 12))
-                        .foregroundColor(.red)
-                    Text("введите 10 цифр номера")
                         .font(.system(size: 12))
                         .foregroundColor(.red)
                 }

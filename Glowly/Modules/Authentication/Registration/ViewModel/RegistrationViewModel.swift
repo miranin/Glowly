@@ -14,10 +14,8 @@ final class RegistrationViewModel: ObservableObject {
     // MARK: - Published Properties
     @Published var name: String = ""
     @Published var email: String = ""
-    @Published var phone: String = ""
     @Published var password: String = ""
     @Published var confirmPassword: String = ""
-    @Published var registrationType: RegistrationType = .email
     @Published var showPassword: Bool = false
     @Published var showConfirmPassword: Bool = false
     @Published var showOTPVerification: Bool = false
@@ -28,19 +26,6 @@ final class RegistrationViewModel: ObservableObject {
 
     // MARK: - Dependencies (Injected)
     let authManager: any AuthManagerProtocol
-
-    // MARK: - Types
-    enum RegistrationType {
-        case email
-        case phone
-
-        var placeholder: String {
-            switch self {
-            case .email: return "e-mail"
-            case .phone: return "700 123 45 67"
-            }
-        }
-    }
 
     // MARK: - Initialization with Dependency Injection
     nonisolated init(authManager: any AuthManagerProtocol) {
@@ -57,26 +42,20 @@ final class RegistrationViewModel: ObservableObject {
             return
         }
 
-        // Route to appropriate registration flow
-        if registrationType == .email {
-            await signUpWithEmail()
-        } else {
-            await signUpWithPhone()
-        }
+        await signUpWithEmail()
     }
 
-    // MARK: - Email Registration Flow
+    // MARK: - Email Registration Flow (Email-only with OTP)
 
     private func signUpWithEmail() async {
         isLoading = true
         defer { isLoading = false }
 
         do {
-            // Create registration request
+            // Create registration request (email-only)
             let request = RegisterRequest(
                 username: name.isEmpty ? email.components(separatedBy: "@").first ?? "user" : name,
                 email: email,
-                phoneNumber: "", // Empty for email registration
                 password: password,
                 valid: true
             )
@@ -84,39 +63,7 @@ final class RegistrationViewModel: ObservableObject {
             // Email registration - authenticate with backend API
             _ = try await authManager.signUp(request)
             HapticsService.shared.success()
-            // Email signup also shows OTP, but it will authenticate on success
-            showOTPVerification = true
-        } catch let error as AuthError {
-            showError(message: error.localizedDescription)
-            HapticsService.shared.warning()
-        } catch {
-            showError(message: "Произошла ошибка. Попробуйте снова.")
-            HapticsService.shared.warning()
-        }
-    }
-
-    // MARK: - Phone Registration Flow
-
-    private func signUpWithPhone() async {
-        isLoading = true
-        defer { isLoading = false }
-
-        let phoneNumber = "+7\(phone.filter { $0.isNumber })"
-
-        do {
-            // Create registration request
-            let request = RegisterRequest(
-                username: name.isEmpty ? "user" : name,
-                email: "", // Empty for phone registration (backend will use phone as identifier)
-                phoneNumber: phoneNumber,
-                password: password,
-                valid: true
-            )
-
-            // Phone registration - authenticate with backend API
-            _ = try await authManager.signUp(request)
-            HapticsService.shared.success()
-            // Show OTP verification - user will be authenticated after OTP
+            // Show OTP verification - user will receive OTP via email
             showOTPVerification = true
         } catch let error as AuthError {
             showError(message: error.localizedDescription)
@@ -190,15 +137,14 @@ final class RegistrationViewModel: ObservableObject {
     // MARK: - Validation
 
     func isFormValid() -> Bool {
-        let hasValidContact = registrationType == .email ?
-            isValidEmail(email) :
-            isValidPhone(phone)
+        // Email-only validation
+        let hasValidEmail = isValidEmail(email)
 
         // Password must be at least medium strength (3+) or strong (4+)
         let hasStrongEnoughPassword = calculatePasswordStrength() >= 3
 
         return !name.isEmpty &&
-               hasValidContact &&
+               hasValidEmail &&
                !password.isEmpty &&
                !confirmPassword.isEmpty &&
                passwordsMatch() &&
@@ -209,11 +155,6 @@ final class RegistrationViewModel: ObservableObject {
         let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
         let emailPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
         return emailPredicate.evaluate(with: email)
-    }
-
-    func isValidPhone(_ phone: String) -> Bool {
-        let digitsOnly = phone.filter { $0.isNumber }
-        return digitsOnly.count == 10 && digitsOnly.hasPrefix("7")
     }
 
     func passwordsMatch() -> Bool {
@@ -275,52 +216,5 @@ final class RegistrationViewModel: ObservableObject {
     func emailBorderColor() -> Color {
         if email.isEmpty { return .clear }
         return isValidEmail(email) ? .green : .red
-    }
-
-    func phoneBorderColor() -> Color {
-        if phone.isEmpty { return .clear }
-        return isValidPhone(phone) ? .green : .red
-    }
-
-    // MARK: - Phone Formatting
-
-    func formatPhone(_ input: String) -> String {
-        let digitsOnly = input.filter { $0.isNumber }
-        let limited = String(digitsOnly.prefix(10))
-
-        // Format: 700 123 45 67
-        var formatted = ""
-        for (index, char) in limited.enumerated() {
-            if index == 3 || index == 6 || index == 8 {
-                formatted += " "
-            }
-            formatted.append(char)
-        }
-
-        return formatted
-    }
-
-    func handlePhoneInput(_ newValue: String) {
-        let digitsOnly = newValue.filter { $0.isNumber }
-        if digitsOnly.count > 10 {
-            phone = String(digitsOnly.prefix(10))
-        }
-    }
-
-    // MARK: - Clear Fields on Type Change
-
-    func handleRegistrationTypeChange(_ newType: RegistrationType) {
-        if newType != registrationType {
-            // Clear all form fields when switching between email and phone
-            // This ensures no mixed data between the two separate flows
-            email = ""
-            phone = ""
-            password = ""
-            confirmPassword = ""
-            // Note: We preserve 'name' as it's common to both flows
-
-            registrationType = newType
-            HapticsService.shared.impactLight()
-        }
     }
 }

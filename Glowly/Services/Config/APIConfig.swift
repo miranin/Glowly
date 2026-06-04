@@ -17,7 +17,7 @@ struct APIConfig {
 
     // MARK: - OpenAI API (Alternative)
     /// Get your API key from: https://platform.openai.com/api-keys
-    static let openAIAPIKey = "YOUR_OPENAI_API_KEY_HERE"
+    static let openAIAPIKey = "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"
     static let openAIBaseURL = "https://api.openai.com/v1"
     static let openAIModel = "gpt-4-turbo-preview"
 

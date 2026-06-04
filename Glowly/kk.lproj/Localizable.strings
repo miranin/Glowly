@@ -225,10 +225,18 @@
 "category_primer" = "Праймер";
 "category_setting_spray" = "Бекіту спреі";
 "category_cleanser" = "Тазартқыш";
+"category_toner" = "Тонер";
+"category_essence" = "Эссенция";
 "category_moisturizer" = "Ылғалдандырғыш";
 "category_serum" = "Сыворотка";
+"category_eye_cream" = "Көзге арналған крем";
+"category_face_oil" = "Бетке арналған май";
+"category_exfoliant" = "Эксфолиант";
+"category_spot_treatment" = "Нүктелік құрал";
+"category_mist" = "Мист";
 "category_sunscreen" = "Күннен қорғау кремі";
 "category_mask" = "Маска";
+"category_lip_care" = "Ерінге күтім";
 "category_other" = "Басқа";
 
 /* Social Product Detail Sheet */
