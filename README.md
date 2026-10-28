@@ -32,20 +32,10 @@ AI-powered beauty assistant that helps users organize their cosmetic collection,
 | **[PRODUCTION_READINESS_PLAN.md](PRODUCTION_READINESS_PLAN.md)** | Complete 6-week roadmap | Planning & reference |
 | **[QUICK_START_GUIDE.md](QUICK_START_GUIDE.md)** | Daily tasks & actions | Daily development |
 | **[CODE_TEMPLATES.md](CODE_TEMPLATES.md)** | Ready-to-use code | Implementation |
-| **[NOTION_ROADMAP.md](NOTION_ROADMAP.md)** | Project management | Team coordination |
+| **[NOTION_ROADMAP.md](NOTION_ROADMAP.md)** | Project management | Team ### 🚨 Critical Issues (Fix First!)
 
-### 🚨 Critical Issues (Fix First!)
 
-1. **🔴 No Backend Server** - Need to rent server and set up API
-   - **Solution:** Follow [BACKEND_INTEGRATION_PLAN.md](BACKEND_INTEGRATION_PLAN.md) for step-by-step server rental and setup
-   - **Cost:** Starting at $5-12/month for basic VPS
-2. **🔴 No Database** - Database schema ready but not deployed
-   - **Solution:** Use [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) to set up PostgreSQL
-3. **🔴 No SMS Service** - OTP verification requires SMS provider
-   - **Solution:** See [SMS Service Integration](BACKEND_INTEGRATION_PLAN.md#sms-service-integration) for provider options ($5-20/month)
-4. **🔴 API Endpoints Not Implemented** - iOS app ready, backend needed
-   - **Solution:** Use [AUTH_IMPLEMENTATION.md](AUTH_IMPLEMENTATION.md) for authentication code examples
-5. **🟡 Scalability Issues** - Using UserDefaults instead of Core Data
+   - **Solution:** Follow [BACKEND_INTEGRATION_PLAN.md](BACKEND_INTEGRATION_PLAN.md) for step-by-step server rental
 
 ### 📅 Timeline to Production
 
